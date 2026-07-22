@@ -1,10 +1,13 @@
 ## ============================================================
-## CTL_widget_instructional-resources_listing  (v2)
+## CTL_widget_instructional_parent  (v8)
+## dotCMS widget variable: CtlWidgetInstructionalParent
 ## Fixes from debug session:
 ##  - modality is a Checkbox field -> .selectedValues, mapped to labels
 ##  - featured is a Radio -> .selectValue only
 ##  - zero-visible-resources is now LOUD, not a silent blank page
 ##  - edit-mode notice shows how many items the reviewedBy gate hid
+##  - format/category NULL bug root-caused: formatType/topics are Category
+##    fields (iterate + .categoryName), not the old $r.format/$r.category
 ## ============================================================
 
 #set($allResources = $dotcontent.pull("+contentType:CtlInstructionalResource +languageId:1 +live:true", 500, "score"))
@@ -155,7 +158,7 @@
                             #end
                         </div>
                         <h3 class="h5 card-title">
-                            <a href="/centers/ctl/instructional-resources/$!r.urlTitle">$!r.resourceTitle</a>
+                            <a href="/centers/ctl/instructional-resources/$!r.urlTitle" class="stretched-link">$!r.resourceTitle</a>
                         </h3>
                         #if($cardDesc != "")
                             <p class="card-text small">$cardDesc</p>
