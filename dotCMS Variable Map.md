@@ -90,12 +90,12 @@ This is the newer, unified content type covering events, opportunities, and gene
 - **Content Type Variable:** `CtlInstructionalResource`
 - **Base Type:** Content
 - **Site:** www2.cortland.edu
-- **URL Map Pattern:** No `urlMapPattern` field on this content type (unlike CtlActivity). Detail links are built manually from the `urlTitle` Text field, e.g. `/centers/ctl/instructional-resources/{urlTitle}`. No confirmed single-item detail widget exists yet for this content type — see [Known Issues](#known-issues--not-yet-built).
+- **URL Map Pattern:** No `urlMapPattern` field on this content type (unlike CtlActivity). Detail links are built manually from the `urlTitle` Text field, e.g. `/centers/ctl/instructional-resources/{urlTitle}`. The detail widget now exists (see Widgets below) but **404s until the content type's URL Map Pattern is configured in the dotCMS admin** — see [Known Issues](#known-issues--not-yet-built).
 
 | Tab / Section | Field Label | Variable | Field Type | Req? | Notes |
 |---|---|---|---|---|---|
 | 📌 THE BASICS | Resource Title | `resourceTitle` | Text | Yes | The full display title of this resource. |
-| 📌 THE BASICS | URL Title | `urlTitle` | Text | Yes | Lowercase, hyphens only, no spaces. Becomes the page URL — do not change after publishing. |
+| 📌 THE BASICS | URL Title | `urlTitle` | Text | Yes | Lowercase, hyphens only, no spaces. Becomes the page URL — do not change after publishing. **Must have "System Indexed" and "Unique" checked in the field settings, or the URL Map Pattern silently fails to resolve** (confirmed 2026-07-22 — this was the actual root cause of a long detail-page 404 debugging session). No year suffix — do NOT apply the same regexCheck used on CtlActivity's `urlMapPattern`. |
 | 📌 THE BASICS | Short Description Blurb | `shortDescription` | Textarea | Yes | 1–2 sentences shown on the listing card. |
 | 📌 THE BASICS | Thumbnail | `thumbnail` | Image | No | Optional. Shown on listing card and detail page header. |
 | 📄 THE CONTENT | Body | `body` | WYSIWYG | Yes | The resource itself, or context for downloads/videos. |
@@ -138,12 +138,23 @@ Widgets don't hold content-editor fields in the same way; this section is a quic
 - **Queries / Renders:** `$dotcontent.pull("+contentType:CtlActivity ...")`, filtered to `isOpportunity = true`, sorted by deadline.
 - **⚠️ BUG (confirmed 2026-07-22 via full CtlActivity REST pull):** this widget reads `$opp.oppSubmissionDeadline` and `$opp.oppApplicationLink` — neither field exists on CtlActivity. The real fields are `signupDeadline` and `registerApplyLink` (the same ones CTL_widget_activity-detail already uses correctly). Until fixed, the deadline display and Apply button on this listing page will silently render blank/fallback for every opportunity.
 
-### CTL_widget_instructional-resources_listing (v8) — 🚧 IN PROGRESS
+### CTL_widget_instructional_parent (v8) — 🚧 IN PROGRESS
 - **File:** `ctl-site_instRes-parent.html`
+- **dotCMS widget variable:** `CtlWidgetInstructionalParent`
+- **Host page:** "Instructional Resources" — url `index.dot` in `/centers/ctl/instructional-resources/`
 - **Purpose:** Renders the Instructional Resources listing page — radio filters (Format / Modality), a collapsible multi-select Topic pill cloud (6 parent category headings), dynamic cross-section dimming for zero-match options, partial-match fallback ordering, featured-item pinning (maroon border, ★ badge, capped at 3, JS-sorted by modDate), and a QC gate hiding items with an empty `reviewedBy` from the listing (still reachable via direct URL).
 - **Queries / Renders:** `$dotcontent.pull("+contentType:CtlInstructionalResource +languageId:1 +live:true", 500, "score")`.
 - **Root-caused bug (fixed in this version):** earlier drafts referenced format/category as `$r.format` / `$r.category`, which don't exist on the live schema — the real fields are `formatType` and `topics` (both Category fields, accessed by iterating the field and reading `.categoryName` on each entry, NOT the Checkbox/Radio `.selectedValues` / `.selectValue` pattern). Still pending: final live-URL verification of this fix.
-- Note: the file `ctl-site_instRes-detail` (despite its name) currently contains an earlier draft of this same LISTING widget, not a single-item detail page — see Known Issues below.
+- Note: `ctl-site_instRes-detail` used to contain a mis-named duplicate of this listing widget — it now holds the real detail widget (see below).
+
+### CTL_widget_inst-detail — ✅ LIVE (resolved 2026-07-22)
+- **File:** `ctl-site_instRes-detail`
+- **dotCMS widget variable:** `CtlWidgetInstDetail`
+- **Purpose:** Renders the full detail page for a single CtlInstructionalResource record — thumbnail, format/modality tags, byline (author + lastUpdated), frameworks badges, video (local `videoFile` or `embedUrl` link), body, topic chips, citations, related resources/events, back link.
+- **Queries / Renders:** same pull-all + Velocity-side slug match pattern as CTL_widget_activity-detail, matching the URL slug against `urlTitle` (CtlInstructionalResource has no `urlMapPattern` field).
+- **Host page:** "Instructional Resource Detail" — url `instructional-resource-detail` in `/centers/ctl/instructional-resources/`.
+- **Content type config:** URL Map Pattern = `/centers/ctl/instructional-resources/{urlTitle}`; Detail Page = `//www2.cortland.edu/centers/ctl/instructional-resources/instructional-resource-detail`.
+- **Root cause of the 404 (resolved):** the `urlTitle` field needed **"System Indexed" AND "Unique" checked** in its own field settings — without those, dotCMS's URL Map resolution silently fails to bind even though the URL Map Pattern + Detail Page are configured correctly on the content type. See the gotcha in CLAUDE.md — this will affect any future URL-mapped content type (e.g. CtlTechSupport).
 
 ### CTL Homepage Widget — 🔴 BROKEN
 - **File:** `ctl-site_home.html`
@@ -161,5 +172,5 @@ Widgets don't hold content-editor fields in the same way; this section is a quic
 
 - **CtlTechSupport** content type: planned, not yet built. Do not build against `CtlTechResource` — that name was deprecated in favor of `CtlTechSupport` to match an existing live relationship field (see `relatedTechSupport` above).
 - **Orphaned widgets to delete:** `ctl_widget_detail-router`, `CTL_widget_event-calendar_detail`, `CTL_widget_opportunities_detail` — all reference the deleted `CtlEventItem`/`CtlOpportunity` content types (replaced by unified CtlActivity).
-- **`ctl-site_instRes-detail`** is a misnamed / duplicate earlier draft of the Instructional Resources LISTING widget, not an actual single-item detail page. CtlInstructionalResource has no confirmed detail widget yet — pending a decision on whether to build one from scratch (parallel to CTL_widget_activity-detail).
+- **Regex accidentally added to `urlTitle` during 404 debugging needs removal:** `[a-z0-9]+(-[a-z0-9]+)*-(19|20)\d{2}` (copied from CtlActivity's `urlMapPattern` field) requires a trailing `-YYYY` year suffix. No CtlInstructionalResource slug has one, so this will block saving/editing every existing resource until it's removed — it was never actually the cause of the 404 (see `urlTitle` row above for the real fix).
 - **CtlAttachment thumbnail letterboxing:** current rendering uses `.thumbnailUri`, which letterboxes non-matching aspect ratios. Needs a crop-based URL pattern instead.

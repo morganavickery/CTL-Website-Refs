@@ -17,9 +17,11 @@ CtlInstructionalResource, CtlTechSupport (planned, NOT yet built — do not buil
 CtlTechResource, that name was deprecated in favor of CtlTechSupport to match an existing
 live relationship field), CtlAttachment, and others.
 
-A separate local Variable Map document is the definitive reference for all types/fields/
-variable names/tabs/widgets. It is NOT included here in full — ask before assuming field
-names on a given content type if unsure, rather than relying on memory or older docs.
+A separate local Variable Map document (`dotCMS Variable Map.md` — this is the editable
+source of truth going forward; a `.docx` copy also exists but is no longer actively
+maintained) is the definitive reference for all types/fields/variable names/tabs/widgets.
+It is NOT included here in full — ask before assuming field names on a given content type
+if unsure, rather than relying on memory or older docs.
 
 ## Current State (as of this session)
 
@@ -75,16 +77,51 @@ longer exist):
 Note: `videoFile` is a File field (not Binary) — access via `.rawUri`/`.name`/`.thumbnailUri`,
 NOT the Binary-field pattern used elsewhere.
 
-### CtlActivity (unified events + opportunities) — live and working
+### CtlInstructionalResource — detail widget built and WORKING (resolved 2026-07-22)
 
-### CTL homepage — done: tile grid, Upcoming Events/Opportunities carousel, Featured Resources block
+`ctl-site_instRes-detail` now contains a real single-item detail page (previously this file
+held a mis-named duplicate of the listing widget — that's fixed). Matches the URL slug
+(last path segment) against `urlTitle` via pull-all + Velocity-side filter, same pattern as
+CTL_widget_activity-detail. Host page: "Instructional Resource Detail" at
+`/centers/ctl/instructional-resources/instructional-resource-detail`.
+
+**Root cause of the 404 (finally resolved):** the URL Map Pattern
+(`/centers/ctl/instructional-resources/{urlTitle}`) and Detail Page were both configured
+correctly on the content type, but URLs still 404'd. The actual fix: the `urlTitle` field
+itself needed **"System Indexed" and "Unique" checked** in its field settings — without
+those, dotCMS's URL Map resolution can't bind to the field even though the pattern config
+looks correct. See the new gotcha below — this will bite any future content type that gets
+its own URL-mapped detail page (e.g. CtlTechSupport).
+
+### CtlActivity (unified events + opportunities) — live and working; full schema confirmed via REST pull this session
+
+**Bug found in `ctl-site_opportunity-parent.html`** (not yet fixed): reads
+`$opp.oppSubmissionDeadline`/`$opp.oppApplicationLink`, neither of which exists on
+CtlActivity — same stale-field-name failure mode as the format/category bug above. Real
+fields are `signupDeadline`/`registerApplyLink` (already used correctly in
+activity-detail.html).
+
+### CTL homepage — currently BROKEN (not "done" as previously noted)
+
+`ctl-site_home.html` has: a variable-name typo (`$featuredResources` vs `$featResources`),
+stale field names (`resourceUrl`/`resourceThumbnail` don't exist on CtlInstructionalResource),
+carousel card markup entirely HTML-commented-out (renders an empty shell), sorts by a
+nonexistent `activityDate` field, and leftover debug output. Not yet fixed — full detail in
+the Variable Map doc's Known Issues section.
 
 ## Next Up / On the Horizon
 
+* Remove (or fix) the regexCheck accidentally added to `urlTitle` during 404 debugging —
+  it requires a trailing `-YYYY` year suffix (copied from CtlActivity's urlMapPattern
+  field), which no CtlInstructionalResource slug actually has, so it'll block future
+  edits/saves on every resource until removed
+* Fix `ctl-site_home.html` (typo, stale fields, dead carousel, nonexistent activityDate field)
+* Fix `ctl-site_opportunity-parent.html` (oppSubmissionDeadline/oppApplicationLink → the real
+  fields, signupDeadline/registerApplyLink)
 * CtlTechSupport content type (not yet built — see naming note above)
 * Delete orphaned widgets: ctl_widget_detail-router, CTL_widget_event-calendar_detail,
   CTL_widget_opportunities_detail (reference deleted CtlEventItem/CtlOpportunity)
-* Finish verifying the format/category fix in CtlInstructionalResource widget
+* Finish verifying the format/category fix in CtlInstructionalResource listing widget (v8)
 * Fix CtlAttachment thumbnail letterboxing — need a crop-based URL pattern instead of thumbnailUri
 
 ## Critical Instance-Specific Gotchas (this dotCMS instance specifically)
@@ -107,6 +144,13 @@ NOT the Binary-field pattern used elsewhere.
   format/category bug above — always verify field names against a fresh REST API pull,
   not memory or older docs)
 * `urlMapPattern` not indexed for Lucene — pull-all + Velocity-side filter instead
+* URL Map Pattern fields (the field referenced in a content type's `{fieldVar}` URL Map
+  Pattern, e.g. `urlTitle`) must have **"System Indexed" AND "Unique" checked** in the
+  field's own settings, or dotCMS's URL Map resolution silently fails to bind — matching
+  URLs 404 at the routing layer (before any Velocity even runs) even though the URL Map
+  Pattern + Detail Page are both configured correctly on the content type. This cost a long
+  debugging session on CtlInstructionalResource's `urlTitle` field — check this FIRST for
+  any future URL-mapped content type (e.g. CtlTechSupport)
 * Hyphenated slugs can fail field-scoped Lucene queries — Velocity-side filter workaround
 * Use `+path:` not `+url:` in content queries
 * `$uri.substring($uri.lastIndexOf('/') + 1)` silently kills template render (integer boxing bug) — fix:
