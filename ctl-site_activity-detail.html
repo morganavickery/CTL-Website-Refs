@@ -1,0 +1,318 @@
+#set($now = $date.getDate())
+#set($nowMs = $now.getTime())
+
+## Use the pre-forward URI when available (vanity URL forwards), fall back to
+## getRequestURI() for direct access to the page (e.g. previewing in the editor)
+#set($forwardUri = $request.getAttribute("javax.servlet.forward.request_uri"))
+#if("$!forwardUri" != "")
+    #set($uri = $forwardUri)
+#else
+    #set($uri = $request.getRequestURI())
+#end
+
+#set($idx = $uri.lastIndexOf('/'))
+#set($idxPlus = $idx.intValue() + 1)
+#set($slug = $uri.substring($idxPlus))
+
+## Determine which listing this request originally came in on (survives the vanity forward)
+#if($uri.contains("/opportunities/"))
+    #set($parentLabel = "Opportunities")
+    #set($parentUrl = "/centers/ctl/opportunities/")
+#else
+    ## Default / fallback covers /event-calendar/ and any direct hits on /activities/
+    #set($parentLabel = "Event Calendar")
+    #set($parentUrl = "/centers/ctl/event-calendar/")
+#end
+
+#if($slug == "activity-detail" || $slug == "event-calendar" || $slug == "opportunities" || $slug == "index" || $slug == "index.dot" || $slug == "")
+    <div style="background: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 6px;">
+        <h4 style="margin-top: 0;">🛠️ Editor System Template View</h4>
+        <p>No activity slug detected. To preview, publish this page and click a card from the Event Calendar or Opportunities page.</p>
+    </div>
+#else
+    #set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1", 100, "score"))
+    #set($matchList = [])
+    #foreach($a in $allActivities)
+        #if("$!a.urlMapPattern" == $slug)
+            #set($dummy = $matchList.add($a))
+        #end
+    #end
+    #if($matchList.size() > 0)
+        #set($item = $matchList.get(0))
+
+        #set($isEventItem = $item.isEvent.selectedValues.contains("true"))
+        #set($isOppItem = $item.isOpportunity.selectedValues.contains("true"))
+
+        #set($isPastEvent = false)
+        #if($isEventItem)
+            #if("$!item.eventEndDate" != "")
+                #set($compareMs = $item.eventEndDate.getTime())
+            #elseif("$!item.eventStartDate" != "")
+                #set($compareMs = $item.eventStartDate.getTime())
+            #else
+                #set($compareMs = false)
+            #end
+            #if($compareMs && $compareMs < $nowMs)
+                #set($isPastEvent = true)
+            #end
+        #end
+
+        #set($signupType = "$!item.signupType.selectValue")
+        #if($signupType == "")
+            #set($signupType = "open")
+        #end
+        #set($needsRegistration = ($signupType == "registration"))
+        #set($needsApplication = ($signupType == "application"))
+        #set($showSignupRow = ($needsRegistration || $needsApplication))
+        #set($isClosedByOverride = $item.signupCapacityReached.selectedValues.contains("true"))
+        #set($isClosedByDate = false)
+        #if("$!item.signupDeadline" != "" && $item.signupDeadline.getTime() < $nowMs)
+            #set($isClosedByDate = true)
+        #end
+        #set($isSignupClosed = $isClosedByOverride || $isClosedByDate)
+
+        #set($showsSubmissions = $item.acceptsSubmissions.selectedValues.contains("true"))
+        #set($isSubmissionClosed = false)
+        #if($showsSubmissions && "$!item.submissionDeadline" != "" && $item.submissionDeadline.getTime() < $nowMs)
+            #set($isSubmissionClosed = true)
+        #end
+
+        <style>
+            .ctl-tag { display: inline-flex; align-items: center; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; background-color: #f4f4f4; color: #444; border: 1px solid #ddd; border-radius: 4px; }
+            .ctl-badge { display: inline-flex; align-items: center; font-size: 0.8rem; font-weight: 700; padding: 6px 14px; border-radius: 20px; white-space: nowrap; }
+            .ctl-badge-closed { display: inline-flex; align-items: center; background: #f8d7da; color: #842029; border-radius: 4px; padding: 4px 10px; font-size: 0.85rem; white-space: nowrap; }
+            .ctl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; padding: 6px 16px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; color: #730A00; background: transparent; border: 1px solid #730A00; border-radius: 4px; text-decoration: none; }
+            .ctl-btn:hover { background: #730A00; color: #fff; text-decoration: none; }
+            .ctl-info-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-size: 0.9rem; color: #555; }
+            .ctl-deadline-box { border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; }
+            .ctl-deadline-box-primary { border: 1px solid #e0e0e0; }
+            .ctl-deadline-box-optional { border: 1px dashed #ccc; background: #fafafa; }
+        </style>
+
+        <article style="max-width: 860px;">
+
+            #if("$!item.thumbnail.fileName" != "")
+                <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" style="width: 100%; max-height: 360px; object-fit: cover; border-radius: 8px; margin-bottom: 24px;" />
+            #end
+
+            #if($item.categories && $item.categories.size() > 0)
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                    #foreach($cat in $item.categories)
+                        #if("$!cat.categoryName" != "")
+                            <span class="ctl-tag">$cat.categoryName</span>
+                        #end
+                    #end
+                </div>
+            #end
+
+            <h1 style="margin-top: 0;">$item.title</h1>
+
+            ## Event logistics: date/time/location/past-status/calendar action
+            <div class="ctl-info-row" style="margin-bottom: 12px;">
+                #if($isEventItem && "$!item.eventStartDate" != "")
+                    <span><i class="bi bi-calendar-event"></i> $date.format('MMM d', $item.eventStartDate)#if("$!item.eventEndDate" != "" && $item.eventStartDate != $item.eventEndDate) &ndash; $date.format('MMM d, yyyy', $item.eventEndDate)#else, $date.format('yyyy', $item.eventStartDate)#end</span>
+                #end
+                #if($isEventItem && "$!item.eventStartTime" != "")
+                    <span><i class="bi bi-clock"></i> $date.format('h:mma', $item.eventStartTime).toLowerCase()#if("$!item.eventEndTime" != "") &ndash; $date.format('h:mma', $item.eventEndTime).toLowerCase()#end</span>
+                #end
+                #if($isEventItem && "$!item.eventLocation" != "")
+                    <span><i class="bi bi-geo-alt"></i> $item.eventLocation</span>
+                #end
+                #if($isEventItem && $isPastEvent)
+                    <span class="ctl-badge-closed">Past Event</span>
+                #end
+                #if($isEventItem && !$isPastEvent && "$!item.eventStartDate" != "")
+                    #set($calDatePart = $date.format('yyyyMMdd', $item.eventStartDate))
+                    #set($calEndDatePart = $calDatePart)
+                    #if("$!item.eventEndDate" != "")
+                        #set($calEndDatePart = $date.format('yyyyMMdd', $item.eventEndDate))
+                    #end
+                    #set($icsDtStart = "")
+                    #set($icsDtEnd = "")
+                    #if("$!item.eventStartTime" != "")
+                        #set($calStartTimePart = $date.format('HHmmss', $item.eventStartTime))
+                        #set($calEndTimePart = $calStartTimePart)
+                        #if("$!item.eventEndTime" != "")
+                            #set($calEndTimePart = $date.format('HHmmss', $item.eventEndTime))
+                        #end
+                        #set($icsDtStart = "DTSTART:${calDatePart}T${calStartTimePart}")
+                        #set($icsDtEnd = "DTEND:${calEndDatePart}T${calEndTimePart}")
+                    #else
+                        #set($icsDtStart = "DTSTART;VALUE=DATE:${calDatePart}")
+                        #set($icsDtEnd = "DTEND;VALUE=DATE:${calEndDatePart}")
+                    #end
+                    #set($icsTitle = $item.title.replace(",", " "))
+                    #set($icsLocation = "")
+                    #if("$!item.eventLocation" != "")
+                        #set($icsLocation = $item.eventLocation.replace(",", " "))
+                    #end
+                    #set($icsUid = "${item.identifier}@ctl.cortland.edu")
+                    #set($icsStamp = "${calDatePart}T000000Z")
+                    #set($icsContent = "BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//SUNY Cortland CTL//Activity//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:${icsUid}
+DTSTAMP:${icsStamp}
+${icsDtStart}
+${icsDtEnd}
+SUMMARY:${icsTitle}
+LOCATION:${icsLocation}
+END:VEVENT
+END:VCALENDAR")
+                    #set($icsEncoded = $icsContent.replace(" ", "%20").replace("
+", "%0A"))
+                    <a href="data:text/calendar;charset=utf8,${icsEncoded}" download="${slug}.ics" class="ctl-btn">
+                        <i class="bi bi-calendar-plus"></i> Add to Calendar
+                    </a>
+                #end
+            </div>
+
+            ## Compensation info: visually separated from logistics since it's a different
+            ## kind of detail (what you get, not when/where)
+            #if("$!item.oppAmountPaid" != "" || "$!item.oppLaborExpectation" != "")
+                <div class="ctl-info-row" style="background: #f8f7f5; border-radius: 6px; padding: 10px 14px; margin-bottom: 24px;">
+                    #if("$!item.oppAmountPaid" != "")
+                        <span><i class="bi bi-cash-stack"></i> <strong>#if(!$item.oppAmountPaid.startsWith("$"))$#end$item.oppAmountPaid</strong></span>
+                    #end
+                    #if("$!item.oppLaborExpectation" != "")
+                        <span><i class="bi bi-info-circle"></i> $item.oppLaborExpectation</span>
+                    #end
+                </div>
+            #end
+
+            
+
+            #if("$!item.longDescription" != "")
+                <div style="line-height: 1.7; font-size: 1rem; color: #333; margin-bottom: 28px;">$item.longDescription</div>
+            #end
+
+            #if("$!item.primaryContact" != "")
+                <dl style="font-size: 0.95rem; border-top: 1px solid #e0e0e0; padding-top: 20px; margin-bottom: 28px;">
+                    <dt style="font-weight: 700;">Contact</dt>
+                    <dd style="margin: 2px 0 0 0;">$item.primaryContact</dd>
+                </dl>
+            #end
+
+            ## Primary signup box: registration or application only
+            #if($showSignupRow)
+                #set($badgeText = "Registration Required")
+                #set($badgeBg = "#cfe2ff")
+                #set($badgeColor = "#084298")
+                #set($ctaLabel = "Register")
+                #if($needsApplication)
+                    #set($badgeText = "Application Required — Selective")
+                    #set($badgeBg = "#fff3cd")
+                    #set($badgeColor = "#856404")
+                    #set($ctaLabel = "Apply")
+                #end
+                <div class="ctl-deadline-box ctl-deadline-box-primary">
+                    <div class="ctl-info-row">
+                        <span class="ctl-badge" style="background-color: $badgeBg; color: $badgeColor;">$badgeText</span>
+                        #if("$!item.signupDeadline" != "")
+                            <span style="flex: 1; min-width: 140px;">Deadline: $date.format('MMMM d, yyyy', $item.signupDeadline)</span>
+                        #else
+                            <span style="flex: 1; min-width: 140px;">Ongoing</span>
+                        #end
+                        #if($isSignupClosed)
+                            <span class="ctl-badge-closed">Closed</span>
+                        #elseif("$!item.registerApplyLink" != "" && "$!item.registerApplyLink" != "http://")
+                            <a href="$item.registerApplyLink" target="_blank" class="ctl-btn">$ctaLabel</a>
+                        #end
+                    </div>
+                </div>
+            #end
+
+            ## Optional presenter/submission track -- independent of the main signup type,
+            ## since someone can register normally AND separately choose to submit something
+            #if($showsSubmissions)
+                #set($submissionBadgeText = "Optional: Submit to Present")
+                #if("$!item.submissionLabel" != "")
+                    #set($submissionBadgeText = $item.submissionLabel)
+                #end
+                <div class="ctl-deadline-box ctl-deadline-box-optional">
+                    <div class="ctl-info-row">
+                        <span class="ctl-badge" style="background-color: #eee; color: #555;">$submissionBadgeText</span>
+                        #if("$!item.submissionDeadline" != "")
+                            <span style="flex: 1; min-width: 140px;">Deadline: $date.format('MMMM d, yyyy', $item.submissionDeadline)</span>
+                        #else
+                            <span style="flex: 1; min-width: 140px;">Ongoing</span>
+                        #end
+                        #if($isSubmissionClosed)
+                            <span class="ctl-badge-closed">Closed</span>
+                        #elseif("$!item.submissionLink" != "" && "$!item.submissionLink" != "http://")
+                            <a href="$item.submissionLink" target="_blank" class="ctl-btn">Submit</a>
+                        #end
+                    </div>
+                </div>
+            #end
+
+            #if($item.attachments && $item.attachments.size() > 0)
+                <div style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Downloads</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 500px;">
+                        #foreach($file in $item.attachments)
+                            #if("$!file.ctlAttachmentfile.rawUri" != "")
+                                <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="btn btn-default" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
+                                    <div style="width: 54px; height: 54px; flex-shrink: 0; background-color: #ffffff !important; color: #730A00 !important; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor;">
+                                        #if("$!file.ctlAttachmentfile.thumbnailUri" != "")
+                                            <img src="$file.ctlAttachmentfile.thumbnailUri" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: top; display: block;" />
+                                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(194, 0, 0, 0.2); z-index: 2; pointer-events: none;"></div>
+                                        #else
+                                            <div style="width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-file-earmark-pdf" style="font-size: 1.25rem; opacity: 0.5;"></i>
+                                            </div>
+                                        #end
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; flex: 1; padding: 0 16px; gap: 12px;">
+                                        <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; line-height: 1.2;">$file.ctlAttachmentlabel</span>
+                                        <i class="bi bi-download" style="font-size: 0.95rem; font-weight: 700; display: inline-flex; flex-shrink: 0;"></i>
+                                    </div>
+                                </a>
+                            #end
+                        #end
+                    </div>
+                </div>
+            #end
+
+            <p style="margin-top: 40px;">
+                <a href="$parentUrl" style="color: inherit;">&larr; Back to $parentLabel</a>
+            </p>
+
+        </article>
+
+    #else
+        <div style="padding: 40px; text-align: center; color: #666;">
+            <h2>Not Found</h2>
+            <p>Sorry, this item could not be found or may have been removed.</p>
+            <a href="$parentUrl" style="color: inherit;">Return to $parentLabel</a>
+        </div>
+    #end
+#end
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var titleBanner = document.querySelector('.page-title h1');
+    if (titleBanner) {
+        titleBanner.textContent = '$item.title';
+    }
+    document.title = '$item.title';
+
+    var crumbs = document.querySelectorAll('ol.breadcrumb li.breadcrumb-item');
+    if (crumbs.length >= 2) {
+        var parentCrumb = crumbs[crumbs.length - 2];
+        var activeCrumb = crumbs[crumbs.length - 1];
+
+        var parentLink = parentCrumb.querySelector('a');
+        if (parentLink) {
+            parentLink.setAttribute('href', '$parentUrl');
+            parentLink.textContent = '$parentLabel';
+        } else {
+            parentCrumb.textContent = '$parentLabel';
+        }
+
+        activeCrumb.textContent = '$item.title';
+    }
+});
+</script>

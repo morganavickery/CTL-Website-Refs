@@ -1,0 +1,501 @@
+## ============================================================
+## CTL_widget_instructional-resources_listing  (v2)
+## Fixes from debug session:
+##  - modality is a Checkbox field -> .selectedValues, mapped to labels
+##  - featured is a Radio -> .selectValue only
+##  - zero-visible-resources is now LOUD, not a silent blank page
+##  - edit-mode notice shows how many items the reviewedBy gate hid
+## ============================================================
+
+#set($allResources = $dotcontent.pull("+contentType:CtlInstructionalResource +languageId:1 +live:true", 500, "score"))
+
+## ---- QC gate: only reviewed items appear ----
+#set($visibleResources = [])
+#set($hiddenCount = 0)
+#foreach($r in $allResources)
+    #if("$!r.reviewedBy" != "")
+        #set($dummy = $visibleResources.add($r))
+    #else
+        #set($hiddenCount = $hiddenCount + 1)
+    #end
+#end
+
+#if($EDIT_MODE && $hiddenCount > 0)
+    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.9rem;">
+        &#128736;&#65039; <strong>Editors only:</strong> $hiddenCount item(s) hidden from this listing because "Reviewed By" is empty.
+    </div>
+#end
+
+<style>
+    .ctl-res-card { position: relative; }
+    .ctl-res-card.is-featured { border: 2px solid #730A00; background: rgba(115, 10, 0, 0.05); }
+    .ctl-res-featured-flag { position: absolute; top: 10px; right: 10px; background: #730A00; color: #fff; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; z-index: 2; }
+    #ctlResTopicCloud { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+    .ctl-res-topic-group { flex: 1 1 300px; max-width: 100%; }
+    .ctl-res-topic-group-heading { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #730A00; margin-bottom: 2px; }
+    .ctl-res-filterbar { background: #f8f7f5; border: 1px solid #e0e0e0; border-radius: 10px; padding: 18px 20px 20px; margin-bottom: 32px; }
+    .ctl-res-subpanel { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px 14px; }
+    .ctl-res-filter-label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #666; margin-bottom: 6px; }
+    .ctl-res-radio-list { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+    .ctl-res-radio-list label { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #444; cursor: pointer; margin-bottom: 0; }
+    .ctl-res-radio-list input[type="radio"] { accent-color: #730A00; margin: 0; }
+    .ctl-res-dimmed { opacity: 0.4; }
+    .ctl-res-partial-divider { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; padding-top: 6px; }
+    .ctl-res-pill { font-size: 0.8rem; padding: 4px 12px; border: 1px solid #ccc; border-radius: 20px; background: #fff; color: #444; cursor: pointer; }
+    .ctl-res-pill:hover { border-color: #730A00; color: #730A00; }
+    .ctl-res-pill.active { background: #730A00; border-color: #730A00; color: #fff; }
+    .ctl-res-fmt-badge { display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; background: #f4f4f4; color: #444; border: 1px solid #ddd; border-radius: 4px; margin-right: 4px; margin-bottom: 6px; }
+    .ctl-res-topic-chip { display: inline-block; font-size: 0.7rem; padding: 2px 9px; background: #fff; color: #666; border: 1px solid #ccc; border-radius: 20px; margin-right: 4px; margin-top: 4px; }
+    .ctl-res-card .card-title a { color: inherit; text-decoration: none; }
+    .ctl-res-card .card-title a:hover { color: #730A00; text-decoration: underline; }
+    .ctl-res-card img.ctl-res-thumb { width: 100%; height: 160px; object-fit: cover; }
+    .ctl-res-count { font-size: 0.85rem; color: #666; margin-bottom: 12px; }
+</style>
+
+<div class="ctl-res-listing">
+
+#if($visibleResources.size() == 0)
+
+    <div style="padding: 40px; text-align: center; color: #666;">
+        <p>Resources are coming soon &mdash; check back shortly.</p>
+    </div>
+
+#else
+
+    ## ---- Filter bar: search on top, then Format | Modality | Topics columns ----
+    <div class="ctl-res-filterbar" id="ctlResFilterBar" style="display:none;">
+        <div class="mb-3">
+            <input type="text" class="form-control form-control-sm" id="ctlResSearch"
+                   placeholder="Search resources&hellip;" style="max-width: 320px;" />
+        </div>
+        <div class="mb-3" id="ctlResFilterTopicCol">
+            <span class="ctl-res-filter-label">Topics</span>
+            <div id="ctlResTopicCloud" class="ctl-res-subpanel"></div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 g-3">
+            <div class="col" id="ctlResFilterFormatCol">
+                <span class="ctl-res-filter-label">Format</span>
+                <div class="ctl-res-radio-list ctl-res-subpanel" id="ctlResFilterFormat"></div>
+            </div>
+            <div class="col" id="ctlResFilterModalityCol">
+                <span class="ctl-res-filter-label">Modality</span>
+                <div class="ctl-res-radio-list ctl-res-subpanel" id="ctlResFilterModality"></div>
+            </div>
+        </div>
+    </div>
+
+    <p class="ctl-res-count" id="ctlResCount"></p>
+
+    ## ---- The cards ----
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="ctlResGrid">
+        #foreach($r in $visibleResources)
+
+            ## --- format / category / topics: pipe-joined category names ---
+            #set($fmtStr = "")
+            #if($r.formatType && $r.formatType.size() > 0)
+                #foreach($c in $r.formatType)
+                    #if($fmtStr == "")#set($fmtStr = "$!c.categoryName")#else#set($fmtStr = "$fmtStr|$!c.categoryName")#end
+                #end
+            #end
+
+            #set($topicStr = "")
+            #if($r.topics && $r.topics.size() > 0)
+                #foreach($c in $r.topics)
+                    #if($topicStr == "")#set($topicStr = "$!c.categoryName")#else#set($topicStr = "$topicStr|$!c.categoryName")#end
+                #end
+            #end
+
+            ## --- modality: Checkbox field -> selectedValues, mapped to display labels ---
+            #set($modStr = "")
+            #if($r.modality && $r.modality.selectedValues && $r.modality.selectedValues.size() > 0)
+                #foreach($sv in $r.modality.selectedValues)
+                    #set($label = $sv)
+                    #set($idx = 0)
+                    #foreach($v in $r.modality.values)
+                        #if("$v" == "$sv")
+                            #set($label = $r.modality.options.get($idx))
+                        #end
+                        #set($idx = $idx + 1)
+                    #end
+                    #if($modStr == "")#set($modStr = "$label")#else#set($modStr = "$modStr|$label")#end
+                #end
+            #end
+
+            #set($updatedMs = 0)
+            #if("$!r.lastUpdated" != "")
+                #set($updatedMs = $r.lastUpdated.getTime())
+            #end
+            #set($modDateMs = 0)
+            #if("$!r.modDate" != "")
+                #set($modDateMs = $r.modDate.getTime())
+            #end
+
+            #set($isFeatured = "no")
+            #if("$!r.featured.selectValue" == "yes")
+                #set($isFeatured = "yes")
+            #end
+
+            #set($cardDesc = "$!r.shortDescription")
+
+            <div class="col ctl-res-card-wrap"
+                 data-format="$fmtStr"
+                 data-modality="$modStr"
+                 data-topics="$topicStr"
+                 data-featured="$isFeatured"
+                 data-updated="$updatedMs"
+                 data-moddate="$modDateMs">
+                <div class="card h-100 ctl-res-card">
+                    #if("$!r.thumbnail.fileName" != "")
+                        <img src="$r.thumbnail.path$r.thumbnail.fileName" alt="" class="ctl-res-thumb card-img-top" />
+                    #end
+                    <div class="card-body">
+                        <div>
+                            #foreach($f in $fmtStr.split("\|"))
+                                #if($f != "")<span class="ctl-res-fmt-badge">$f</span>#end
+                            #end
+                        </div>
+                        <h3 class="h5 card-title">
+                            <a href="/centers/ctl/instructional-resources/$!r.urlTitle">$!r.resourceTitle</a>
+                        </h3>
+                        #if($cardDesc != "")
+                            <p class="card-text small">$cardDesc</p>
+                        #end
+                        #if($topicStr != "")
+                            <div>
+                                #foreach($tp in $topicStr.split("\|"))
+                                    #if($tp != "")<span class="ctl-res-topic-chip">$tp</span>#end
+                                #end
+                            </div>
+                        #end
+                    </div>
+                </div>
+            </div>
+        #end
+    </div>
+
+    <div id="ctlResEmpty" style="display:none; padding: 40px; text-align: center; color: #666;">
+        <p>No resources match your filters.</p>
+        <button type="button" class="ctl-res-pill" id="ctlResClear">Clear all filters</button>
+    </div>
+
+#end
+</div>
+
+#if($visibleResources.size() > 0)
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var grid = document.getElementById('ctlResGrid');
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.ctl-res-card-wrap'));
+    var countEl = document.getElementById('ctlResCount');
+    var emptyEl = document.getElementById('ctlResEmpty');
+
+    // ---- topic schema: parent categories and their child topics ----
+    // Keep in sync with the dotCMS category tree. Topics found on cards but not
+    // listed here fall into a "More Topics" group, so new topics still filter.
+    var TOPIC_SCHEMA = [
+        { parent: 'Course Policies, Norms, & Expectations', children: ['Attendance', 'Grade Scheme', 'Expectations for Participation', 'Assignments', 'Student Access to Materials', 'Student Wellbeing', 'Academic Integrity', 'Communication'] },
+        { parent: 'Curriculum Design', children: ['Content + Sequencing', 'Learning Objectives', 'Course Planning / Schedule'] },
+        { parent: 'Student Engagement', children: ['Peer Collaboration', 'Interactive Tech', 'Activity Design'] },
+        { parent: 'Assessment & Grading', children: ['Formative Assessment', 'Summative Assessment', 'Rubric Design', 'Giving Feedback', 'Grading', 'Resubmission'] },
+        { parent: 'Course Materials & Tooling', children: ['Title II Remediation', 'OER', 'Selecting Readings / Textbooks', 'Lectures + Slides', 'AI Use'] },
+        { parent: 'Classroom Climate & Student Voice', children: ['Course Evals', 'Feedback Systems', 'Inclusive Instruction', 'Intellectual Respect', 'A Culture of Care'] }
+    ];
+    var PARENT_NAMES = {};
+    TOPIC_SCHEMA.forEach(function(g) { PARENT_NAMES[g.parent] = true; });
+
+    // ---- prune parent-category chips from cards (child topics only on tiles) ----
+    grid.querySelectorAll('.ctl-res-topic-chip').forEach(function(ch) {
+        if (PARENT_NAMES[ch.textContent.trim()]) { ch.parentNode.removeChild(ch); }
+    });
+
+    // ---- featured: top 3 by modDate get pinned + badged, but filter like any card ----
+    var MAX_FEATURED = 3;
+    var featured = cards.filter(function(c) { return c.getAttribute('data-featured') === 'yes'; });
+    featured.sort(function(a, b) {
+        return Number(b.getAttribute('data-moddate')) - Number(a.getAttribute('data-moddate'));
+    });
+    featured.slice(0, MAX_FEATURED).forEach(function(c) {
+        c.setAttribute('data-pinned', '1');
+        var inner = c.querySelector('.ctl-res-card');
+        if (inner) {
+            inner.classList.add('is-featured');
+            var flag = document.createElement('span');
+            flag.className = 'ctl-res-featured-flag';
+            flag.textContent = '\u2605 Featured';
+            inner.appendChild(flag);
+        }
+    });
+
+    // ---- base order: pinned featured first, then lastUpdated desc ----
+    cards.sort(function(a, b) {
+        var pa = a.getAttribute('data-pinned') === '1' ? 0 : 1;
+        var pb = b.getAttribute('data-pinned') === '1' ? 0 : 1;
+        if (pa !== pb) { return pa - pb; }
+        return Number(b.getAttribute('data-updated')) - Number(a.getAttribute('data-updated'));
+    });
+    cards.forEach(function(c, i) {
+        c.setAttribute('data-base', i);
+        grid.appendChild(c);
+    });
+
+    // ---- helpers ----
+    function attrHas(card, attr, value) {
+        if (value === '') { return true; }
+        var parts = (card.getAttribute(attr) || '').split('|');
+        for (var i = 0; i < parts.length; i++) {
+            if (parts[i].trim() === value) { return true; }
+        }
+        return false;
+    }
+
+    function collectValues(attr) {
+        var seen = {};
+        var out = [];
+        cards.forEach(function(c) {
+            (c.getAttribute(attr) || '').split('|').forEach(function(v) {
+                v = v.trim();
+                if (v !== '' && !seen[v]) { seen[v] = true; out.push(v); }
+            });
+        });
+        out.sort();
+        return out;
+    }
+
+    // ---- filter state ----
+    // critOrder remembers the order filters were activated in, so partial-match
+    // fallback ranks matches of earlier selections above later ones.
+    var state = { format: '', modality: '', topics: [], search: '' };
+    var critOrder = [];   // tokens: 'format', 'modality', 'topic:<Name>'
+
+    function passesSearch(card) {
+        if (state.search === '') { return true; }
+        return card.textContent.toLowerCase().indexOf(state.search) !== -1;
+    }
+
+    function critMatches(card, token) {
+        if (token === 'format') { return attrHas(card, 'data-format', state.format); }
+        if (token === 'modality') { return attrHas(card, 'data-modality', state.modality); }
+        if (token.indexOf('topic:') === 0) { return attrHas(card, 'data-topics', token.substring(6)); }
+        return true;
+    }
+
+    // does a hypothetical state (fmt, mod, topics[]) have at least one full match?
+    function existsFullMatch(fmt, mod, topics) {
+        for (var i = 0; i < cards.length; i++) {
+            var c = cards[i];
+            if (!passesSearch(c)) { continue; }
+            if (!attrHas(c, 'data-format', fmt)) { continue; }
+            if (!attrHas(c, 'data-modality', mod)) { continue; }
+            var ok = true;
+            for (var j = 0; j < topics.length; j++) {
+                if (!attrHas(c, 'data-topics', topics[j])) { ok = false; break; }
+            }
+            if (ok) { return true; }
+        }
+        return false;
+    }
+
+    // ---- build radio groups (Format, Modality) ----
+    var radioEntries = [];
+    function buildRadioGroup(containerId, colId, stateKey, attrName) {
+        var container = document.getElementById(containerId);
+        var values = collectValues(attrName);
+        if (values.length === 0) {
+            document.getElementById(colId).style.display = 'none';
+            return;
+        }
+        function mk(value, labelText, checked) {
+            var label = document.createElement('label');
+            var input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'ctlRes-' + stateKey;
+            input.checked = checked;
+            input.addEventListener('change', function() {
+                state[stateKey] = value;
+                var idx = critOrder.indexOf(stateKey);
+                if (idx !== -1) { critOrder.splice(idx, 1); }
+                if (value !== '') { critOrder.push(stateKey); }
+                applyFilters();
+            });
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(labelText));
+            container.appendChild(label);
+            radioEntries.push({ dim: stateKey, value: value, labelEl: label, input: input });
+        }
+        mk('', 'All', true);
+        values.forEach(function(v) { mk(v, v, false); });
+    }
+
+    buildRadioGroup('ctlResFilterFormat', 'ctlResFilterFormatCol', 'format', 'data-format');
+    buildRadioGroup('ctlResFilterModality', 'ctlResFilterModalityCol', 'modality', 'data-modality');
+
+    // ---- build grouped topic cloud ----
+    var topicCloud = document.getElementById('ctlResTopicCloud');
+    var topicValues = collectValues('data-topics');
+    var topicEntries = [];
+
+    if (topicValues.length === 0) {
+        document.getElementById('ctlResFilterTopicCol').style.display = 'none';
+    } else {
+        var presentTopics = {};
+        topicValues.forEach(function(v) { presentTopics[v] = true; });
+
+        function makeTopicPill(v) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ctl-res-pill';
+            btn.style.margin = '3px';
+            btn.textContent = v;
+            btn.addEventListener('click', function() {
+                var token = 'topic:' + v;
+                var i = state.topics.indexOf(v);
+                if (i === -1) {
+                    state.topics.push(v);
+                    critOrder.push(token);
+                    btn.classList.add('active');
+                } else {
+                    state.topics.splice(i, 1);
+                    var ci = critOrder.indexOf(token);
+                    if (ci !== -1) { critOrder.splice(ci, 1); }
+                    btn.classList.remove('active');
+                }
+                applyFilters();
+            });
+            topicEntries.push({ value: v, btn: btn });
+            return btn;
+        }
+
+        function addTopicGroup(heading, names) {
+            if (names.length === 0) { return; }
+            var group = document.createElement('div');
+            group.className = 'ctl-res-topic-group';
+            var h = document.createElement('span');
+            h.className = 'ctl-res-topic-group-heading';
+            h.textContent = heading;
+            group.appendChild(h);
+            names.forEach(function(v) { group.appendChild(makeTopicPill(v)); });
+            topicCloud.appendChild(group);
+        }
+
+        var placed = {};
+        TOPIC_SCHEMA.forEach(function(g) {
+            var here = g.children.filter(function(name) { return presentTopics[name]; });
+            here.forEach(function(name) { placed[name] = true; });
+            addTopicGroup(g.parent, here);
+        });
+        var leftovers = topicValues.filter(function(v) { return !placed[v] && !PARENT_NAMES[v]; });
+        addTopicGroup('More Topics', leftovers);
+    }
+
+    // ---- search ----
+    var searchBox = document.getElementById('ctlResSearch');
+    searchBox.addEventListener('input', function() {
+        state.search = searchBox.value.toLowerCase().trim();
+        applyFilters();
+    });
+
+    document.getElementById('ctlResFilterBar').style.display = '';
+
+    // ---- cross-section dimming: grey out (but keep clickable) any option whose
+    //      combination with the current selections has zero exact matches ----
+    function updateDimming() {
+        radioEntries.forEach(function(e) {
+            if (e.value === '') { e.labelEl.classList.remove('ctl-res-dimmed'); return; }
+            var fmt = (e.dim === 'format') ? e.value : state.format;
+            var mod = (e.dim === 'modality') ? e.value : state.modality;
+            var ok = existsFullMatch(fmt, mod, state.topics);
+            e.labelEl.classList.toggle('ctl-res-dimmed', !ok);
+        });
+        topicEntries.forEach(function(e) {
+            var topics = state.topics;
+            if (topics.indexOf(e.value) === -1) { topics = topics.concat([e.value]); }
+            var ok = existsFullMatch(state.format, state.modality, topics);
+            e.btn.classList.toggle('ctl-res-dimmed', !ok);
+        });
+    }
+
+    // ---- divider shown between match tiers in partial-fallback mode ----
+    var divider = document.createElement('div');
+    divider.className = 'col-12 ctl-res-partial-divider';
+    divider.textContent = '\u2193 Partial matches';
+
+    // ---- filtering with partial-match fallback ----
+    function applyFilters() {
+        var crits = critOrder.slice();
+        var n = crits.length;
+        var results = [];
+
+        cards.forEach(function(c) {
+            if (!passesSearch(c)) {
+                results.push({ card: c, matched: -1, score: 0 });
+                return;
+            }
+            var matched = 0, score = 0;
+            for (var i = 0; i < n; i++) {
+                if (critMatches(c, crits[i])) {
+                    matched++;
+                    score += Math.pow(2, n - i);   // earlier selections weigh more
+                }
+            }
+            results.push({ card: c, matched: matched, score: score });
+        });
+
+        var fulls = results.filter(function(r) { return r.matched === n; });
+        var partials = [];
+        if (fulls.length === 0 && n > 0) {
+            partials = results.filter(function(r) { return r.matched >= 1; });
+        }
+
+        if (divider.parentNode) { divider.parentNode.removeChild(divider); }
+        cards.forEach(function(c) { c.style.display = 'none'; });
+
+        function byBase(a, b) {
+            return Number(a.card.getAttribute('data-base')) - Number(b.card.getAttribute('data-base'));
+        }
+
+        fulls.sort(byBase);
+        fulls.forEach(function(r) { r.card.style.display = ''; grid.appendChild(r.card); });
+
+        if (partials.length > 0) {
+            partials.sort(function(a, b) { return (b.score - a.score) || byBase(a, b); });
+            var topScore = partials[0].score;
+            var dividerPlaced = false;
+            partials.forEach(function(r) {
+                if (!dividerPlaced && r.score < topScore) {
+                    grid.appendChild(divider);
+                    dividerPlaced = true;
+                }
+                r.card.style.display = '';
+                grid.appendChild(r.card);
+            });
+        }
+
+        var shown = fulls.length + partials.length;
+        emptyEl.style.display = (shown === 0) ? '' : 'none';
+        if (n === 0) {
+            countEl.textContent = 'Showing ' + fulls.length + ' of ' + cards.length + ' resources';
+        } else if (fulls.length > 0) {
+            countEl.textContent = 'Showing ' + fulls.length + ' of ' + cards.length + ' resources';
+        } else if (partials.length > 0) {
+            countEl.textContent = 'No exact matches for this combination \u2014 showing ' + partials.length + ' closest matches';
+        } else {
+            countEl.textContent = '';
+        }
+
+        updateDimming();
+    }
+
+    // ---- clear all ----
+    document.getElementById('ctlResClear').addEventListener('click', function() {
+        state = { format: '', modality: '', topics: [], search: '' };
+        critOrder = [];
+        searchBox.value = '';
+        radioEntries.forEach(function(e) { e.input.checked = (e.value === ''); });
+        topicEntries.forEach(function(e) { e.btn.classList.remove('active'); });
+        applyFilters();
+    });
+
+    applyFilters();
+});
+</script>
+#end

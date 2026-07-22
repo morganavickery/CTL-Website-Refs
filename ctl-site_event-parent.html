@@ -1,0 +1,109 @@
+#set($now = $date.getDate())
+#set($nowMs = $now.getTime())
+#set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1", 100, "score"))
+#set($allEvents = [])
+#foreach($item in $allActivities)
+    #if($item.isEvent.selectedValues.contains("true"))
+        #set($dummy = $allEvents.add($item))
+    #end
+#end
+#set($upcomingList = [])
+#set($pastList = [])
+#foreach($item in $allEvents)
+#if("$!item.eventEndDate" != "")
+        #set($compareMs = $item.eventEndDate.getTime())
+    #elseif("$!item.eventStartDate" != "")
+        #set($compareMs = $item.eventStartDate.getTime())
+    #else
+        #set($compareMs = false)
+    #end
+    #if($compareMs && $compareMs < $nowMs)
+        #set($dummy = $pastList.add($item))
+    #else
+        #set($dummy = $upcomingList.add($item))
+    #end
+#end
+
+<h2 class="section-title">Upcoming Events</h2>
+<div class="event-listing-group">
+    #if($upcomingList.size() > 0)
+        #foreach($item in $upcomingList)
+            <div style="display: flex; gap: 20px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: #fff; align-items: flex-start;">
+                <div style="flex: 0 0 200px;">
+                    #if("$!item.thumbnail.fileName" != "")
+                        <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" style="width: 200px; height: 150px; object-fit: cover; border-radius: 4px;" />
+                    #else
+                        <div style="width: 200px; height: 150px; background: #f0f0f0; border-radius: 4px;"></div>
+                    #end
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="margin-top: 0;">
+                        <a href="/centers/ctl/event-calendar/$item.urlMapPattern" style="text-decoration: none; color: inherit;">$item.title</a>
+                    </h3>
+                    #if("$!item.shortDescription" != "")
+                        <p style="color: #444; font-size: 0.95rem;">$item.shortDescription</p>
+                    #end
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 16px; margin-top: 20px; padding-top: 12px; border-top: 1px solid #f0f0f0; font-size: 0.9rem; color: #555; flex-wrap: wrap;">
+                        #if("$!item.eventStartDate" != "")
+                            <span>$date.format('MMM d', $item.eventStartDate)#if("$!item.eventEndDate" != "" && $item.eventStartDate != $item.eventEndDate) &ndash; $date.format('MMM d, yyyy', $item.eventEndDate)#else, $date.format('yyyy', $item.eventStartDate)#end</span>
+                        #end
+                        #if("$!item.eventStartDate" != "")
+                            <span style="color: #ccc;">|</span>
+                            <span>$date.format('h:mma', $item.eventStartDate).toLowerCase()#if("$!item.eventEndDate" != "") &ndash; $date.format('h:mma', $item.eventEndDate).toLowerCase()#end</span>
+                        #end
+                        #if("$!item.eventLocation" != "")
+                            <span style="color: #ccc;">|</span>
+                            <span>$item.eventLocation</span>
+                        #end
+                        <span style="color: #ccc;">|</span>
+                        #if("$!item.eventRegistrationLink" != "" && "$!item.eventRegistrationLink" != "http://")
+                            <a href="$item.eventRegistrationLink" target="_blank" class="btn btn-default">Register</a>
+                        #else
+                            <a href="/centers/ctl/event-calendar/$item.urlMapPattern" class="btn btn-default">Details</a>
+                        #end
+                    </div>
+                </div>
+            </div>
+        #end
+    #else
+        <p style="color: #666; font-style: italic;">No upcoming events scheduled at this time.</p>
+    #end
+</div>
+
+<h2 class="section-title" style="margin-top: 50px;">Past Events</h2>
+<div class="event-listing-group">
+    #if($pastList.size() > 0)
+        #foreach($item in $pastList)
+            <div style="display: flex; gap: 20px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: #fff; align-items: flex-start;">
+                <div style="flex: 0 0 200px;">
+                    #if("$!item.thumbnail.fileName" != "")
+                        <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" style="width: 200px; height: 150px; object-fit: cover; border-radius: 4px;" />
+                    #else
+                        <div style="width: 200px; height: 150px; background: #f0f0f0; border-radius: 4px;"></div>
+                    #end
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="margin-top: 0;">
+                        <a href="/centers/ctl/event-calendar/$item.urlMapPattern" style="text-decoration: none; color: inherit;">$item.title</a>
+                    </h3>
+                    #if("$!item.shortDescription" != "")
+                        <p style="color: #444; font-size: 0.95rem;">$item.shortDescription</p>
+                    #end
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 16px; margin-top: 20px; padding-top: 12px; border-top: 1px solid #f0f0f0; font-size: 0.9rem; color: #555; flex-wrap: wrap;">
+                        #if("$!item.eventStartDate" != "")
+                            <span>$date.format('MMM d', $item.eventStartDate)#if("$!item.eventEndDate" != "" && $item.eventStartDate != $item.eventEndDate) &ndash; $date.format('MMM d, yyyy', $item.eventEndDate)#else, $date.format('yyyy', $item.eventStartDate)#end</span>
+                        #end
+                        #if("$!item.eventLocation" != "")
+                            <span style="color: #ccc;">|</span>
+                            <span>$item.eventLocation</span>
+                        #end
+                        <span style="color: #ccc;">|</span>
+                        <a href="/centers/ctl/event-calendar/$item.urlMapPattern" class="btn btn-default">View Materials</a>
+                    </div>
+                </div>
+            </div>
+        #end
+    #else
+        <p style="color: #666; font-style: italic;">No past events found.</p>
+    #end
+</div>

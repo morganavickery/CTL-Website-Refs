@@ -1,0 +1,180 @@
+<h2>Welcome to the CTL!</h2>
+<p>
+    The Center for Teaching and Learning (CTL) supports our community through developing and delivering engaging and innovative teaching resources for faculty and staff. We collaborate with offices, departments, and individual faculty members to improve teaching effectiveness and student success.
+    
+    We support faculty and staff in every unit to ensure that Cortland provides equitable, accessible learning environments, advancing the university’s principles through well-researched, data-driven design.
+</p>
+<div class="container py-4">
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+
+    <div class="col">
+      <a href="/centers/ctl/instructional-resources" class="card h-100 text-decoration-none text-body">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-easel fs-3" aria-hidden="true"></i>
+            <h2 class="h5 fw-bold mb-0 card-title">Instructional Resources</h2>
+          </div>
+          <p class="card-text mb-0">Explore our online compendium of instructional design resources.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/technology-support" class="card h-100 text-decoration-none text-body">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-display fs-3" aria-hidden="true"></i>
+            <h2 class="h5 fw-bold mb-0 card-title">Technology Support</h2>
+          </div>
+          <p class="card-text mb-0">Get tech help with BrightSpace, Teams, and other university-supported tools.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/make-an-appointment" class="card h-100 text-decoration-none text-body">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-chat-dots fs-3" aria-hidden="true"></i>
+            <h2 class="h5 fw-bold mb-0 card-title">Make an Appointment</h2>
+          </div>
+          <p class="card-text mb-0">Meet with a CTL designer or technologist.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/event-calendar" class="card h-100 text-decoration-none text-body">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-calendar-check fs-3" aria-hidden="true"></i>
+            <h2 class="h5 fw-bold mb-0 card-title">Event Calendar</h2>
+          </div>
+          <p class="card-text mb-0">Attend an upcoming workshop, reading group, showcase, webinar, or conference.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/opportunities" class="card h-100 text-decoration-none text-body">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-stack fs-3" aria-hidden="true"></i>
+            <h2 class="h5 fw-bold mb-0 card-title">Opportunities</h2>
+          </div>
+          <p class="card-text mb-0">Apply for internal awards, grants, fellowships, and funded opportunities.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/about-us" class="card h-100 text-decoration-none text-body">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-info-circle fs-3" aria-hidden="true"></i>
+            <h2 class="h5 fw-bold mb-0 card-title">About Us</h2>
+          </div>
+          <p class="card-text mb-0">Learn about the Center for Teaching &amp; Learning, our staff, &amp; get in touch!</p>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<div class="container py-4">
+  <h2 class="h3 fw-bold mb-4">Upcoming Events &amp; Opportunities</h2>
+
+#set($now = $date.systemTime)
+#set($activityQuery = "+structureName:CtlActivity +path:/centers/ctl* +(isEvent:true isOpportunity:true)")
+#set($activities = $dotcontent.pull($activityQuery, 20, "score"))
+
+#set($upcoming = [])
+#foreach($item in $activities)
+  #if($item.activityDate)
+    #set($activityMillis = $item.activityDate.getTime())
+    #if($activityMillis >= $now)
+      #set($discard = $upcoming.add($item))
+    #end
+  #end
+#end
+
+## Manual bubble sort ascending by date — test this block in isolation before trusting it
+#set($n = $upcoming.size())
+#foreach($i in [1..$n])
+  #foreach($j in [1..($n - $i)])
+    #set($a = $upcoming.get($j - 1))
+    #set($b = $upcoming.get($j))
+    #if($a.activityDate.getTime() > $b.activityDate.getTime())
+      #set($upcoming[$j - 1] = $b)
+      #set($upcoming[$j] = $a)
+    #end
+  #end
+#end
+
+#if($upcoming.size() > 0)
+  <div id="ctlUpcomingCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      #foreach($item in $upcoming)
+        <!-- <div class="carousel-item#if($foreach.count == 1) active#end">
+          <div class="card mx-auto" style="max-width: 600px;">
+            #if("$!item.thumbnail.fileName" != "")
+              <img src="$item.thumbnail.path$item.thumbnail.fileName" class="card-img-top" alt="$item.title">
+            #end
+            <div class="card-body">
+              <span class="badge #if($item.isEvent)text-bg-primary#else text-bg-success#end mb-2">
+                #if($item.isEvent)Event#else Opportunity#end
+              </span>
+              <h3 class="h5 card-title">$item.title</h3>
+              <p class="card-text">$item.shortDescription</p>
+              <a href="$item.urlMapPattern" class="btn btn-outline-primary btn-sm">Learn more</a>
+            </div>
+          </div>
+        </div> -->
+      #end
+    <!-- </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#ctlUpcomingCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#ctlUpcomingCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div> -->
+#else
+  <p class="text-muted">No upcoming events or opportunities at this time.</p>
+#end
+</div>
+
+
+<div class="container py-4">
+  <h2 class="h3 fw-bold mb-4">Featured Resources</h2>
+
+#set($allResources = $dotcontent.pull("+contentType:CtlInstructionalResource +languageId:1 +live:true", 500, "score"))
+<p>Count of allResources: $allResources.size()</p>
+
+#set($featResources = $dotcontent.pull("+contentType:CtlInstructionalResource +languageId:1 +live:true +featured:yes", 500, "score"))
+<p>Count of featResources: $featResources.size()</p>
+
+
+#if($featuredResources.size() > 0)
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    #foreach($item in $featuredResources)
+      <div class="col">
+        <a href="$item.resourceUrl" class="card h-100 text-decoration-none text-body">
+          #if("$!item.resourceThumbnail.fileName" != "")
+            <img src="$item.resourceThumbnail.path$item.thumbnail.fileName" class="card-img-top" alt="$item.resourceTitle">
+          #end
+          <div class="card-body">
+            <h3 class="h6 fw-bold card-title">$item.resourceTitle</h3>
+            <p class="card-text">$item.shortDescription</p>
+          </div>
+        </a>
+      </div>
+    #end
+  </div>
+#else
+  <p class="text-muted">No featured resources at this time.</p>
+#end
+</div>
