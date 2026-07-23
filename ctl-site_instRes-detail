@@ -68,8 +68,12 @@
         #end
 
         ## --- modality: Checkbox field -> selectedValues, mapped to display labels ---
+        ## All 3 possible modality values (inperson/async/sync) selected at once collapses
+        ## to a single "All Modalities" tag instead of listing all 3 redundantly.
         #set($modStr = "")
+        #set($modCount = 0)
         #if($item.modality && $item.modality.selectedValues && $item.modality.selectedValues.size() > 0)
+            #set($modCount = $item.modality.selectedValues.size())
             #foreach($sv in $item.modality.selectedValues)
                 #set($label = $sv)
                 #set($midx = 0)
@@ -82,16 +86,73 @@
                 #if($modStr == "")#set($modStr = "$label")#else#set($modStr = "$modStr|$label")#end
             #end
         #end
+        #set($modAllSelected = $modCount >= 3)
+
+        ## --- body/citations: downgrade any H1/H2 in WYSIWYG content to H3 so editor-typed
+        ## headings can't clash with the page's own H1/H2 (accessibility/screenreader hazard) ---
+        #set($bodyHtml = "$!item.body")
+        #if($bodyHtml != "")
+            #set($bodyHtml = $bodyHtml.replaceAll("(?i)<h1([^>]*)>", "<h3$1>"))
+            #set($bodyHtml = $bodyHtml.replaceAll("(?i)</h1>", "</h3>"))
+            #set($bodyHtml = $bodyHtml.replaceAll("(?i)<h2([^>]*)>", "<h3$1>"))
+            #set($bodyHtml = $bodyHtml.replaceAll("(?i)</h2>", "</h3>"))
+        #end
+
+        #set($citationsHtml = "$!item.citations")
+        #if($citationsHtml != "")
+            #set($citationsHtml = $citationsHtml.replaceAll("(?i)<h1([^>]*)>", "<h3$1>"))
+            #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h1>", "</h3>"))
+            #set($citationsHtml = $citationsHtml.replaceAll("(?i)<h2([^>]*)>", "<h3$1>"))
+            #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h2>", "</h3>"))
+        #end
+
+        ## --- embedUrl: build a native embeddable src (YouTube/Vimeo) so video plays inline
+        ## instead of opening a new tab. Falls back to the raw URL for unrecognized hosts. ---
+        #set($embedSrc = "")
+        #set($rawEmbed = "$!item.embedUrl")
+        #if($rawEmbed != "")
+            #if($rawEmbed.contains("youtube.com/watch"))
+                #set($vIdx = $rawEmbed.indexOf("v="))
+                #if($vIdx >= 0)
+                    #set($vIdxPlus = $vIdx + 2)
+                    #set($vidId = $rawEmbed.substring($vIdxPlus))
+                    #set($ampIdx = $vidId.indexOf("&"))
+                    #if($ampIdx >= 0)
+                        #set($vidId = $vidId.substring(0, $ampIdx))
+                    #end
+                    #set($embedSrc = "https://www.youtube.com/embed/$vidId")
+                #end
+            #elseif($rawEmbed.contains("youtu.be/"))
+                #set($slashIdx = $rawEmbed.lastIndexOf("/"))
+                #set($slashIdxPlus = $slashIdx.intValue() + 1)
+                #set($vidId = $rawEmbed.substring($slashIdxPlus))
+                #set($embedSrc = "https://www.youtube.com/embed/$vidId")
+            #elseif($rawEmbed.contains("vimeo.com/"))
+                #set($slashIdx = $rawEmbed.lastIndexOf("/"))
+                #set($slashIdxPlus = $slashIdx.intValue() + 1)
+                #set($vidId = $rawEmbed.substring($slashIdxPlus))
+                #set($embedSrc = "https://player.vimeo.com/video/$vidId")
+            #else
+                #set($embedSrc = $rawEmbed)
+            #end
+        #end
 
         <style>
             .ctl-ir-tag { display: inline-flex; align-items: center; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; background-color: #f4f4f4; color: #444; border: 1px solid #ddd; border-radius: 4px; margin-right: 6px; margin-bottom: 6px; }
+            .ctl-ir-modality-tag { display: inline-flex; align-items: center; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; background-color: #730A00; color: #fff; border: 1px solid #730A00; border-radius: 20px; margin-right: 6px; margin-bottom: 6px; }
             .ctl-ir-topic-chip { display: inline-block; font-size: 0.75rem; padding: 3px 10px; background: #fff; color: #666; border: 1px solid #ccc; border-radius: 20px; margin-right: 6px; margin-bottom: 6px; }
             .ctl-ir-framework-chip { display: inline-block; font-size: 0.75rem; padding: 3px 10px; background: #f0ece9; color: #730A00; border: 1px solid #e0d6d2; border-radius: 20px; margin-right: 6px; margin-bottom: 6px; }
             .ctl-ir-byline { font-size: 0.9rem; color: #666; margin-bottom: 24px; }
-            .ctl-ir-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; padding: 6px 16px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; color: #730A00; background: transparent; border: 1px solid #730A00; border-radius: 4px; text-decoration: none; }
-            .ctl-ir-btn:hover { background: #730A00; color: #fff; text-decoration: none; }
             .ctl-ir-related-card .card-title a { color: inherit; text-decoration: none; }
             .ctl-ir-related-card .card-title a:hover { color: #730A00; text-decoration: underline; }
+            ## --- shared horizontally-scrolling carousel, same pattern as the homepage's
+            ## Upcoming Events / Featured Resources rows (ctl-site_home.html) — not a
+            ## Bootstrap .carousel, which can't peek a partial next card or free-scroll ---
+            .ctl-ir-hscroll { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 0.75rem; scrollbar-width: thin; }
+            .ctl-ir-hscroll-item { flex: 0 0 88%; scroll-snap-align: start; }
+            @media (min-width: 576px) { .ctl-ir-hscroll-item { flex-basis: 62%; } }
+            @media (min-width: 768px) { .ctl-ir-hscroll-item { flex-basis: 48%; } }
+            @media (min-width: 992px) { .ctl-ir-hscroll-item { flex-basis: 44%; } }
         </style>
 
         <article style="max-width: 860px;">
@@ -105,8 +166,12 @@
                     #foreach($f in $fmtStr.split("\|"))
                         #if($f != "")<span class="ctl-ir-tag">$f</span>#end
                     #end
-                    #foreach($m in $modStr.split("\|"))
-                        #if($m != "")<span class="ctl-ir-tag">$m</span>#end
+                    #if($modAllSelected)
+                        <span class="ctl-ir-modality-tag">All Modalities</span>
+                    #else
+                        #foreach($m in $modStr.split("\|"))
+                            #if($m != "")<span class="ctl-ir-modality-tag">$m</span>#end
+                        #end
                     #end
                 </div>
             #end
@@ -126,25 +191,47 @@
                 </div>
             #end
 
-            ## --- video: local upload (File field) takes precedence over an embed URL ---
-            #if("$!item.videoFile.rawUri" != "")
+            #if($bodyHtml != "")
+                <div style="line-height: 1.7; font-size: 1rem; color: #333; margin-bottom: 28px;">$bodyHtml</div>
+            #end
+
+            #if("$!item.videoFile.fileName" != "")
                 <div style="margin-bottom: 28px;">
-                    <video controls style="width: 100%; border-radius: 8px;" src="$item.videoFile.rawUri"></video>
+                    <video controls style="width: 100%; border-radius: 8px;" src="$item.videoFile.path$item.videoFile.fileName"></video>
                 </div>
-            #elseif("$!item.embedUrl" != "")
-                <div style="margin-bottom: 28px;">
-                    <a href="$item.embedUrl" target="_blank" rel="noopener" class="ctl-ir-btn">
-                        <i class="bi bi-play-circle"></i> Watch Video
-                    </a>
+            #end
+            #if($embedSrc != "")
+                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin-bottom: 28px; border-radius: 8px;">
+                    <iframe src="$embedSrc" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
             #end
 
-            #if("$!item.shortDescription" != "")
-                <p style="font-size: 1.1rem; color: #444; margin-bottom: 24px;">$item.shortDescription</p>
-            #end
-
-            #if("$!item.body" != "")
-                <div style="line-height: 1.7; font-size: 1rem; color: #333; margin-bottom: 28px;">$item.body</div>
+            #if($item.downloadableAttachments && $item.downloadableAttachments.size() > 0)
+                <div style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Downloads</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 500px;">
+                        #foreach($file in $item.downloadableAttachments)
+                            #if("$!file.ctlAttachmentfile.rawUri" != "")
+                                <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="btn btn-default" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
+                                    <div style="width: 54px; height: 54px; flex-shrink: 0; background-color: #ffffff !important; color: #730A00 !important; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor;">
+                                        #if("$!file.ctlAttachmentfile.thumbnailUri" != "")
+                                            <img src="$file.ctlAttachmentfile.thumbnailUri" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: top; display: block;" />
+                                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(194, 0, 0, 0.2); z-index: 2; pointer-events: none;"></div>
+                                        #else
+                                            <div style="width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-file-earmark-pdf" style="font-size: 1.25rem; opacity: 0.5;"></i>
+                                            </div>
+                                        #end
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; flex: 1; padding: 0 16px; gap: 12px;">
+                                        <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; line-height: 1.2;">$file.ctlAttachmentlabel</span>
+                                        <i class="bi bi-download" style="font-size: 0.95rem; font-weight: 700; display: inline-flex; flex-shrink: 0;"></i>
+                                    </div>
+                                </a>
+                            #end
+                        #end
+                    </div>
+                </div>
             #end
 
             #if(!$topicsList.isEmpty())
@@ -156,19 +243,12 @@
                 </div>
             #end
 
-            #if("$!item.citations" != "")
-                <div style="margin-bottom: 28px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">Citations &amp; Further Reading</h3>
-                    <div style="font-size: 0.9rem; color: #444; line-height: 1.6;">$item.citations</div>
-                </div>
-            #end
-
             #if($item.relatedInstructionalResources && $item.relatedInstructionalResources.size() > 0)
                 <div style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Related Resources</h3>
-                    <div class="row row-cols-1 row-cols-md-2 g-3">
+                    <div class="ctl-ir-hscroll">
                         #foreach($rel in $item.relatedInstructionalResources)
-                            <div class="col">
+                            <div class="ctl-ir-hscroll-item">
                                 <div class="card h-100 ctl-ir-related-card">
                                     <div class="card-body">
                                         <h4 class="h6 card-title">
@@ -193,6 +273,13 @@
                             <li><a href="/centers/ctl/activities/$!rel.urlMapPattern">$!rel.title</a></li>
                         #end
                     </ul>
+                </div>
+            #end
+
+            #if($citationsHtml != "")
+                <div style="margin-bottom: 28px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">Citations &amp; Further Reading</h3>
+                    <div style="font-size: 0.9rem; color: #444; line-height: 1.6;">$citationsHtml</div>
                 </div>
             #end
 
