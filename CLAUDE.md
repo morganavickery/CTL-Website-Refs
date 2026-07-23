@@ -74,8 +74,14 @@ longer exist):
 | relatedEvents | Relationship → CtlActivity | No |
 | relatedTechSupport | Relationship → CtlTechSupport | No |
 
-Note: `videoFile` is a File field (not Binary) — access via `.rawUri`/`.name`/`.thumbnailUri`,
-NOT the Binary-field pattern used elsewhere.
+Note: `videoFile` is a File field, which dotCMS represents as a **FileAssetMap** — the same
+object type as Image fields (e.g. `thumbnail`), NOT a BinaryMap. Confirmed via live debug dump
+2026-07-23: `.rawUri`/`.thumbnailUri`/`.resizeUri` do not exist on it and silently resolve empty
+(the same "empty vs. wrong accessor" trap as the earlier format/category bug). Correct access is
+`.path` + `.fileName` concatenation, identical to the Image-field pattern — e.g.
+`$item.videoFile.path$item.videoFile.fileName`. This was root-caused by adding a temporary
+EDIT_MODE debug panel that printed the raw Java object's toString(), which showed
+`FileAssetMap@...[...fileName=..., path=...]` instead of the expected BinaryMap shape.
 
 ### CtlInstructionalResource — detail widget built and WORKING (resolved 2026-07-22)
 
@@ -162,8 +168,19 @@ same pull-all + `.selectValue` pattern the listing widget uses. Raw always-visib
 * Don't use /dA/, /dotAsset/, /convert/image?id=, /contentAsset/raw-data/ for images — none work here
 * Image field → FileAssetMap: `src="$item.field.path$item.field.fileName"`, check existence
   with `#if("$!item.field.fileName" != "")`
-* Binary/File field (e.g. CtlAttachment, videoFile) → BinaryMap: use `.rawUri`, `.name`,
-  `.thumbnailUri`, `.resizeUri` (NOT `.path`/`.fileName`)
+* **File**-type field (dotCMS field type "File", e.g. `videoFile`) → also a **FileAssetMap**,
+  same as Image fields — use `.path`/`.fileName` (NOT `.rawUri`/`.thumbnailUri`/`.resizeUri`,
+  which don't exist on it and silently resolve empty). Confirmed 2026-07-23 via a live
+  EDIT_MODE debug panel printing the raw object's toString() — it showed
+  `FileAssetMap@...[map={fileName=..., path=...}]`, not a BinaryMap. An earlier version of this
+  doc wrongly generalized "Binary/File field → BinaryMap, use `.rawUri`" — that only holds for
+  actual **Binary**-type fields (dotCMS field type "Binary", embedded/private to the content
+  record), which really is a different field type from "File" despite the similar name and
+  despite both storing an uploaded file. Don't assume the two are interchangeable — verify
+  which one a field actually is before choosing an accessor.
+* Binary-type field (dotCMS field type "Binary") → BinaryMap: use `.rawUri`, `.name`,
+  `.thumbnailUri`, `.resizeUri` (NOT `.path`/`.fileName`) — confirm the field is actually typed
+  Binary (not File) before relying on this pattern; see the File-type note above.
 * CheckboxMap → `.selectedValues` (parallel options/values arrays for labels)
 * RadioMap → `.selectValue`
 * Category fields → different access pattern than Checkbox/Radio, verify in isolation
