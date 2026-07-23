@@ -101,21 +101,50 @@ CtlActivity — same stale-field-name failure mode as the format/category bug ab
 fields are `signupDeadline`/`registerApplyLink` (already used correctly in
 activity-detail.html).
 
-### CTL homepage — currently BROKEN (not "done" as previously noted)
+### CTL homepage — fixed and CONFIRMED WORKING (as of 2026-07-23)
 
-`ctl-site_home.html` has: a variable-name typo (`$featuredResources` vs `$featResources`),
-stale field names (`resourceUrl`/`resourceThumbnail` don't exist on CtlInstructionalResource),
-carousel card markup entirely HTML-commented-out (renders an empty shell), sorts by a
-nonexistent `activityDate` field, and leftover debug output. Not yet fixed — full detail in
-the Variable Map doc's Known Issues section.
+Must live in a dotCMS Widget, not a generic "Web Page Content" block — pasting the same
+code into a Web Page Content block rendered nothing at all (not even the plain-HTML tile
+grid), while a Widget rendered correctly. Matches how every other piece of Velocity in this
+project already lives in a Widget (CtlWidgetActivityDetail, CtlWidgetInstructionalParent,
+CtlWidgetInstDetail, EventCalendarWidget, CtlWidgetOpportunitiesParent) — Web Page Content
+blocks apparently don't evaluate Velocity in this instance (or run it through a sanitizer
+that strips it).
+
+`ctl-site_home.html` current design, three sections:
+1. **Tile grid** — links to all six site sections, unchanged.
+2. **Upcoming Events & Opportunities** — pulls CtlActivity, filters to `isEvent`/
+   `isOpportunity` via pull-all + `.selectedValues.contains("true")`, computes a per-record
+   relevant date (`eventStartDate`/`eventEndDate` for events, `signupDeadline`/
+   `submissionDeadline` for opportunities — `activityDate` never existed as a field),
+   filters to future-dated items, bubble-sorts ascending, renders each as a card with a
+   badge that handles the both-event-and-opportunity case, linking to
+   `/centers/ctl/activities/{urlMapPattern}`.
+3. **Featured Resources** — pulls CtlInstructionalResource, filters to `featured.selectValue
+   == "yes"` AND non-empty `reviewedBy` (same QC gate as the listing widget), renders using
+   the exact same card markup/classes (`ctl-res-card`, format badges, topic chips minus the
+   6 parent-category names) as the Instructional Resources listing widget, so featured cards
+   look identical there and on the homepage.
+
+**Display pattern for both sections:** NOT a Bootstrap `.carousel` (that component only
+supports one slide at a time via JS transitions, with no way to peek at a partial next card
+or free-scroll). Instead both use a shared `.ctl-hscroll` / `.ctl-hscroll-item` pair — a flex
+row with `overflow-x: auto` + `scroll-snap-type: x mandatory`, no auto-play, user scrolls
+manually (trackpad/touch/scrollbar). Responsive via media queries: ~1.1 cards visible on
+mobile, scaling up to ~2.3 cards at standard/max desktop width (2 full + a peek of the 3rd,
+by design — signals scrollability without needing arrows) and staying there at all wider
+widths too, since the container itself caps out. See the CSS block at the top of the Events
+section (shared by both, defined once).
+
+Fixed along the way: `$featuredResources`/`$featResources` typo (Featured Resources could
+never show real data before), stale `resourceUrl`/`resourceThumbnail` fields (real ones are
+built from `urlTitle`/`thumbnail`), Radio-field `featured` query switched from Lucene to the
+same pull-all + `.selectValue` pattern the listing widget uses. Raw always-visible debug
+`<p>` tags replaced with `$EDIT_MODE`-gated debug lines at each pull/filter/sort checkpoint
+(editor-only, invisible to real visitors).
 
 ## Next Up / On the Horizon
 
-* Remove (or fix) the regexCheck accidentally added to `urlTitle` during 404 debugging —
-  it requires a trailing `-YYYY` year suffix (copied from CtlActivity's urlMapPattern
-  field), which no CtlInstructionalResource slug actually has, so it'll block future
-  edits/saves on every resource until removed
-* Fix `ctl-site_home.html` (typo, stale fields, dead carousel, nonexistent activityDate field)
 * Fix `ctl-site_opportunity-parent.html` (oppSubmissionDeadline/oppApplicationLink → the real
   fields, signupDeadline/registerApplyLink)
 * CtlTechSupport content type (not yet built — see naming note above)
@@ -162,6 +191,28 @@ the Variable Map doc's Known Issues section.
   ```
 * Relationship fields are pre-hydrated — no separate pull needed
 * Velocity array assignment: `#set($list[$i] = $value)`
+* This dotCMS's Velocity engine does NOT support map literals (`#set($x = {"k": v})`) —
+  confirmed via live bisection debugging on the homepage carousel: using one blanked the
+  entire page render with no error message, even in sections before the map literal in the
+  file. Use parallel arrays instead (one array per "field" you'd have put in the map)
+* `$foreach.count` is NOT supported either (a Velocity 2.x feature) — use a manually
+  incremented counter (`#set($i = $i + 1)`) instead, consistent with this project's existing
+  preference for hand-rolled loop state over trusting engine implicit behavior
+* Inline arithmetic directly inside a `.get(...)` call or `[...]` index — e.g.
+  `$list.get($i - 1)` or `$list[$i - 1]` — silently fails to render past that point. `#set`
+  the computed index to its own variable FIRST (`#set($idx = $i - 1)`), then use that plain
+  variable in the `.get()`/`[]` call. Arithmetic directly in a `#set` right-hand side or an
+  `#if` condition is fine — it's specifically inline arithmetic as a method/index argument
+  that breaks
+* Velocity's `[m..n]` range operator produces a DESCENDING list when `m > n` (e.g.
+  `[1..0]` evaluates to `[1, 0]`, two elements — NOT an empty range like most languages'
+  range semantics). A hand-rolled bubble sort using `[1..$n]` / `[1..($n - $i)]` hits this
+  on its last outer pass for ANY `$n` (not just `$n == 0`), producing an out-of-bounds
+  `.get(-1)` call that crashes the whole render. Fix: use fixed ranges (e.g. `[0..99]`)
+  with explicit `#if` bounds guards instead of deriving range bounds from a value that can
+  reach zero or go negative — this is the pattern `ctl-site_opportunity-parent.html`'s
+  bubble sort already used safely; `ctl-site_home.html`'s carousel sort did not, and it
+  cost a long blank-page debugging session before being fixed to match
 * CtlEventItem/CtlOpportunity are deleted, replaced by unified CtlActivity
   (isEvent/isOpportunity checkboxes). CTL_widget_activity-detail is the live detail widget
 * Combine listing+detail Velocity logic into one widget (slug switches view) — Constant

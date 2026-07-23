@@ -1,6 +1,6 @@
 # CTL Website — dotCMS Variable Map
 
-Compiled from the dotCMS Content Type REST API (`/api/v1/contenttype`). Last compiled: July 2026. Updated July 22, 2026 with the full CtlActivity schema, CtlAttachment schema, and current widget health notes.
+Compiled from the dotCMS Content Type REST API (`/api/v1/contenttype`). Last compiled: July 2026. Updated July 22, 2026 with the full CtlActivity schema, CtlAttachment schema, and current widget health notes. Updated July 23, 2026: CtlInstructionalResource detail page 404 resolved (System Indexed/Unique gotcha), CTL homepage widget confirmed working end-to-end with a horizontally-scrolling card layout replacing the original grid/carousel design.
 
 ## How to Use This Document
 
@@ -156,15 +156,14 @@ Widgets don't hold content-editor fields in the same way; this section is a quic
 - **Content type config:** URL Map Pattern = `/centers/ctl/instructional-resources/{urlTitle}`; Detail Page = `//www2.cortland.edu/centers/ctl/instructional-resources/instructional-resource-detail`.
 - **Root cause of the 404 (resolved):** the `urlTitle` field needed **"System Indexed" AND "Unique" checked** in its own field settings — without those, dotCMS's URL Map resolution silently fails to bind even though the URL Map Pattern + Detail Page are configured correctly on the content type. See the gotcha in CLAUDE.md — this will affect any future URL-mapped content type (e.g. CtlTechSupport).
 
-### CTL Homepage Widget — 🔴 BROKEN
+### CTL Homepage Widget — ✅ LIVE, CONFIRMED WORKING (2026-07-23)
 - **File:** `ctl-site_home.html`
-- **Purpose:** Tile grid linking to all six site sections, an "Upcoming Events & Opportunities" carousel, and a "Featured Resources" block.
-- **Known bugs (confirmed 2026-07-22):**
-  - Featured Resources block checks `$featuredResources.size()`, but the pull two lines earlier stores its result in `$featResources` — a variable-name typo. This section never shows real data as written.
-  - That same block reads `$item.resourceUrl` and `$item.resourceThumbnail`, neither of which exists on CtlInstructionalResource — the real fields are `urlTitle` (build the link from it, as the listing widget does) and `thumbnail`.
-  - The entire carousel's card markup is wrapped in HTML comments, so it currently renders an empty carousel shell with no visible cards.
-  - Sorts "upcoming" by `$item.activityDate`, which does not exist anywhere on CtlActivity (confirmed via full schema pull). Needs to branch per record: `eventStartDate` for events, `signupDeadline` (falling back to `submissionDeadline`) for opportunities.
-  - Leftover debug output still present in the markup ("Count of allResources...", "Count of featResources...").
+- **Must live in a dotCMS Widget, not a "Web Page Content" block** — the latter rendered nothing at all in this instance (not even plain HTML), matching every other Velocity file in this project already living in a Widget.
+- **Purpose:** Tile grid linking to all six site sections, an "Upcoming Events & Opportunities" row, and a "Featured Resources" row.
+- **Display pattern (both rows):** a horizontally-scrolling flex row (`.ctl-hscroll` container / `.ctl-hscroll-item` per card — CSS defined once at the top of the Events section, shared by both), NOT a Bootstrap `.carousel`. No auto-play; the user scrolls manually. Responsive: ~1.1 cards visible on mobile, scaling up to ~2.3 cards at standard/max desktop width (2 full + a peek of the 3rd — deliberate, signals scrollability) and staying there at wider widths too, via media queries on `.ctl-hscroll-item`'s `flex-basis`.
+- **Upcoming Events & Opportunities:** pulls CtlActivity (pull-all + Velocity-side `isEvent`/`isOpportunity` filter via `.selectedValues.contains("true")`, not Lucene), computes a per-record relevant date (`eventStartDate`/`eventEndDate` for events, `signupDeadline`/`submissionDeadline` for opportunities — `activityDate` never existed as a field), filters to future-dated items, bubble-sorts ascending, renders each with a badge that handles the both-event-and-opportunity case, linking to `/centers/ctl/activities/{urlMapPattern}`.
+- **Featured Resources:** filters to `featured.selectValue == "yes"` AND non-empty `reviewedBy` (same QC gate as the Instructional Resources listing widget), renders using the *exact same* card markup/classes (`ctl-res-card`, `ctl-res-fmt-badge`, `ctl-res-topic-chip`, stretched-link title) as that listing widget, so featured cards look identical there and on the homepage. Holds ALL featured + reviewed resources, no cap. Fixed along the way: `$featuredResources`/`$featResources` typo (block could never show real data before), stale `resourceUrl`/`resourceThumbnail` fields (real ones are `urlTitle`/`thumbnail`), Radio-field `featured` query switched from Lucene to pull-all + `.selectValue`.
+- **Debugging:** raw always-visible debug `<p>` tags removed; replaced with `$EDIT_MODE`-gated debug lines at each pull/filter/sort checkpoint in both sections (editor-only, invisible to real visitors).
 
 ---
 
@@ -172,5 +171,4 @@ Widgets don't hold content-editor fields in the same way; this section is a quic
 
 - **CtlTechSupport** content type: planned, not yet built. Do not build against `CtlTechResource` — that name was deprecated in favor of `CtlTechSupport` to match an existing live relationship field (see `relatedTechSupport` above).
 - **Orphaned widgets to delete:** `ctl_widget_detail-router`, `CTL_widget_event-calendar_detail`, `CTL_widget_opportunities_detail` — all reference the deleted `CtlEventItem`/`CtlOpportunity` content types (replaced by unified CtlActivity).
-- **Regex accidentally added to `urlTitle` during 404 debugging needs removal:** `[a-z0-9]+(-[a-z0-9]+)*-(19|20)\d{2}` (copied from CtlActivity's `urlMapPattern` field) requires a trailing `-YYYY` year suffix. No CtlInstructionalResource slug has one, so this will block saving/editing every existing resource until it's removed — it was never actually the cause of the 404 (see `urlTitle` row above for the real fix).
 - **CtlAttachment thumbnail letterboxing:** current rendering uses `.thumbnailUri`, which letterboxes non-matching aspect ratios. Needs a crop-based URL pattern instead.
