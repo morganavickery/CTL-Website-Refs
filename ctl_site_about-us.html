@@ -1,0 +1,194 @@
+## ============================================================
+## CTL_widget_about-us  (v1)
+## dotCMS widget variable: CtlWidgetAboutUs
+## Pulls CtlPersonnel content instead of hard-coded staff bio cards.
+## Bootstrap 5.3 + Cortland theme classes only — no custom CSS, matching
+## the markup this replaces.
+## Field map (CtlPersonnel): name, pronouns (RADIO field, NOT Text as first
+## assumed -- confirmed 2026-07-28 via live render showing the raw
+## RadioMap.toString(); access via .selectValue + values/options lookup,
+## same pattern as the modality Checkbox elsewhere in this project. Options:
+## she/her, he/him, they/them, she/they, he/they, they/she, they/he, dont
+## show pronouns -- that last one is a real selectable value, treated same
+## as blank so the parenthetical is hidden. Rendered next to name,
+## small/non-bold, in parens, e.g. "Jane Doe (she/her)"), jobTitle, degrees
+## (jobTitle and degrees are combined onto one line as "Job Title | Deg1,
+## Deg2" — no longer appended to the name), emailCortlandEdu,
+## bookWithMeFullLink, areasOfExpertise (textarea), howICanHelp (textarea),
+## headshotPhoto (image), rank (whole number — display sort order, added
+## 2026-07-28)
+## ROOT-CAUSED 2026-07-28 (attempt 1): rank used to be compared as a
+## zero-padded STRING, which this Velocity engine's ">" does not evaluate
+## the way Number ">" comparisons do (every other working Velocity-side
+## sort in this project — e.g. the homepage's event-date bubble sort —
+## compares actual Numbers, like epoch millis from .getTime(), never
+## Strings). The ">" on Strings silently never triggered a swap, so a
+## person with e.g. rank 5 could still appear above ranks 1-4 (the list
+## just kept pull order, effectively last-modified-first).
+## ROOT-CAUSED 2026-07-28 (attempt 2): switching to "$rankRaw + 0" for
+## numeric coercion STILL didn't fix it. Suspected cause: this Velocity
+## engine's "+" may do String concatenation on a String operand (like
+## JS/Groovy) instead of always coercing to Number, so "5" + 0 could
+## silently become the STRING "50", not the Number 5 — reintroducing the
+## same String-comparison bug from attempt 1. Switched to "* 1", also
+## insufficient.
+## ROOT-CAUSED 2026-07-28 (actual root cause, found via visible debug
+## output live on ctl-site_get-help.html): $p.rank was ALREADY a real
+## java.lang.Long the whole time (confirmed via $p.rank.class.name), NOT a
+## String, despite the field being labeled "Text ... whole number" in the
+## dotCMS editor. Attempts 1-3 all made the SAME mistake: forced it into a
+## String first via "$!p.rank" (quoted-string interpolation always
+## stringifies, regardless of underlying type), then tried converting it
+## BACK to a Number ("+0"/"*1" on the STRING) — and that reverse
+## conversion silently failed (String arithmetic throws in this engine's
+## MathUtils, which makes the #set a no-op, leaving the variable
+## completely UNSET rather than null/zero). With every rank key silently
+## unset, the bubble sort's ">" comparison never evaluated true, so
+## nothing ever swapped. FIX: skip the round-trip — use $p.rank DIRECTLY
+## (it's already a Long) as the sort key; only the blank-check needs the
+## stringified "$!p.rank" version.
+
+#set($allPersonnel = $dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true", 500, "score"))
+
+## ---- sort ascending by rank (parallel array of Number keys, bubble sort) ----
+#set($sortedPersonnel = [])
+#set($rankKeys = [])
+#set($rankDebug = "")
+#foreach($p in $allPersonnel)
+    #set($dummy = $sortedPersonnel.add($p))
+    #set($rankRaw = "$!p.rank")
+    #if($rankRaw == "")
+        #set($rankKey = 999999)
+    #else
+        #set($rankKey = $p.rank)
+    #end
+    #set($dummy = $rankKeys.add($rankKey))
+    #set($rankDebug = "$rankDebug | $!p.name: raw=$rankRaw key=$rankKey")
+#end
+
+#foreach($i in [0..20])
+    #foreach($j in [0..20])
+        #set($k = $j + 1)
+        #if($k < $sortedPersonnel.size())
+            #if($rankKeys.get($j) > $rankKeys.get($k))
+                #set($tmpP = $sortedPersonnel.get($j))
+                #set($tmpR = $rankKeys.get($j))
+                #set($dummy = $sortedPersonnel.set($j, $sortedPersonnel.get($k)))
+                #set($dummy = $rankKeys.set($j, $rankKeys.get($k)))
+                #set($dummy = $sortedPersonnel.set($k, $tmpP))
+                #set($dummy = $rankKeys.set($k, $tmpR))
+            #end
+        #end
+    #end
+#end
+
+#if($EDIT_MODE)
+    <!-- DEBUG: pulled $allPersonnel.size() CtlPersonnel record(s) -->
+    <!-- DEBUG rank keys (pre-sort): $rankDebug -->
+    #set($sortedDebug = "")
+    #foreach($sp in $sortedPersonnel)
+        #set($sortedDebug = "$sortedDebug | $!sp.name (rank $!sp.rank)")
+    #end
+    <!-- DEBUG final sorted order: $sortedDebug -->
+#end
+
+#if($sortedPersonnel.size() == 0)
+
+    <div style="padding: 40px; text-align: center; color: #666;">
+        <p>Staff bios are coming soon &mdash; check back shortly.</p>
+    </div>
+
+#else
+
+    #foreach($p in $sortedPersonnel)
+
+        #set($titleLine = "$!p.jobTitle")
+        #if("$!p.degrees" != "")
+            #if($titleLine != "")
+                #set($titleLine = "$titleLine | $!p.degrees")
+            #else
+                #set($titleLine = "$!p.degrees")
+            #end
+        #end
+
+        ## pronouns is a Radio field (RadioMap) -> .selectValue, mapped to its display
+        ## label via the parallel values/options arrays (same pattern as the modality
+        ## Checkbox elsewhere in this project). "dont show pronouns" is a real
+        ## selectable value, not a blank -- treated the same as blank (hidden).
+        #set($pronounsDisplay = "")
+        #if($p.pronouns && "$!p.pronouns.selectValue" != "" && "$!p.pronouns.selectValue" != "dont show pronouns")
+            #set($pVal = $p.pronouns.selectValue)
+            #set($pronounsDisplay = $pVal)
+            #set($pIdx = 0)
+            #foreach($pv in $p.pronouns.values)
+                #if("$pv" == "$pVal")
+                    #set($pronounsDisplay = $p.pronouns.options.get($pIdx))
+                #end
+                #set($pIdx = $pIdx + 1)
+            #end
+        #end
+
+        <div class="d-flex align-items-start gap-4 p-4 bg-light border rounded-3 mb-4">
+
+            #if("$!p.headshotPhoto.fileName" != "")
+                <img
+                    src="$p.headshotPhoto.path$p.headshotPhoto.fileName"
+                    alt="$!p.name"
+                    width="160"
+                    class="rounded flex-shrink-0 object-fit-cover"
+                />
+            #end
+
+            <div class="flex-grow-1">
+                <h3 class="fw-bold mb-0">$!p.name#if($pronounsDisplay != "") <span class="fw-normal text-muted" style="font-size: 0.8rem;">($pronounsDisplay)</span>#end</h3>
+
+                #if($titleLine != "")
+                    <p class="fst-italic text-muted mb-3">$titleLine</p>
+                #end
+
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        #if("$!p.areasOfExpertise" != "")
+                            <p class="fw-bold mb-1">Expertise in:</p>
+                            <ul class="mb-0 lh-sm">
+                                #foreach($line in $p.areasOfExpertise.split("\n"))
+                                    #set($trimmedLine = $line.trim())
+                                    #if($trimmedLine != "")
+                                        <li class="mb-0">$trimmedLine</li>
+                                    #end
+                                #end
+                            </ul>
+                        #end
+                    </div>
+
+                    <div class="col-12 col-md-6 d-flex flex-column justify-content-between">
+                        <div>
+                            #if("$!p.howICanHelp" != "")
+                                <p class="fw-bold mb-1">Contact me for:</p>
+                                <ul class="mb-3 lh-sm">
+                                    #foreach($line in $p.howICanHelp.split("\n"))
+                                        #set($trimmedLine = $line.trim())
+                                        #if($trimmedLine != "")
+                                            <li class="mb-0">$trimmedLine</li>
+                                        #end
+                                    #end
+                                </ul>
+                            #end
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-end gap-3 mt-2">
+                            #if("$!p.emailCortlandEdu" != "")
+                                <a href="mailto:$!p.emailCortlandEdu" class="text-body">$!p.emailCortlandEdu</a>
+                            #end
+                            #if("$!p.bookWithMeFullLink" != "")
+                                <a class="btn btn-default text-nowrap" role="button" href="$!p.bookWithMeFullLink" target="_blank" rel="noopener">Meet with Me</a>
+                            #end
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    #end
+
+#end
