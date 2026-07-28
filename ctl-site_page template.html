@@ -1,0 +1,133 @@
+#set($pageURL = $!VTLSERVLET_URI)
+## CHECK IF THIS LOOKS LIKE A DETAIL PAGE
+#if(!$URLMapContent)
+  #if($UtilMethods.isSet($request.getParameter('id')))
+    #set($URLMapContent = $dotcontent.find("$request.getParameter('id')"))
+  #end
+#end
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    #dotParse("/application/themes/cortland/html_head.vtl")
+  </head>
+
+  <body>
+    #dotParse("/application/themes/cortland/header.vtl")
+
+    <main>
+        #dotParse("/application/velocity/page-heading.vtl")
+        <div class="container">
+          <div class="row">
+
+            <!-- ── Sidebar column (LEFT) ── -->
+            <div id="sidebar" class="col-lg-3 col-md-4">
+              <div class="inner">
+
+                <nav id="nav-secondary" aria-label="Page level navigation">
+                  <div class="navbar-toggle">
+                    <div class="navbar-toggle-inner">
+                      <a href="#" class="secondary-menu-btn">
+                        <span class="sr-only">Toggle page navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="navbar-secondary-content">
+                    <h3 class="hidden-lg hidden-md">Menu</h3>
+                    <div class="cort-gray-warm">
+
+                      ## Build CTL nav from published pages
+                      #set($ctlPages = $dotcontent.pull("+contentType:htmlpageasset +path:/centers/ctl/* +live:true +deleted:false +languageId:1", 20, "htmlpageasset.sortOrder asc"))
+                      #set($seen = [])
+                      <ul class="nav-secondary-list">
+                          #foreach($page in $ctlPages)
+                              #set($pageUrl = $page.url)
+
+                              ## Normalize: strip .dot and /index suffix to get a clean folder-style URL
+                              #set($linkUrl = $pageUrl.replace("index.dot", "").replace(".dot", ""))
+
+                              ## CTL homepage
+                              #set($isCtlHome = $pageUrl == "/centers/ctl/index.dot")
+                              ## Direct child page (e.g. /centers/ctl/about-us)
+                              #set($isDirectChild = $linkUrl.matches("/centers/ctl/[^/]+/?") && $linkUrl != "/centers/ctl/")
+                              ## Subfolder index page (e.g. /centers/ctl/event-calendar/index.dot)
+                              #set($isSubfolderIndex = $pageUrl.matches("/centers/ctl/[^/]+/index\\.dot"))
+
+                              #if(($isCtlHome || $isDirectChild || $isSubfolderIndex) && !$linkUrl.contains("event-detail") && !$seen.contains($linkUrl))
+                                  #set($dummy = $seen.add($linkUrl))
+                                  #set($navLabel = $page.friendlyName)
+                                  #if($isCtlHome)
+                                      #set($navLabel = "Home")
+                                  #end
+                                  #if($request.getRequestURI().contains($linkUrl) && $linkUrl != "/centers/ctl/")
+                                      <li class="active"><a href="$linkUrl">$navLabel</a></li>
+                                  #else
+                                      <li><a href="$linkUrl">$navLabel</a></li>
+                                  #end
+                              #end
+                          #end
+                      </ul>
+
+                      ## Contact/hours blurb
+                      <div style="margin-top: 1.5rem; padding: 1.25rem; border-top: 1px solid #d6d3ce; font-size: 0.875rem; line-height: 1.4;">
+                          <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Visit the Center</h3>
+                          <dl class="mb-0">
+                              <dt class="mb-0" style="font-weight: 600;">Location</dt>
+                              <dd class="mb-3 ms-0">Memorial Library, B117 C</dd>
+                              <dt class="mb-0" style="font-weight: 600;">Open Drop-Ins</dt>
+                              <dd class="mb-3 ms-0">Mon &ndash; Fri, 11am &ndash; 1pm</dd>
+                              <dt class="mb-0" style="font-weight: 600;">By Appointment</dt>
+                              <dd class="mb-3 ms-0">Mon &ndash; Fri, 9am &ndash; 4pm</dd>
+                              <dt class="mb-0" style="font-weight: 600;">Email</dt>
+                              <dd class="mb-0 ms-0"><a href="mailto:designhelp@cortland.edu">designhelp@cortland.edu</a></dd>
+                          </dl>
+                      </div>
+
+                    </div>
+                  </div>
+                </nav>
+
+                <script type="text/javascript">
+                (function($) {
+                  $(document).ready(function () {
+                    $(".secondary-menu-btn").on("click", function (e) {
+                      e.preventDefault();
+                      $(".navbar-secondary-content").toggleClass("active");
+                      $("#nav-secondary").children(".navbar-toggle").toggleClass("active");
+                    });
+                  });
+                })(jQuery);
+                </script>
+
+                <div class="row">
+                  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    ## Container: New - Column - Left (default)
+                    #parseContainer('46352')
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <!-- ── End sidebar ── -->
+
+            <!-- ── Main content column (RIGHT) ── -->
+            <div class="col-lg-9 col-md-8" style="margin-bottom: 20px; position: relative; z-index: 1">
+              #dotParse("/application/velocity/breadcrumbs.vtl")
+
+              ## Container: RWD - Small Banner
+              #parseContainer('ce1b4923-ee70-437b-87b9-8f52598f8f58')
+
+              ## Container: New - Main Body (default)
+              #parseContainer('271')
+            </div>
+
+          </div>
+        </div>
+    </main>
+
+    #dotParse("/application/themes/cortland/footer.vtl")
+  </body>
+</html>
