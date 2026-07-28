@@ -185,6 +185,29 @@ same pull-all + `.selectValue` pattern the listing widget uses. Raw always-visib
 * RadioMap → `.selectValue`
 * Category fields → different access pattern than Checkbox/Radio, verify in isolation
 * Date fields are java.sql.Timestamp — use `.getTime()` for epoch comparisons
+* Velocity's `>`/`<` comparison operators only reliably work Number-vs-Number in this
+  engine — comparing two Strings silently never evaluates true, so a bubble sort built on
+  String keys just never swaps and quietly keeps pull order. Symptom looks like "sorting
+  did nothing" (e.g. a higher-rank item still appearing first), not an error.
+  Root-caused 2026-07-28 on the `rank` sort in both `ctl-site_get-help.html` and
+  `ctl_site_about-us.html` — **root cause was self-inflicted, not an engine limitation.**
+  `$item.rank` (CtlPersonnel's sort-order field) is labeled "Text ... whole number" in the
+  dotCMS editor, but at the Velocity layer it's already a real `java.lang.Long` — confirmed
+  via `.class.name` in a live `EDIT_MODE` debug dump. Two dead-end fix attempts happened
+  before this was known: `#set($n = $rawStringValue + 0)` and then `* 1`, both trying to
+  coerce a *String* back into a Number — but the String was never necessary; it was created
+  by our own code doing `#set($rawRank = "$!p.rank")` first (quoted-string interpolation
+  always stringifies, regardless of underlying type). That reverse String→Number conversion
+  silently failed both times (String arithmetic throws in this engine's `MathUtils`, which
+  makes the enclosing `#set` a no-op — the variable is left completely UNSET, not null/zero).
+  Proof it was silently failing: downstream references printed as literal unresolved tokens
+  like `$debugKey` in the rendered page — that only happens when a variable was never
+  successfully `#set`, and is a reliable tell for "this #set threw and got swallowed."
+  **Fix:** don't assume a field's runtime type from its dotCMS editor label — check
+  `$item.field.class.name` via a live debug dump FIRST. If it's already a Number, use it
+  directly as the sort key; skip any String round-trip entirely (only the blank-check needs
+  the stringified `"$!item.field"` quiet-reference form). Treat blank as a large sentinel
+  Number (e.g. `999999`), not a padded string, so it still sorts last correctly.
 * `$!` quiet reference hides empty fields AND wrong variable names identically — a typo'd
   variable name is silently indistinguishable from an empty field (this caused the
   format/category bug above — always verify field names against a fresh REST API pull,
