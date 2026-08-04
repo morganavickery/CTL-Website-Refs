@@ -1,0 +1,22 @@
+- [ ] no local stored video, yuja preferred, youtube okay; add quality control in form for video
+- [ ] attachment quality control cehck for accessibility
+- [ ] add host field to content type to protect from other office/dept visibility 
+- [ ] page tmplate -- change to right side nav, move non-nav items to a webpagecontent element; use RWD 1 main | subnav built-in template
+- [ ] split up sections into mutliple widgets for potential reuse
+- [ ] rephrase opportunities to “funded oportunities
+- [ ] move authors & superfluous tags to bottom of articles
+- [ ] detail page titles should be heading 2
+- [ ] add hidden screen reader text for all buttons
+- [ ] friendly-names should stand alone -- rename friendly names for each page
+- [ ] modality filter -→ “course modality”
+- [ ] past events should be less cluttered
+- [ ] spell out FDC acronym
+- [ ] “About the CTL” becomes a folder containing subpages
+  - [ ] FDC
+  - [ ] Records
+- [ ] IR resources -- captions are same format as body content -- smaller?
+- [ ] rename how can we help -→ “Request support”
+- [ ] create distinct styles page to override in-line styles
+- [ ] \
+
+

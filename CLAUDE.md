@@ -107,6 +107,41 @@ CtlActivity — same stale-field-name failure mode as the format/category bug ab
 fields are `signupDeadline`/`registerApplyLink` (already used correctly in
 activity-detail.html).
 
+**Second instance of the same bug found 2026-08-04 in `ctl-site_event-parent.html`:** its
+"Register" button reads `$item.eventRegistrationLink`, which isn't a documented or
+REST-confirmed field on CtlActivity and isn't used anywhere else in the project — almost
+certainly the same stale-name failure as the opportunity-parent bug, just a different fake
+name. `ctl-site_activity-detail.html` (the detail page for the same records) already uses
+the real field, `registerApplyLink`, correctly. Verify against a fresh REST pull before
+fixing, same as any other "returns empty" symptom in this project.
+
+### CtlPersonnel — affiliation-gated About Us / Get Help sections (added 2026-07-29)
+
+Three fields exist on CtlPersonnel beyond the original bio fields, confirmed live in both
+`ctl_site_about-us.html` and `ctl-site_get-help.html`:
+
+* `affiliations` — Checkbox (CheckboxMap), access via `.selectedValues.contains(...)`.
+  **Option values are capitalized — `"CTL"`, `"FDC"`, `"Other"` — not lowercase.** A
+  lowercase-value assumption silently matches nothing (`.contains()` is case-sensitive) —
+  same "quiet empty result" failure signature as the format/category bug, confirmed via a
+  live REST pull 2026-07-29 after the lowercase assumption first failed silently.
+* `websitePromo` — Text (URL). About Us only; Get Help's staff cards intentionally omit it.
+* `buttonLabel` — Text, label for the `websitePromo` button, falls back to "Visit My
+  Website" when empty. Distinct from CtlService's `serviceButtonLabel` — don't conflate.
+
+About Us now renders three affiliation-gated sections — CTL Staff, FDC Members, Other
+Affiliates — each independently sorted by `rank` (see the rank root-cause writeup in
+Gotchas below). Get Help's "Make an Appointment" section only shows personnel with `CTL`
+checked in `affiliations`.
+
+`pronouns` is a Radio field (RadioMap), not Text as first assumed — access via
+`.selectValue`, then map to its display label via the parallel `.values`/`.options` arrays
+(same pattern as the `modality` Checkbox). `"dont show pronouns"` is a real selectable
+option, not blank — treat it as equivalent to blank in display logic (hide the
+parenthetical). This is a second instance of the general pattern: a field can have a real
+option whose meaning is "show nothing," which looks identical to blank/unset at the
+template layer unless you check for it explicitly.
+
 ### CTL homepage — fixed and CONFIRMED WORKING (as of 2026-07-23)
 
 Must live in a dotCMS Widget, not a generic "Web Page Content" block — pasting the same
@@ -153,11 +188,28 @@ same pull-all + `.selectValue` pattern the listing widget uses. Raw always-visib
 
 * Fix `ctl-site_opportunity-parent.html` (oppSubmissionDeadline/oppApplicationLink → the real
   fields, signupDeadline/registerApplyLink)
+* Fix `ctl-site_event-parent.html` (`eventRegistrationLink` isn't a real field — same bug
+  as opportunity-parent, found 2026-08-04; almost certainly should be `registerApplyLink`,
+  verify via REST pull first)
+* **Verify `ctlAttachmentfile` downloads actually work** — `ctl-site_activity-detail.html`
+  and `ctl-site_instRes-detail` both still access it via `.rawUri`/`.thumbnailUri`
+  (BinaryMap accessors) on what is a **File**-type field. `videoFile` looked identical on
+  paper and turned out to need `.path`/`.fileName` (FileAssetMap) instead — `ctlAttachmentfile`
+  has never been confirmed working with a live debug dump the way `videoFile` was. If
+  Downloads links/thumbnails are ever silently blank, check this first.
 * CtlTechSupport content type (not yet built — see naming note above)
 * Delete orphaned widgets: ctl_widget_detail-router, CTL_widget_event-calendar_detail,
   CTL_widget_opportunities_detail (reference deleted CtlEventItem/CtlOpportunity)
-* Finish verifying the format/category fix in CtlInstructionalResource listing widget (v8)
+* Format/category fix in CtlInstructionalResource listing widget (v8) is confirmed applied
+  in code (verified 2026-08-04) — still pending a live-URL check
 * Fix CtlAttachment thumbnail letterboxing — need a crop-based URL pattern instead of thumbnailUri
+* Clean up leftover `$EDIT_MODE` debug scaffolding once the rank-sort fix has been confirmed
+  stable live — heaviest in `ctl-site_get-help.html` (visible debug panels with per-record
+  `.class.name` reflection output), lighter in `ctl-site_home.html` and `ctl_site_about-us.html`.
+  Harmless to leave (invisible to real visitors) but worth trimming.
+* `relatedTechSupport` (CtlInstructionalResource field) exists on the schema but isn't
+  rendered anywhere yet — not a bug, just unbuilt (CtlTechSupport itself doesn't exist yet
+  either, so there's nothing to relate to)
 
 ## Critical Instance-Specific Gotchas (this dotCMS instance specifically)
 
@@ -212,6 +264,21 @@ same pull-all + `.selectValue` pattern the listing widget uses. Raw always-visib
   variable name is silently indistinguishable from an empty field (this caused the
   format/category bug above — always verify field names against a fresh REST API pull,
   not memory or older docs)
+* Checkbox/Category option VALUES can be case-sensitive against `.contains()` checks —
+  e.g. CtlPersonnel's `affiliations` field stores `"CTL"`/`"FDC"`/`"Other"` (capitalized),
+  not lowercase. A lowercase-value assumption silently matches nothing — same "quiet empty
+  result" failure signature as a wrong field name, just one level deeper (right field,
+  wrong value casing). Confirm actual option values via REST pull, don't guess casing.
+* A Radio/Checkbox field can have a real selectable option whose meaning is "show
+  nothing"/"hide this" (e.g. CtlPersonnel's `pronouns` field has a `"dont show pronouns"`
+  option) — this looks identical to blank/unset at the template layer unless checked for
+  explicitly. Treat it as equivalent to blank in display logic; don't assume blank is the
+  only "don't render this" state.
+* The shared page template's secondary nav (`ctl-site_page template.html`) is data-driven,
+  not hard-coded — it pulls `+contentType:htmlpageasset +path:/centers/ctl/*` and includes
+  a page only if its own `showOnMenu` Checkbox field (a page-level field, not a Ctl content
+  type field) contains `"true"`. Adding/removing a CTL page from the nav is a matter of
+  toggling that checkbox on the page itself, not editing template code.
 * `urlMapPattern` not indexed for Lucene — pull-all + Velocity-side filter instead
 * URL Map Pattern fields (the field referenced in a content type's `{fieldVar}` URL Map
   Pattern, e.g. `urlTitle`) must have **"System Indexed" AND "Unique" checked** in the
