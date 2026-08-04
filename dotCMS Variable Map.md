@@ -1,289 +1,226 @@
 # CTL Website — dotCMS Variable Map
 
-Compiled from the dotCMS Content Type REST API (`/api/v1/contenttype`). Last compiled: July 2026. Updated July 22, 2026 with the full CtlActivity schema, CtlAttachment schema, and current widget health notes. Updated July 23, 2026: CtlInstructionalResource detail page 404 resolved (System Indexed/Unique gotcha), CTL homepage widget confirmed working end-to-end with a horizontally-scrolling card layout replacing the original grid/carousel design.
-
-## How to Use This Document
-
-Each content type below lists its fields grouped by the tab they appear under in the dotCMS content editor. "Variable" is the Velocity variable name used in templates and widgets (e.g. `$item.eventTitle`). "Req?" indicates whether the field is required at the content-entry level.
-
-Where a field's exact name, type, or tab could not be confirmed from the API response captured so far, it is marked accordingly rather than guessed.
-
----
-
-## CTL Activity
-
-- **Content Type Variable:** `CtlActivity`
-- **Base Type:** Content
-- **Description (from dotCMS):** for all time-sensitive ctl events, workshops, conferences, awards, grants, etc.
-- **Site:** www2.cortland.edu
-- **URL Map Pattern:** `/centers/ctl/activities/{urlMapPattern}`
-- **Detail Page ID:** `677c33a575e4ebbf53f573b51c23e87a`
-
-This is the newer, unified content type covering events, opportunities, and general activities in one record, distinguished by the *Is this an event?* and *Is this an opportunity?* checkboxes (a record can be both, or neither).
-
-| Tab / Section          | Field Label                               | Variable                  | Field Type                     | Req? | Notes                                                                                                 |
-| ---------------------- | ----------------------------------------- | ------------------------- | ------------------------------ | ---- | ----------------------------------------------------------------------------------------------------- |
-| 📝 Basic Info          | Activity Title                            | `title`                 | Text                           | Yes  | Shown everywhere: page title, cards, browser tab.                                                     |
-| 📝 Basic Info          | URL Slug                                  | `urlMapPattern`         | Text                           | Yes  | Pattern: type-shortname-year (e.g. workshop-udl-2026). Regex-enforced.                                |
-| 📝 Basic Info          | What type of activity is this?            | `categories`            | Category (multi)               | Yes  | Category tree:`CTL_Activity_Types`.                                                                 |
-| 📝 Basic Info          | Card Preview Text                         | `shortDescription`      | Textarea                       | No   | 1–2 sentences max (~75 words), used for listing-card preview blurb.                                  |
-| 📝 Basic Info          | Thumbnail Image                           | `thumbnail`             | Image                          | No   | Landscape recommended; avoid repeating thumbnails across activities.                                  |
-| 📝 Basic Info          | Full Description                          | `longDescription`       | WYSIWYG                        | Yes  | No length max. Use built-in Heading styles (start at H2) for accessibility.                           |
-| 📝 Basic Info          | Contact Person                            | `primaryContact`        | Text                           | No   | Format: Name, email — e.g. Jane Doe, jane.doe@cortland.edu.                                          |
-| 📝 Basic Info          | Files, Multimedia, & Downloads            | `attachments`           | Relationship → CTL Attachment | No   | Parent side of the relationship to CTL Attachment. Download-button style, not embedded.               |
-| ⚙️ Settings          | Is this an event?                         | `isEvent`               | Checkbox                       | No   | Defaults to checked (true). Also fill in Event Details tab if checked.                                |
-| ⚙️ Settings          | Is this an opportunity?                   | `isOpportunity`         | Checkbox                       | No   | Defaults unchecked. For awards/stipends/fellowships. Also fill in Opportunity Details tab.            |
-| ⚙️ Settings          | How Do People Sign Up?                    | `signupType`            | Radio                          | Yes  | Values:`open` (no RSVP) / `registration` (headcount) / `application` (selective).               |
-| ⚙️ Settings          | Registration/Application Link             | `registerApplyLink`     | Text (URL)                     | No   | Only relevant if Signup Type ≠ open.                                                                 |
-| ⚙️ Settings          | Registration/Application Deadline         | `signupDeadline`        | Date                           | No   | Only if Signup Type ≠ open. Blank defaults to "ongoing."                                             |
-| ⚙️ Settings          | Accepts Submissions (Call for Proposals)? | `acceptsSubmissions`    | Checkbox                       | No   | Rare — separate from registering to attend; for conferences w/ a call for submissions.               |
-| ⚙️ Settings          | Manually Close Signup Early?              | `signupCapacityReached` | Checkbox                       | No   | Only if full before the deadline.                                                                     |
-| ⚙️ Settings          | Submission Type Label                     | `submissionLabel`       | Text                           | No   | e.g. "Submit a Paper." Blank = "Submit to Present."                                                   |
-| ⚙️ Settings          | Submission Link                           | `submissionLink`        | Text (URL)                     | No   | Only if Accepts Submissions is checked.                                                               |
-| ⚙️ Settings          | Submission Deadline                       | `submissionDeadline`    | Date-and-Time                  | No   | Only if Accepts Submissions is checked.                                                               |
-| 📅 Event Details       | Location                                  | `eventLocation`         | Text                           | No   | e.g. Moffett 208. Skip this tab unless "Is this an event?" is checked.                                |
-| 📅 Event Details       | Event Start Date                          | `eventStartDate`        | Date                           | No   | —                                                                                                    |
-| 📅 Event Details       | Event End Date                            | `eventEndDate`          | Date                           | No   | Blank = single-day event.                                                                             |
-| 📅 Event Details       | Daily Start Time                          | `eventStartTime`        | Time                           | No   | e.g. 9:00 AM.                                                                                         |
-| 📅 Event Details       | Daily End Time                            | `eventEndTime`          | Time                           | No   | e.g. 3:00 PM.                                                                                         |
-| 💵 Opportunity Details | Compensation Amount                       | `oppAmountPaid`         | Text                           | No   | Numbers only — "$" is added automatically in the template. Skip tab unless compensation is involved. |
-| 💵 Opportunity Details | What's expected of participants?          | `oppLaborExpectation`   | Textarea                       | No   | Keep under ~10 words — what earns the compensation.                                                  |
-
-| Tab / Section | Field Label            | Variable                        | Field Type                         | Req? | Notes                                                                                                                                                                                                                                                                                              | Hint                                                                                                                                                                                                                   |
-| ------------- | ---------------------- | ------------------------------- | ---------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 📝 Basic Info | Time Block Definitions | `sessionTimeBlockDefinitions` | Key-Value                          | No   | Only used for multi-track conference activities. One entry per time block: Key = block number (1, 2, 3...) matching`sessionTimeBlock` on the related sessions; Value = the display text, e.g. "Concurrent Sessions 1 — 9-9:50 a.m." Typed once here, referenced by every session in that block. | → ⚠️ Fill this in FIRST if this activity has multiple concurrent sessions. One row per time block: Key = block number (1, 2, 3…), Value = the label shown on the page, e.g. "Concurrent Sessions 1 — 9-9:50 a.m." |
-| 📝 Basic Info | Activity Sessions      | `activitySessions`            | Relationship → CtlActivitySession | No   | Parent side, same pattern as`attachments`. Only filled for multi-track conference activities.                                                                                                                                                                                                    | → Only for multi-track conferences. Add one entry per individual talk/session. Leave empty for regular single-session activities.                                                                                     |
+A crash-course index of the CTL site's backend: what content types exist, what fields they
+have, and which widget renders what. Written for someone unfamiliar with this dotCMS
+instance to get oriented quickly — not a debugging log.
 
 
 
-### CTL_Activity_Types (category tree)
+Field names ("Variable") are the Velocity variable used in templates/widgets, e.g.
+`$item.eventTitle`. Compiled from the dotCMS Content Type REST API plus a line-by-line
+audit of every widget file against that API data. Last full verification: 2026-08-04.
 
-| name                     | key                     | variable                |
-| ------------------------ | ----------------------- | ----------------------- |
-| Award                    | award                   | award                   |
-| Conference               | conference              | conference              |
-| Fellowship               | fellowship              | fellowship              |
-| Paid                     | paid                    | paid                    |
-| Professional Development | professionalDevelopment | professionalDevelopment |
-| Research Grant           | researchGrant           | researchGrant           |
-| Service                  | service                 | service                 |
-| Teaching Grant           | teachingGrant           | teachingGrant           |
-| Working Group            | workingGroup            | workingGroup            |
-| Workshop                 | workshop                | workshop                |
 
----
+## Site Map
 
-## CTL Activity_Session
+Six public sections, all under `/centers/ctl/`, sharing one advanced template
+(`ctl-site_page template.html`):
 
-- **Content Type Variable:** `CtlActivitySession`
-- **Base Type:** Content
-- **Site:** www2.cortland.edu
-- **URL Map Pattern:** None — accessed only via relationship from CTL Activity, same pattern as CtlAttachment.
+| Section | Listing Widget | Detail Widget |
+|----|----|----|
+| Event Calendar | `EventCalendarWidget` (`ctl-site_event-parent.html`) | `CtlWidgetActivityDetail` |
+| Opportunities | `CtlWidgetOpportunitiesParent` (`ctl-site_opportunity-parent.html`) | `CtlWidgetActivityDetail` (shared) |
+| Instructional Resources | `CtlWidgetInstructionalParent` (`ctl-site_instRes-parent.html`) | `CtlWidgetInstDetail` (`ctl-site_instRes-detail`) |
+| Technology Resources |    |    |
+| Request Support | `CtlWidgetGetHelp` (`ctl-site_get-help.html`) | — (no detail pages; cards only) |
+| About Us | `CtlWidgetAboutUs` (`ctl_site_about-us.html`) | — |
+| Homepage | Homepage widget (`ctl-site_home.html`) — tile grid + upcoming activity/featured resource scrollers | — |
 
-| Field Label        | Variable                | Field Type                    | Req? | Notes                                                                                                                                                                                                                     | Hint                                                                                                                           |
-| ------------------ | ----------------------- | ----------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Time Block         | `sessionTimeBlock`    | Select (Dropdown)             | Yes  | Fixed values: 1, 2, 3, 4, 5, 6. Purely a grouping key — no free text, so no typo risk. Matched against the parent activity's Time Block Definitions to get the display label/time range.                                 | → Which concurrent time slot this session belongs to. Must match a Key in the parent Activity's Time Block Definitions field. |
-| Session Sort Order | `sessionRowSortOrder` | Text (number)                 | Yes  | Controls order of sessions within a time block.                                                                                                                                                                           | → Number controlling this session's position within its time block (lower = higher on page). E.g. 1, 2, 3…                   |
-| Room               | `sessionRoom`         | Text                          | Yes  | e.g. "204-205" or "Fireplace Lounge." Shown on the collapsed bar.                                                                                                                                                         | → Room name or number only, e.g. "204-205" or "Fireplace Lounge." No "Room" prefix needed — it's added automatically.        |
-| Session Title      | `sessionTitle`        | Text                          | Yes  | Shown on the collapsed bar.                                                                                                                                                                                               | → The talk/presentation title exactly as it should appear on the collapsed bar.                                               |
-| Speaker Name(s)    | `sessionSpeakers`     | Text                          | Yes  | e.g. "Xiaoping 'Ping' Fan, Jacob Hall, and Xiaolu Liu." Shown on the collapsed bar.                                                                                                                                       | → Full name(s), comma-separated. E.g. "Jane Doe, John Smith."                                                                 |
-| Tags               | `sessionTags`         | Text                          | No   | Comma-separated free-form keywords, e.g. "AITL, Multi-Session." Varies per event — not a fixed taxonomy. Widget splits on comma and trims whitespace before rendering as badges, so stray spacing doesn't break display. | → Comma-separated keywords, e.g. "AITL, Multi-Session." Optional — leave blank if none apply. Extra spaces are OK.           |
-| Abstract           | `sessionAbstract`     | WYSIWYG                       | Yes  | Full description shown inside the collapsed region.                                                                                                                                                                       | → Full session description. Shown when someone clicks to expand this session.                                                 |
-| Slides / Handouts  | `sessionAttachments`  | Relationship → CtlAttachment | No   | Own relationship field to CtlAttachment. Rendered in the collapsed region with the same download-button markup used elsewhere.                                                                                            | → Optional. Attach any downloadable files for this specific session (not the whole activity).                                 |
+Event Calendar and Opportunities both list `CtlActivity` records (distinguished by
+`isEvent`/`isOpportunity`) and share one detail widget/page.
 
-## CTL Attachment
+**Shared template** (`ctl-site_page template.html`): every CTL page uses this one advanced
+template — detail-page logic lives in the listing widgets, not the template. The sidebar
+nav is built dynamically each render from published pages under `/centers/ctl/*`, gated by
+each page's own `showOnMenu` checkbox field (a page-level field, not a content-type field)
+— to add/remove a page from the nav, toggle that checkbox on the page itself.
 
-- **Content Type Variable:** `CtlAttachment`
-- **Base Type:** Content
-- **Description (from dotCMS):** for any / all attachments that will be individually-downloadable from the CTL website
-- **Site:** www2.cortland.edu
-- **URL Map Pattern:** None — not a URL-mapped type; accessed only via the relationship from CTL Activity.
+Widgets must live in a dotCMS **Widget**, not a "Web Page Content" block — the latter
+doesn't evaluate Velocity in this instance.
 
-| Tab / Section | Field Label      | Variable                   | Field Type | Req? | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------- | ---------------- | -------------------------- | ---------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (single tab)  | Attachment Label | `ctlAttachmentlabel`     | Text       | No   | Display name shown on the download button — e.g. "Slide Deck," "Event Flyer," "Handout."                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| (single tab)  | Attachment File  | `ctlAttachmentfile`      | File       | No   | The actual file asset. Currently rendered via`$file.ctlAttachmentfile.rawUri` (thumbnail: `.thumbnailUri`) in both CTL_widget_activity-detail and CTL_widget_inst-detail's Downloads sections. **⚠️ Unverified as of 2026-07-23:** `videoFile` (also documented as field type "File") turned out to actually be a FileAssetMap needing `.path`/`.fileName`, not a BinaryMap — `.rawUri` on it silently resolved empty. `ctlAttachmentfile` has NOT been re-checked with a live debug dump since that discovery. If Downloads links ever appear blank/broken, check this field the same way (dump `$!file.ctlAttachmentfile` raw object in an EDIT_MODE debug line) before assuming it's still fine. |
-| (single tab)  | Sort Order       | `ctlAttachmentsortorder` | Text       | No   | Optional — controls order when an activity has multiple attachments.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| (single tab)  | Attachment Type  | `ctlAttachmenttype`      | Radio      | No   | Values: Slide Deck / Agenda / Schedule / Handout / Reading.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
-> **NOTE:** No parent-link (Tag) field exists on this content type in the current API pull — association to CTL Activity happens via CTL Activity's own "attachments" Relationship field instead.
+## Content Types
 
----
+### CtlActivity — unified events + opportunities
 
-## CTL Instructional Resource
+* **Base Type:** Content · **Site:** www2.cortland.edu
+* **URL Map Pattern:** `/centers/ctl/activities/{urlMapPattern}` · **Detail Page ID:** `677c33a575e4ebbf53f573b51c23e87a`
+* One record can be an event, an opportunity, both, or neither — distinguished by `isEvent`/`isOpportunity`.
 
-- **Content Type Variable:** `CtlInstructionalResource`
-- **Base Type:** Content
-- **Site:** www2.cortland.edu
-- **URL Map Pattern:** No `urlMapPattern` field on this content type (unlike CtlActivity). Detail links are built manually from the `urlTitle` Text field, e.g. `/centers/ctl/instructional-resources/{urlTitle}`. The detail widget now exists (see Widgets below) but **404s until the content type's URL Map Pattern is configured in the dotCMS admin** — see [Known Issues](#known-issues--not-yet-built).
+| Variable | Field Type | Req? | Note |
+|----|----|----|----|
+| `title` | Text | Yes | Page title, cards, browser tab. |
+| `urlMapPattern` | Text | Yes | Slug, e.g. `workshop-udl-2026`. Not Lucene-indexed — filter in Velocity. |
+| `categories` | Category (multi) | Yes | Tree: `CTL_Activity_Types` (see below). |
+| `shortDescription` | Textarea | No | Card preview blurb. |
+| `thumbnail` | Image | No | FileAssetMap — `.path` + `.fileName`. |
+| `longDescription` | WYSIWYG | Yes | Full body. |
+| `primaryContact` | Text | No | "Name, email" format. |
+| `attachments` | Relationship → CtlAttachment | No | Parent side; download buttons. |
+| `isEvent` | Checkbox | No | Default checked. |
+| `isOpportunity` | Checkbox | No | Default unchecked. |
+| `signupType` | Radio | Yes | `open` / `registration` / `application`. |
+| `registerApplyLink` | Text (URL) | No | Real field for register/apply — see Known Issues for two widgets that don't use it. |
+| `signupDeadline` | Date | No | Blank = "ongoing." |
+| `acceptsSubmissions` | Checkbox | No | Separate from registering to attend (calls for proposals). |
+| `signupCapacityReached` | Checkbox | No | Manually close signup early. |
+| `submissionLabel` | Text | No | e.g. "Submit a Paper." Blank → "Submit to Present." |
+| `submissionLink` | Text (URL) | No | Only if `acceptsSubmissions`. |
+| `submissionDeadline` | Date-and-Time | No | Only if `acceptsSubmissions`. |
+| `eventLocation` | Text | No | e.g. "Moffett 208." |
+| `eventStartDate` / `eventEndDate` | Date | No | Blank end date = single-day event. |
+| `eventStartTime` / `eventEndTime` | Time | No | — |
+| `oppAmountPaid` | Text | No | Numbers only; `$` added by the template. |
+| `oppLaborExpectation` | Textarea | No | \~10 words, what earns the compensation. |
+| `sessionTimeBlockDefinitions` | Key-Value | No | Multi-track conferences only. Key = block number, Value = display label (e.g. "Concurrent Sessions 1 — 9-9:50 a.m."). |
+| `activitySessions` | Relationship → CtlActivitySession | No | Multi-track conferences only. |
 
-| Tab / Section                  | Field Label                     | Variable                          | Field Type                               | Req? | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------------ | ------------------------------- | --------------------------------- | ---------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 📌 THE BASICS                  | Resource Title                  | `resourceTitle`                 | Text                                     | Yes  | The full display title of this resource.                                                                                                                                                                                                                                                                                                                                                                                                   |
-| 📌 THE BASICS                  | URL Title                       | `urlTitle`                      | Text                                     | Yes  | Lowercase, hyphens only, no spaces. Becomes the page URL — do not change after publishing.**Must have "System Indexed" and "Unique" checked in the field settings, or the URL Map Pattern silently fails to resolve** (confirmed 2026-07-22 — this was the actual root cause of a long detail-page 404 debugging session). No year suffix — do NOT apply the same regexCheck used on CtlActivity's `urlMapPattern`.             |
-| 📌 THE BASICS                  | Short Description Blurb         | `shortDescription`              | Textarea                                 | Yes  | 1–2 sentences shown on the listing card.                                                                                                                                                                                                                                                                                                                                                                                                  |
-| 📌 THE BASICS                  | Thumbnail                       | `thumbnail`                     | Image                                    | No   | Optional. Shown on listing card and detail page header.                                                                                                                                                                                                                                                                                                                                                                                    |
-| 📄 THE CONTENT                 | Body                            | `body`                          | WYSIWYG                                  | Yes  | The resource itself, or context for downloads/videos.                                                                                                                                                                                                                                                                                                                                                                                      |
-| 🎬 VIDEO (recordings only)     | Video File                      | `videoFile`                     | File                                     | No   | Local upload, short clips only (~10 min).**Confirmed 2026-07-23 via live debug dump:** this is a FileAssetMap (same object type as Image fields), NOT a BinaryMap — `.rawUri`/`.thumbnailUri`/`.resizeUri` don't exist on it and silently resolve empty. Correct access: `.path` + `.fileName` concatenation, e.g. `$item.videoFile.path$item.videoFile.fileName` (identical to the `thumbnail` Image field pattern). |
-| 🎬 VIDEO (recordings only)     | Embed URL                       | `embedUrl`                      | Text (URL)                               | No   | Plain video URL (e.g. YouTube), not iframe code. For anything longer than ~10 min.                                                                                                                                                                                                                                                                                                                                                         |
-| 📚 CITATIONS & FURTHER READING | Citations                       | `citations`                     | WYSIWYG                                  | No   | One reference per line/bullet. Leave empty if none — section won't render.                                                                                                                                                                                                                                                                                                                                                                |
-| *Unconfirmed*                | Downloadable Attachments        | `downloadableAttachments`       | Relationship → CtlAttachment            | No   | Renders as a "Downloads" section on the detail page — same button/thumbnail markup as CtlActivity's`attachments` field. Pre-hydrated like all relationship fields; access `.ctlAttachmentfile`/`.ctlAttachmentlabel` directly. Tab placement not yet confirmed.                                                                                                                                                                     |
-| 🏷️ TAGGING & FILTERS         | Modality                        | `modality`                      | Checkbox                                 | Yes  | Course format(s). Values: In-Person\|inperson, Online Async\|async, Online Sync\|sync                                                                                                                                                                                                                                                                                                                                                      |
-| 🏷️ TAGGING & FILTERS         | Format Type                     | `formatType`                    | Category                                 | Yes  | Tree:`CTL_Inst. Resource_Types` (key: `ctlInstResourceTypes`). What kind of thing this is (video, blog-post, slide-deck, template, guide).                                                                                                                                                                                                                                                                                             |
-| 🏷️ TAGGING & FILTERS         | Topics                          | `topics`                        | Category (multi)                         | Yes  | Tree:`CTL_Inst. Resource_Topics`. Powers the collapsible multi-select topic pill cloud (6 parent category headings) in the listing widget.                                                                                                                                                                                                                                                                                               |
-| 🏷️ TAGGING & FILTERS         | Frameworks                      | `frameworks`                    | Category (multi)                         | No   | Display-only badges on cards/detail — NOT filterable. Category tree not yet confirmed.                                                                                                                                                                                                                                                                                                                                                    |
-| *Unconfirmed*                | Author                          | `author`                        | Text                                     | Yes  | Byline shown on the resource. Tab placement not yet confirmed — verify via REST pull.                                                                                                                                                                                                                                                                                                                                                     |
-| *Unconfirmed*                | Reviewed By                     | `reviewedBy`                    | Text                                     | No   | QC gate: empty ⇒ item is hidden from the listing widget (still reachable via direct URL). Edit-mode banner shows how many items this hides. Tab placement not yet confirmed.                                                                                                                                                                                                                                                              |
-| *Unconfirmed*                | Last Updated                    | `lastUpdated`                   | Date                                     | Yes  | `java.sql.Timestamp` — use `.getTime()` for epoch comparisons, not string comparison. Drives default card sort order (desc). Tab placement not yet confirmed.                                                                                                                                                                                                                                                                         |
-| *Unconfirmed*                | Featured                        | `featured`                      | Radio                                    | No   | Access via`.selectValue` ("yes"/"no"), NOT `.selectedValues` — it's a Radio field, not Checkbox. Featured items get a maroon border + ★ badge, capped at 3, JS-sorted by modDate. Tab placement not yet confirmed.                                                                                                                                                                                                                   |
-| 🔗 Related Content*(assumed)*  | Related Instructional Resources | `relatedInstructionalResources` | Relationship → CtlInstructionalResource | No   | Self-relationship. Tab name assumed, not yet confirmed via REST pull.                                                                                                                                                                                                                                                                                                                                                                      |
-| 🔗 Related Content*(assumed)*  | Related Events                  | `relatedEvents`                 | Relationship → CtlActivity              | No   | Tab name assumed, not yet confirmed via REST pull.                                                                                                                                                                                                                                                                                                                                                                                         |
-| 🔗 Related Content*(assumed)*  | Related Tech Support            | `relatedTechSupport`            | Relationship → CtlTechSupport           | No   | CtlTechSupport content type is planned but**NOT YET BUILT** (see Known Issues) — this relationship field already exists on CtlInstructionalResource per the REST pull. Do NOT build against a type called `CtlTechResource` — that name was deprecated in favor of `CtlTechSupport`.                                                                                                                                           |
+#### CTL_Activity_Types (category tree)
 
----
+Award · Conference · Fellowship · Paid · Professional Development · Research Grant ·
+Service · Teaching Grant · Working Group · Workshop
+(name/key/variable are identical lowerCamelCase-or-plain strings for each, e.g. `workshop`)
 
-## CTL Personnel
 
-- **Content Type Variable:** `CtlPersonnel` — confirmed working live 2026-07-28 via CTL_widget_about-us and CTL_widget_get-help.
-- **Base Type:** Content
-- **URL Map Pattern:** None — not a URL-mapped type; all staff render on the single About Us page.
+### CtlActivitySession — conference session sub-records
 
-| Field Label          | Variable             | Field Type | Req? | Notes                                                                                                          |
-| --------------------- | -------------------- | ---------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
-| Name                  | `name`               | Text       | *Unconfirmed* | ✅ Confirmed live 2026-07-28 (CTL_widget_get-help). Full display name. |
-| Pronouns              | `pronouns`           | Radio      | *Unconfirmed* | Added 2026-07-28 by user. **Corrected 2026-07-28:** originally assumed Text — a live render exposed the raw `RadioMap.toString()` in the parenthetical, confirming it's actually a Radio field. Access via `.selectValue`, mapped to its display label via the parallel `.values`/`.options` arrays (same pattern as the `modality` Checkbox on CtlInstructionalResource). Options: she/her, he/him, they/them, she/they, he/they, they/she, they/he, dont show pronouns — that last one is a real selectable value, treated the same as blank (hides the parenthetical). Rendered directly next to `name`, small/non-bold, in parentheses — e.g. "Jane Doe (she/her)". |
-| Job Title             | `jobTitle`           | Text       | *Unconfirmed* | ✅ Confirmed live 2026-07-28 (CTL_widget_get-help) — since revised. e.g. "Senior Director." As of 2026-07-28, combined with `degrees` on one line: "Job Title \| Deg1, Deg2" (pipe only shown when both are present). |
-| Cortland Email        | `emailCortlandEdu`   | Text       | *Unconfirmed* | ✅ Confirmed live 2026-07-28 (CTL_widget_get-help). Rendered as a `mailto:` link. Widget hides the link entirely if empty. |
-| Degrees               | `degrees`            | Text       | *Unconfirmed* | ✅ Confirmed live 2026-07-28 (CTL_widget_get-help) — since revised. e.g. "PhD," "MSEd," "MA." **Changed 2026-07-28:** no longer appended to `name` — now combined onto the job-title line instead (see `jobTitle` above), per user request. |
-| Book With Me Link     | `bookWithMeFullLink` | Text       | *Unconfirmed* | ✅ Confirmed live 2026-07-28 (CTL_widget_get-help). Full external booking URL. Widget renders the "Meet with Me" button only when this is non-empty (opens in a new tab) — no dead `href="#"` placeholder. |
-| Areas of Expertise    | `areasOfExpertise`   | Textarea   | *Unconfirmed* | ✅ Confirmed live 2026-07-28 (CTL_widget_about-us). One bullet per line — widget splits on `\n` and renders each non-blank line as an `<li>`. Section omitted entirely when empty. |
-| How I Can Help        | `howICanHelp`        | Textarea   | *Unconfirmed* | ✅ Confirmed live 2026-07-28 (CTL_widget_get-help). Same one-bullet-per-line convention as `areasOfExpertise`, rendered under "Contact me for:". |
-| Headshot Photo        | `headshotPhoto`      | Image      | *Unconfirmed* | ✅ Confirmed live 2026-07-28 (CTL_widget_get-help). FileAssetMap, same pattern as CtlInstructionalResource's `thumbnail` — `$item.headshotPhoto.path$item.headshotPhoto.fileName`, guarded by `#if("$!item.headshotPhoto.fileName" != "")`. |
-| Rank                  | `rank`               | Text (whole number) | *Unconfirmed* | Added 2026-07-28 by user. ✅ Sort now confirmed working live 2026-07-28. Sort-order key — ascending, lower rank displays first; blank sorts last. **Runtime type note:** despite being labeled "Text ... whole number" in the dotCMS editor, `$item.rank` actually comes back as a real `java.lang.Long` at the Velocity layer (confirmed via `.class.name` in a live debug dump), not a String — see the root-cause writeup below. |
+* **Base Type:** Content · **Site:** www2.cortland.edu · No URL Map — reached only via `CtlActivity.activitySessions`.
 
-> **NOTE (updated 2026-07-28):** `rank` now provides a sort-order field — see above. Both `CTL_widget_get-help`'s staff section ("Make an Appointment") and `CTL_widget_about-us` sort by it ascending via a Velocity-side bubble sort (blank ranks sort last); the original hard-coded page order (Jennifer Hall → Morgan Vickery → Kristina Maricle → Lisa Sieg → Heather Hammond) is no longer the fallback on either page. Each widget carries its own copy of the sort block rather than a shared include, consistent with this project's existing per-widget-copy convention (e.g. the homepage/detail-page `.ctl-hscroll` CSS).
->
-> **⚠️ Root-caused 2026-07-28, attempt 1 (insufficient):** the first version of this sort on both widgets compared zero-padded rank **Strings** with `>`. This Velocity engine's `>` doesn't evaluate String comparisons the way it does for Numbers (every other working Velocity-side sort in this project — e.g. the homepage's event-date bubble sort — only ever compares actual Numbers, like epoch millis from `.getTime()`). The String `>` silently never triggered a swap, so the list just kept pull order — symptom was a person with rank 5 still showing above ranks 1-4.
->
-> **⚠️ Attempt 2 (also insufficient):** switched to coercing rank via Velocity's `+0` arithmetic (`$rawRank + 0`), expecting Velocity's math operators to parse the numeric-looking String into a real Number. Sorting still tracked last-edited/pull order afterward, not rank. Suspected cause: this Velocity engine's `+` may perform String **concatenation** on a String operand (like JS/Groovy) rather than always coercing to Number — so `"5" + 0` could silently become the STRING `"50"`, not the Number `5`, quietly reintroducing the exact same String-comparison bug from attempt 1.
->
-> **Attempt 3 (still insufficient):** switched to `$rawRank * 1`. Added visible on-page `EDIT_MODE` debug boxes to `CTL_widget_get-help` (not just HTML comments) printing each person's raw `rank`, its Java runtime type via `.class.name`, and the computed sort key + type.
->
-> **✅ ACTUAL ROOT CAUSE, found 2026-07-28 via the visible debug output:** `$p.rank` was a real **`java.lang.Long` the entire time** — confirmed directly via `.class.name` in the live debug boxes — NOT a String, despite being labeled "Text ... whole number" in the dotCMS editor. All three prior attempts made the same mistake: they force-converted it to a String first via `"$!p.rank"` (quoted-string interpolation always stringifies, regardless of the underlying type), then tried converting it back to a Number (`+0` or `*1` on that STRING). That reverse conversion was what silently failed — String arithmetic throws in this Velocity engine's `MathUtils`, which makes the enclosing `#set` a no-op, leaving the variable **completely unset** (not null, not zero). Proof: the debug boxes printed the literal unresolved tokens `$debugKey` / `$debugKeyClass` instead of values — that only happens when a referenced variable was never successfully `#set`. With every rank key silently unset, `$rankKeys` filled with nulls, so the bubble sort's `>` comparison never evaluated true and nothing ever swapped — explaining why all 3 attempts "did nothing" identically.
->
-> **The actual fix:** skip the String round-trip entirely — use `$p.rank` **directly** as the sort key (it's already a Long), and only use the stringified `"$!p.rank"` quiet-reference for the blank-check. Applied to both `ctl-site_get-help.html` and `ctl_site_about-us.html` 2026-07-28. **Lesson for future numeric-field sorts in this instance:** don't assume a field's Velocity runtime type from its dotCMS editor label — check `.class.name` first via a live debug dump before writing any conversion logic.
+| Variable | Field Type | Req? | Note |
+|----|----|----|----|
+| `sessionTimeBlock` | Select (Dropdown) | Yes | Values 1–6; must match a key in the parent's `sessionTimeBlockDefinitions`. |
+| `sessionRowSortOrder` | Text (number) | Yes | Order within a time block. |
+| `sessionRoom` | Text | Yes | e.g. "204-205." |
+| `sessionTitle` | Text | Yes | Shown on the collapsed bar. |
+| `sessionSpeakers` | Text | Yes | Comma-separated names. |
+| `sessionTags` | Text | No | Comma-separated free-form keywords; split/trimmed for badges. |
+| `sessionAbstract` | WYSIWYG | Yes | Shown when expanded. |
+| `sessionAttachments` | Relationship → CtlAttachment | No | Own relationship, separate from the parent activity's. |
 
----
 
-## CTL Service
+### CtlAttachment — downloadable files
 
-- **Content Type Variable:** `CtlService` — confirmed working live 2026-07-28 via CTL_widget_get-help.
-- **Base Type:** Content
-- **URL Map Pattern:** None — not a URL-mapped type; all services render as cards on the Get Help page.
+* **Base Type:** Content · **Site:** www2.cortland.edu · No URL Map — reached only via relationship from CtlActivity/CtlActivitySession/CtlInstructionalResource.
 
-| Field Label            | Variable                | Field Type | Req? | Notes                                                                                                          |
-| ----------------------- | ------------------------ | ---------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
-| Service Name            | `serviceName`             | Text       | *Unconfirmed* | ✅ Confirmed live 2026-07-28. Card title.                                                                      |
-| Service Short Description | `serviceShortDescription` | Textarea   | *Unconfirmed* | ✅ Confirmed live 2026-07-28. Card body text.                                                                  |
-| Service Access Link     | `serviceAccessLink`       | Text       | *Unconfirmed* | ✅ Confirmed live 2026-07-28. External URL. Widget only renders the access button when this is non-empty AND the service is currently available (opens in a new tab, no dead `href="#"` placeholder). |
-| Service Button Label    | `serviceButtonLabel`      | Text       | *Unconfirmed* | ✅ Confirmed live 2026-07-28. Text shown on the `serviceAccessLink` button (e.g. "Book Now," "Request Access"). Falls back to "Access this Service" when empty. |
-| Thumbnail Image         | `thumbnailImage`          | Image      | *Unconfirmed* | ✅ Confirmed live 2026-07-28. FileAssetMap, same pattern as CtlInstructionalResource's `thumbnail` — `$item.thumbnailImage.path$item.thumbnailImage.fileName`, guarded by `#if("$!item.thumbnailImage.fileName" != "")`. |
-| Is Currently Available  | `isCurrentlyAvailable`    | Checkbox   | *Unconfirmed* | ✅ Confirmed live 2026-07-28. Values: Yes\|`yes`, No\|`no`. CheckboxMap — access via `.selectedValues.contains("yes")`, same pattern as CtlActivity's `isEvent`/`isOpportunity`. Drives the "Available Now" / "Currently Unavailable" badge; unavailable services still show on the page (not hidden), just without the access button. |
+| Variable | Field Type | Req? | Note |
+|----|----|----|----|
+| `ctlAttachmentlabel` | Text | No | Download-button display text. |
+| `ctlAttachmentfile` | File | No | ⚠️ Rendered via `.rawUri`/`.thumbnailUri` — **unverified, likely broken**, see Known Issues. |
+| `ctlAttachmentsortorder` | Text | No | Optional manual ordering. |
+| `ctlAttachmenttype` | Radio | No | Slide Deck / Agenda / Schedule / Handout / Reading. |
 
-> **NOTE:** No sort-order field exists on this content type either — same caveat as CTL Personnel above.
+No parent-link field on this type — association happens from the *other* side (the
+relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 
----
 
-## Widgets
+### CtlInstructionalResource
 
-Widgets don't hold content-editor fields in the same way; this section is a quick-reference index of what each one does and what it queries, so you know where to look when something breaks.
+* **Base Type:** Content · **Site:** www2.cortland.edu
+* No native URL Map field. Detail links are built manually: `/centers/ctl/instructional-resources/{urlTitle}`.
 
-### CTL_widget_activity-detail — ✅ LIVE
+| Variable | Field Type | Req? | Note |
+|----|----|----|----|
+| `resourceTitle` | Text | Yes | Full display title. |
+| `urlTitle` | Text | Yes | Must have **System Indexed + Unique** checked or the URL Map silently fails to bind (see CLAUDE.md). Lowercase, hyphens only. |
+| `shortDescription` | Textarea | Yes | Listing-card blurb. |
+| `thumbnail` | Image | No | FileAssetMap — `.path` + `.fileName`. |
+| `body` | WYSIWYG | Yes | Main content. |
+| `videoFile` | File | No | FileAssetMap (not BinaryMap, despite field type "File") — `.path` + `.fileName`. |
+| `embedUrl` | Text (URL) | No | YouTube/Vimeo URL, parsed into an embeddable iframe src. |
+| `citations` | WYSIWYG | No | Section hidden when empty. |
+| `downloadableAttachments` | Relationship → CtlAttachment | No | Renders a Downloads section. |
+| `modality` | Checkbox | Yes | Values: `inperson`, `async`, `sync`. |
+| `formatType` | Category | Yes | Tree: `CTL_Inst. Resource_Types`. |
+| `topics` | Category (multi) | Yes | Tree: `CTL_Inst. Resource_Topics`; powers the topic pill cloud. |
+| `frameworks` | Category (multi) | No | Display-only badges, not filterable. |
+| `author` | Text | Yes | Byline. |
+| `reviewedBy` | Text | No | QC gate — empty hides the item from listings (still URL-reachable). |
+| `lastUpdated` | Date | Yes | `java.sql.Timestamp` — use `.getTime()`. |
+| `featured` | Radio | No | `.selectValue` ("yes"/"no"). Featured + reviewed items get a maroon border/★, capped at 3 on the listing page. |
+| `relatedInstructionalResources` | Relationship → CtlInstructionalResource | No | Self-relationship. |
+| `relatedEvents` | Relationship → CtlActivity | No | — |
+| `relatedTechSupport` | Relationship → CtlTechSupport | No | Field exists on the schema but nothing renders it yet (CtlTechSupport itself isn't built). |
 
-- **Variable:** `CtlWidgetActivityDetail`
-- **Purpose:** Renders the full detail page for a single CTL Activity record (event, opportunity, or general activity).
-- **Queries / Renders:** `$dotcontent.pull("+contentType:CtlActivity ...")` matched by `urlMapPattern` against the URL slug.
-- The current, working detail renderer. Handles Add-to-Calendar (.ics) generation, attachment downloads, signup/submission boxes, and breadcrumb + page-title JS override.
 
-### CTL_widget_event-calendar_parent — ✅ LIVE
+### CtlPersonnel — CTL/FDC/Other staff and affiliates
 
-- **Variable:** `EventCalendarWidget`
-- **Purpose:** Renders the Event Calendar listing page — Upcoming Events and Past Events sections.
-- **Queries / Renders:** `$dotcontent.pull("+contentType:CtlActivity ...")`, filtered client-side (Velocity loop) to `isEvent = true`, split into upcoming/past based on `eventEndDate`/`eventStartDate` vs. now.
-- Correctly migrated to CtlActivity. Links each card to `/centers/ctl/event-calendar/$item.urlMapPattern`.
+* **Base Type:** Content · No URL Map — all personnel render on About Us / Get Help.
 
-### CTL_widget_opportunities_parent — ⚠️ LIVE, BUG CONFIRMED
+| Variable | Field Type | Note |
+|----|----|----|
+| `name` | Text | Full display name. |
+| `pronouns` | Radio | `.selectValue` + parallel `.values`/`.options` lookup for the display label (same pattern as `modality`). `"dont show pronouns"` is a real option, treated as blank. |
+| `headshotPhoto` | Image | FileAssetMap — `.path` + `.fileName`. |
+| `jobTitle` | Text | Combined with `degrees` on one line: "Job Title \| Deg1, Deg2." |
+| `degrees` | Text | e.g. "PhD," "MSEd." See `jobTitle`. |
+| `rank` | Text (whole number) | Sort key, ascending, blank sorts last. **Runtime type is already** `java.lang.Long` despite the "Text" editor label — use `$item.rank` directly, don't round-trip through a String (see CLAUDE.md). |
+| `affiliations` | Checkbox | Values are capitalized — `"CTL"`, `"FDC"`, `"Other"` — `.contains()` is case-sensitive. Drives which of About Us's three sections (CTL Staff / FDC Members / Other Affiliates) a person appears in; Get Help's Staff list shows `CTL` only. |
+| `emailCortlandEdu` | Text | Rendered as `mailto:`; link hidden if empty. |
+| `bookWithMeFullLink` | Text | External booking URL; "Meet with Me" button hidden if empty. |
+| `websitePromo` | Text (URL) | About Us only — Get Help omits this button. |
+| `buttonLabel` | Text | Label for the `websitePromo` button, falls back to "Visit My Website." Distinct from CtlService's `serviceButtonLabel`. |
+| `areasOfExpertise` | Textarea | One bullet per line (splits on `\n`). |
+| `howICanHelp` | Textarea | Same one-bullet-per-line convention. |
 
-- **Variable:** `CtlWidgetOpportunitiesParent`
-- **Purpose:** Renders the Opportunities listing page — active opportunities plus a collapsible "Missed Connections" (expired) section.
-- **Queries / Renders:** `$dotcontent.pull("+contentType:CtlActivity ...")`, filtered to `isOpportunity = true`, sorted by deadline.
-- **⚠️ BUG (confirmed 2026-07-22 via full CtlActivity REST pull):** this widget reads `$opp.oppSubmissionDeadline` and `$opp.oppApplicationLink` — neither field exists on CtlActivity. The real fields are `signupDeadline` and `registerApplyLink` (the same ones CTL_widget_activity-detail already uses correctly). Until fixed, the deadline display and Apply button on this listing page will silently render blank/fallback for every opportunity.
 
-### CTL_widget_instructional_parent (v8) — 🚧 IN PROGRESS
+### CtlService — Request Support page service cards
 
-- **File:** `ctl-site_instRes-parent.html`
-- **dotCMS widget variable:** `CtlWidgetInstructionalParent`
-- **Host page:** "Instructional Resources" — url `index.dot` in `/centers/ctl/instructional-resources/`
-- **Purpose:** Renders the Instructional Resources listing page — radio filters (Format / Modality), a collapsible multi-select Topic pill cloud (6 parent category headings), dynamic cross-section dimming for zero-match options, partial-match fallback ordering, featured-item pinning (maroon border, ★ badge, capped at 3, JS-sorted by modDate), and a QC gate hiding items with an empty `reviewedBy` from the listing (still reachable via direct URL).
-- **Queries / Renders:** `$dotcontent.pull("+contentType:CtlInstructionalResource +languageId:1 +live:true", 500, "score")`.
-- **Root-caused bug (fixed in this version):** earlier drafts referenced format/category as `$r.format` / `$r.category`, which don't exist on the live schema — the real fields are `formatType` and `topics` (both Category fields, accessed by iterating the field and reading `.categoryName` on each entry, NOT the Checkbox/Radio `.selectedValues` / `.selectValue` pattern). Still pending: final live-URL verification of this fix.
-- Note: `ctl-site_instRes-detail` used to contain a mis-named duplicate of this listing widget — it now holds the real detail widget (see below).
+* **Base Type:** Content · No URL Map — all services render as cards on Get Help.
 
-### CTL_widget_inst-detail — ✅ LIVE (resolved 2026-07-22, updated 2026-07-23)
+| Variable | Field Type | Note |
+|----|----|----|
+| `serviceName` | Text | Card title. |
+| `serviceShortDescription` | Textarea | Card body; clamped to 2 lines with a "Read more" toggle. |
+| `serviceAccessLink` | Text | External URL; button hidden unless non-empty AND `isCurrentlyAvailable`. |
+| `serviceButtonLabel` | Text | Falls back to "Access this Service." |
+| `thumbnailImage` | Image | FileAssetMap — `.path` + `.fileName`. |
+| `isCurrentlyAvailable` | Checkbox | Values `yes`/`no`. Drives the availability badge; unavailable services still show, just without the access button. |
 
-- **File:** `ctl-site_instRes-detail`
-- **dotCMS widget variable:** `CtlWidgetInstDetail`
-- **Purpose:** Renders the full detail page for a single CtlInstructionalResource record — thumbnail, format/modality tags, byline (author + lastUpdated), frameworks badges, inline video, body, downloads, topic chips, related resources/events, citations (last), back link. `shortDescription` is intentionally NOT rendered on this page (card-preview text only).
-- **Section order (updated 2026-07-23):** thumbnail → tags → title/byline → frameworks → body → **video** → **Downloads** → Topics → Related Resources (now a carousel, see below) → Related Events → **Citations (moved to last)** → back link. Video was moved to directly under the body text per request (was above it originally).
-- **Downloads (added 2026-07-23):** loops `$item.downloadableAttachments` (Relationship → CtlAttachment, pre-hydrated) using the same button/thumbnail markup as CTL_widget_activity-detail's `attachments` block. Previously this field existed on the content type with no rendering path at all. Positioned directly under the video block.
-- **Related Resources carousel (added 2026-07-23):** switched from a static Bootstrap `row row-cols-md-2` grid to the same `.ctl-hscroll`/`.ctl-hscroll-item` horizontally-scrolling pattern as the homepage (own copy: `.ctl-ir-hscroll`/`.ctl-ir-hscroll-item`, same breakpoints/flex-basis values). Related Events keeps its plain `<ul>` list — only Related Resources was asked to become a carousel.
-- **Modality tags (updated 2026-07-23):** format-type tags (`.ctl-ir-tag`, grey square badge) and modality tags (`.ctl-ir-modality-tag`, solid maroon pill) now use visually distinct styles. If all 3 possible modality values are selected, they collapse to a single "All Modalities" tag instead of listing all 3.
-- **H1/H2 downgrade (added 2026-07-23):** `body` and `citations` WYSIWYG output is regex-sanitized (`<h1>`/`<h2>` → `<h3>`, both open and close tags, case-insensitive) before rendering, so editor-typed headings can't collide with the page's own H1/H2 — directly targets the `stress-full-multimedia-kitchen-sink` heading-collision test case. Sanitized copies are held in `$bodyHtml`/`$citationsHtml`, not `$item.body`/`$item.citations` directly.
-- **Video embed (changed 2026-07-23):** `embedUrl` no longer renders as a "Watch Video" link (new tab) — it's parsed into a native embeddable `src` (YouTube `watch?v=`/`youtu.be` → `youtube.com/embed/...`, `vimeo.com/...` → `player.vimeo.com/video/...`) and rendered inline in a responsive 16:9 `<iframe>`. Unrecognized hosts fall back to using the raw URL as the iframe `src` (best effort — may not render if the host blocks framing).
-- **⚠️ TEMP (2026-07-23):** local `videoFile` and `embedUrl` currently render **both at once** (independent `#if` blocks, not either/or) for side-by-side stress-test comparison — revert to `videoFile`-takes-precedence (`#if`/`#elseif`) once testing is done.
-- **`videoFile` playback bug, root-caused 2026-07-23:** the local `<video>` block never rendered because it used `.rawUri`, which doesn't exist on a File-type field (see the FileAssetMap/BinaryMap gotcha in CLAUDE.md and above). Fixed to `$item.videoFile.path$item.videoFile.fileName`. Root-caused via a temporary EDIT_MODE debug panel dumping the raw field object — now trimmed to a single permanent debug line above the video block.
-- **Queries / Renders:** same pull-all + Velocity-side slug match pattern as CTL_widget_activity-detail, matching the URL slug against `urlTitle` (CtlInstructionalResource has no `urlMapPattern` field).
-- **Host page:** "Instructional Resource Detail" — url `instructional-resource-detail` in `/centers/ctl/instructional-resources/`.
-- **Content type config:** URL Map Pattern = `/centers/ctl/instructional-resources/{urlTitle}`; Detail Page = `//www2.cortland.edu/centers/ctl/instructional-resources/instructional-resource-detail`.
-- **Root cause of the 404 (resolved):** the `urlTitle` field needed **"System Indexed" AND "Unique" checked** in its own field settings — without those, dotCMS's URL Map resolution silently fails to bind even though the URL Map Pattern + Detail Page are configured correctly on the content type. See the gotcha in CLAUDE.md — this will affect any future URL-mapped content type (e.g. CtlTechSupport).
+No sort-order field — display order is whatever the pull returns.
 
-### CTL_widget_about-us (v1) — ✅ LIVE, CONFIRMED WORKING (2026-07-28)
 
-- **File:** `ctl_site_about-us.html`
-- **dotCMS widget variable:** `CtlWidgetAboutUs`
-- **Purpose:** Replaces the old hard-coded staff bio cards (previously pasted directly into a Web Page Content block) with a loop over `CtlPersonnel` records. Same Bootstrap-only card markup as before — photo, name (+ degrees), job title, "Expertise in:" bullets, "Contact me for:" bullets, email link, "Meet with Me" button.
-- **Queries / Renders:** `$dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true", 500, "score")` (personnel results are then re-ordered by `rank` in Velocity, not by the pull itself — same "don't trust pull-level sorting" precedent as the rest of this project).
-- **Must live in a dotCMS Widget, not a Web Page Content block** — per the homepage precedent below, Web Page Content blocks don't evaluate Velocity in this instance.
-- **Confirmed working live 2026-07-28** — `CtlPersonnel` variable name and field variables render correctly end-to-end (confirmed before the `rank`-sort addition below; that part is pending its own live check).
-- Textarea fields (`areasOfExpertise`, `howICanHelp`) are assumed one-bullet-per-line; if editors instead enter running prose, the bullet-list rendering will need to change to a plain paragraph.
-- Sorted ascending by the new `rank` field (see "CTL Personnel" above) via a Velocity-side bubble sort, blank rank sorts last — added 2026-07-28, same sort logic as `CTL_widget_get-help`'s staff section. Took 4 attempts to actually fix — see the CtlPersonnel `rank` note above for the full history; root cause was that `rank` is already a `java.lang.Long` at the Velocity layer, not a String, and prior attempts were fighting a self-inflicted String-round-trip bug. Now uses `$p.rank` directly as the sort key. Still carries `EDIT_MODE`-only HTML-comment debug lines (not the visible-box treatment `CTL_widget_get-help` got) — harmless to leave, remove once confirmed correct live.
+## Widgets Index
 
-### CTL Homepage Widget — ✅ LIVE, CONFIRMED WORKING (2026-07-23)
+| Widget (dotCMS variable) | File | Content Type(s) | Status |
+|----|----|----|----|
+| `CtlWidgetActivityDetail` | `ctl-site_activity-detail.html` | CtlActivity | ✅ Live |
+| `EventCalendarWidget` | `ctl-site_event-parent.html` | CtlActivity | ⚠️ Live, Register button bug — see Known Issues |
+| `CtlWidgetOpportunitiesParent` | `ctl-site_opportunity-parent.html` | CtlActivity | ⚠️ Live, deadline/Apply button bug — see Known Issues |
+| `CtlWidgetInstructionalParent` (v8) | `ctl-site_instRes-parent.html` | CtlInstructionalResource | ✅ Live |
+| `CtlWidgetInstDetail` | `ctl-site_instRes-detail` | CtlInstructionalResource | ✅ Live |
+| `CtlWidgetAboutUs` | `ctl_site_about-us.html` | CtlPersonnel | ✅ Live |
+| `CtlWidgetGetHelp` | `ctl-site_get-help.html` | CtlService, CtlPersonnel | ✅ Live (leftover debug output pending cleanup) |
+| *(homepage widget)* | `ctl-site_home.html` | CtlActivity, CtlInstructionalResource | ✅ Live |
+| *(shared template)* | `ctl-site_page template.html` | — (page-level `showOnMenu` field) | ✅ Live |
 
-- **File:** `ctl-site_home.html`
-- **Must live in a dotCMS Widget, not a "Web Page Content" block** — the latter rendered nothing at all in this instance (not even plain HTML), matching every other Velocity file in this project already living in a Widget.
-- **Purpose:** Tile grid linking to all six site sections, an "Upcoming Events & Opportunities" row, and a "Featured Resources" row.
-- **Display pattern (both rows):** a horizontally-scrolling flex row (`.ctl-hscroll` container / `.ctl-hscroll-item` per card — CSS defined once at the top of the Events section, shared by both), NOT a Bootstrap `.carousel`. No auto-play; the user scrolls manually. Responsive: ~1.1 cards visible on mobile, scaling up to ~2.3 cards at standard/max desktop width (2 full + a peek of the 3rd — deliberate, signals scrollability) and staying there at wider widths too, via media queries on `.ctl-hscroll-item`'s `flex-basis`.
-- **Upcoming Events & Opportunities:** pulls CtlActivity (pull-all + Velocity-side `isEvent`/`isOpportunity` filter via `.selectedValues.contains("true")`, not Lucene), computes a per-record relevant date (`eventStartDate`/`eventEndDate` for events, `signupDeadline`/`submissionDeadline` for opportunities — `activityDate` never existed as a field), filters to future-dated items, bubble-sorts ascending, renders each with a badge that handles the both-event-and-opportunity case, linking to `/centers/ctl/activities/{urlMapPattern}`.
-- **Featured Resources:** filters to `featured.selectValue == "yes"` AND non-empty `reviewedBy` (same QC gate as the Instructional Resources listing widget), renders using the *exact same* card markup/classes (`ctl-res-card`, `ctl-res-fmt-badge`, `ctl-res-topic-chip`, stretched-link title) as that listing widget, so featured cards look identical there and on the homepage. Holds ALL featured + reviewed resources, no cap. Fixed along the way: `$featuredResources`/`$featResources` typo (block could never show real data before), stale `resourceUrl`/`resourceThumbnail` fields (real ones are `urlTitle`/`thumbnail`), Radio-field `featured` query switched from Lucene to pull-all + `.selectValue`.
-- **Debugging:** raw always-visible debug `<p>` tags removed; replaced with `$EDIT_MODE`-gated debug lines at each pull/filter/sort checkpoint in both sections (editor-only, invisible to real visitors).
+For what each widget actually does section-by-section, read the widget file itself — the
+header comment block in each one is kept current as a purpose summary.
 
-### CTL_widget_get-help (v1) — 🚧 IN PROGRESS, layout/sort revised 2026-07-28, PENDING RE-VERIFICATION LIVE
-
-- **File:** `ctl-site_get-help.html`
-- **dotCMS widget variable:** `CtlWidgetGetHelp`
-- **Purpose:** Two independent single-column vertical-list card sections on the Get Help page. 1) "Our Services" — `CtlService` cards (small thumbnail + content row, "Available Now"/"Currently Unavailable" badge from `isCurrentlyAvailable`, description clamped to 2 lines with a JS "Read more"/"Show less" toggle — hidden entirely when the text already fits, access button styled with `.ctl-btn` — see below — small and absolutely positioned in the card's top-right corner, gated on both a non-empty `serviceAccessLink` AND current availability, button text from `serviceButtonLabel` falling back to "Access this Service" when empty). 2) "Make an Appointment" (heading renamed from "Meet Our Staff" by user 2026-07-28) — `CtlPersonnel` cards, a compact variant of `CTL_widget_about-us`'s card (**square** photo — not the circular crop this page originally had — name + pronouns in parens, job title + degrees combined on one line, BOTH "Expertise in:" and "Contact me for:" bullets side-by-side in a 2-col row like `CTL_widget_about-us`). Email + `.ctl-btn`-styled "Meet with Me" button are absolutely positioned in the card's top-right corner (`.ctl-gh-staff-actions`, added 2026-07-28 by request) — same corner-button idea as the Services section's access button, not inline in the card body anymore. Sorted ascending by `rank` (see "CTL Personnel" above), blank rank sorts last.
-- **`.ctl-btn` styling (added 2026-07-28):** both link buttons on this page ("Meet with Me", "Access this Service") now use the exact `.ctl-btn` class/CSS copied from `CTL_widget_activity-detail`'s "Add to Calendar" button (maroon outline, uppercase, fills solid maroon on hover) instead of Bootstrap `.btn.btn-default`, so link-style buttons look the same across the site.
-- **Revision history on this page (2026-07-28):** originally a 3-col service grid → changed to single-column vertical list with truncation; originally a 2-col staff grid → changed to single-column list (both changes by request, in that order, same day).
-- **Queries / Renders:** `$dotcontent.pull("+contentType:CtlService +languageId:1 +live:true", 500, "score")` and the same pull pattern for `CtlPersonnel` (personnel results are then re-ordered by `rank` in Velocity, not by the pull itself — same "don't trust pull-level sorting" precedent as the rest of this project).
-- **Must live in a dotCMS Widget, not a Web Page Content block** — same precedent as every other Velocity file in this project.
-- **Status:** the Services section and an earlier version of the Make an Appointment section were confirmed working live 2026-07-28. The rank sort took 4 attempts total — see the CtlPersonnel `rank` note above for the full history — and its true root cause (rank is already a Long, not a String) is now fixed; also still carries the visible `EDIT_MODE` debug boxes from the troubleshooting session (harmless to leave for editors, invisible to real visitors) — remove them once the sort is confirmed correct on the live page. Layout changes (single-column staff list, dual bullet lists, square photo, `.ctl-btn`, corner-positioned actions) pending a fresh live pass alongside the sort fix.
-- No sort-order field on `CtlService` — display order is whatever the pull returns. `CtlPersonnel` sorts by `rank`, see above.
-
----
 
 ## Known Issues / Not Yet Built
 
-- **CtlTechSupport** content type: planned, not yet built. Do not build against `CtlTechResource` — that name was deprecated in favor of `CtlTechSupport` to match an existing live relationship field (see `relatedTechSupport` above).
-- **Orphaned widgets to delete:** `ctl_widget_detail-router`, `CTL_widget_event-calendar_detail`, `CTL_widget_opportunities_detail` — all reference the deleted `CtlEventItem`/`CtlOpportunity` content types (replaced by unified CtlActivity).
-- **CtlAttachment thumbnail letterboxing:** current rendering uses `.thumbnailUri`, which letterboxes non-matching aspect ratios. Needs a crop-based URL pattern instead.
+* `ctl-site_opportunity-parent.html` reads `$opp.oppSubmissionDeadline` /
+  `$opp.oppApplicationLink` — neither exists on CtlActivity. Real fields are
+  `signupDeadline` / `registerApplyLink` (already correct in `ctl-site_activity-detail.html`).
+  Deadline display and Apply button silently render blank until fixed.
+* `ctl-site_event-parent.html` reads `$item.eventRegistrationLink` — not a documented
+  or REST-confirmed field. Almost certainly the same bug as above; verify against a fresh
+  REST pull, likely fix is `registerApplyLink`.
+* `ctlAttachmentfile` (CtlAttachment) is accessed via `.rawUri`/`.thumbnailUri` in both
+  `ctl-site_activity-detail.html` and `ctl-site_instRes-detail`. `videoFile` looked
+  identical on paper and turned out to need `.path`/`.fileName` instead — `ctlAttachmentfile`
+  has never been confirmed working with a live debug dump. Check this first if
+  Downloads links/thumbnails ever appear blank.
+* **CtlTechSupport** content type: planned, not yet built. Don't build against
+  `CtlTechResource` — deprecated in favor of `CtlTechSupport`.
+* **CtlAttachment thumbnail letterboxing**: `.thumbnailUri` letterboxes non-matching aspect
+  ratios; needs a crop-based URL pattern instead.
+* **Orphaned widgets to delete:** `ctl_widget_detail-router`, `CTL_widget_event-calendar_detail`,
+  `CTL_widget_opportunities_detail` — reference the deleted `CtlEventItem`/`CtlOpportunity`
+  content types.
+* **Leftover** `$EDIT_MODE` debug output (invisible to real visitors, but not yet trimmed):
+  heaviest in `ctl-site_get-help.html` (visible debug panels with per-record Java-type
+  reflection output from the `rank`-sort investigation), lighter in `ctl-site_home.html`
+  and `ctl_site_about-us.html`.
+
+
