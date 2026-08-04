@@ -13,21 +13,32 @@ audit of every widget file against that API data. Last full verification: 2026-0
 
 ## Site Map
 
-Six public sections, all under `/centers/ctl/`, sharing one advanced template
-(`ctl-site_page template.html`):
+Current IA (revised 2026-08-04, two rounds same day — see CLAUDE.md's "Site Information
+Architecture" section for the full hierarchy with levels and intended URL paths), all under
+`/centers/ctl/`, sharing one advanced template (`ctl-site_page template.html`):
 
-| Section | Listing Widget | Detail Widget |
+| Section | Listing Widget(s) | Detail Widget |
 |----|----|----|
-| Event Calendar | `EventCalendarWidget` (`ctl-site_event-parent.html`) | `CtlWidgetActivityDetail` |
-| Opportunities | `CtlWidgetOpportunitiesParent` (`ctl-site_opportunity-parent.html`) | `CtlWidgetActivityDetail` (shared) |
-| Instructional Resources | `CtlWidgetInstructionalParent` (`ctl-site_instRes-parent.html`) | `CtlWidgetInstDetail` (`ctl-site_instRes-detail`) |
-| Technology Resources |    |    |
-| Request Support | `CtlWidgetGetHelp` (`ctl-site_get-help.html`) | — (no detail pages; cards only) |
-| About Us | `CtlWidgetAboutUs` (`ctl_site_about-us.html`) | — |
-| Homepage | Homepage widget (`ctl-site_home.html`) — tile grid + upcoming activity/featured resource scrollers | — |
+| Events | `widgets/ctl-widget_upcoming-events_events.html` + `widgets/ctl-widget_past-events_events.html` | `ctl-site_activity-detail.html` (shared) |
+| Funding > Current Opportunities | `widgets/ctl-widget_active-opportunities_current-opportunities.html` | `ctl-site_activity-detail.html` (shared) |
+| Funding > Past Recipients | `widgets/ctl-widget_missed-opportunities_past-recipients.html` + a not-yet-built past-award-recipients widget | `ctl-site_activity-detail.html` (shared, for the expired-opportunities half only) |
+| Resources > For Course Design | `CtlWidgetInstructionalParent` (`ctl-site_instRes-parent.html`) | `CtlWidgetInstDetail` (`ctl-site_instRes-detail`) |
+| Resources > For Technologies | not yet built |    |
+| Request Support | `widgets/ctl-widget_our-services_request-support.html` + a 2nd instance of `widgets/ctl-widget_ctl-staff-profiles.html` | — (no detail pages; cards only) |
+| About the CTL > Meet the CTL Staff | `widgets/ctl-widget_ctl-staff-profiles.html` | — |
+| About the CTL > Faculty Development Committee | `widgets/ctl-widget_fdc-member-grid_faculty-development-committee.html` | — |
+| About the CTL > Impact & Reports | not yet built | — |
+| Welcome to the CTL (homepage) | `widgets/ctl-widget_home-nav-tiles_welcome-to-the-ctl.html` + `widgets/ctl-widget_upcoming-activities-carousel_welcome-to-the-ctl.html` + `widgets/ctl-widget_featured-instructional-resources_welcome-to-the-ctl.html` | — |
 
-Event Calendar and Opportunities both list `CtlActivity` records (distinguished by
-`isEvent`/`isOpportunity`) and share one detail widget/page.
+All of the above were split from single combined widgets into the standalone files listed
+2026-08-04, for reuse — see the Widgets Index below and CLAUDE.md's Next Up for live
+dotCMS migration status (code is done; several pages still need their old single widget
+swapped for the new ones in the live CMS, and the Funding/About the CTL restructure and
+Impact & Reports/past-award-recipients/Funding-overview widgets still need building).
+
+Events and Funding (both Current Opportunities and the expired half of Past Recipients)
+list `CtlActivity` records (distinguished by `isEvent`/`isOpportunity`) and share one
+detail widget/page, routed via vanity URL prefix — see CLAUDE.md.
 
 **Shared template** (`ctl-site_page template.html`): every CTL page uses this one advanced
 template — detail-page logic lives in the listing widgets, not the template. The sidebar
@@ -116,7 +127,9 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 ### CtlInstructionalResource
 
 * **Base Type:** Content · **Site:** www2.cortland.edu
-* No native URL Map field. Detail links are built manually: `/centers/ctl/instructional-resources/{urlTitle}`.
+* No native URL Map field. Detail links are built manually: `/centers/ctl/resources/course-design/{urlTitle}`
+  (updated 2026-08-04 for the Resources IA revision — formerly `/centers/ctl/instructional-resources/{urlTitle}`;
+  live URL Map Pattern update on the content type itself still pending, see CLAUDE.md's Next Up).
 
 | Variable | Field Type | Req? | Note |
 |----|----|----|----|
@@ -144,7 +157,7 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 
 ### CtlPersonnel — CTL/FDC/Other staff and affiliates
 
-* **Base Type:** Content · No URL Map — all personnel render on About Us / Get Help.
+* **Base Type:** Content · No URL Map — all personnel render on About the CTL (Meet the CTL Staff) / Request Support.
 
 | Variable | Field Type | Note |
 |----|----|----|
@@ -154,10 +167,10 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 | `jobTitle` | Text | Combined with `degrees` on one line: "Job Title \| Deg1, Deg2." |
 | `degrees` | Text | e.g. "PhD," "MSEd." See `jobTitle`. |
 | `rank` | Text (whole number) | Sort key, ascending, blank sorts last. **Runtime type is already** `java.lang.Long` despite the "Text" editor label — use `$item.rank` directly, don't round-trip through a String (see CLAUDE.md). |
-| `affiliations` | Checkbox | Values are capitalized — `"CTL"`, `"FDC"`, `"Other"` — `.contains()` is case-sensitive. Drives which of About Us's three sections (CTL Staff / FDC Members / Other Affiliates) a person appears in; Get Help's Staff list shows `CTL` only. |
+| `affiliations` | Checkbox | Values are capitalized — `"CTL"`, `"FDC"`, `"Other"` — `.contains()` is case-sensitive. Historically drove three sections (CTL Staff / FDC Members / Other Affiliates) on the old combined About Us page; Other Affiliates was dropped from the IA entirely 2026-08-04, so only `CTL` (Meet the CTL Staff / Request Support) and `FDC` (Faculty Development Committee) are still used. |
 | `emailCortlandEdu` | Text | Rendered as `mailto:`; link hidden if empty. |
 | `bookWithMeFullLink` | Text | External booking URL; "Meet with Me" button hidden if empty. |
-| `websitePromo` | Text (URL) | About Us only — Get Help omits this button. |
+| `websitePromo` | Text (URL) | Shown on both instances of the staff-profiles widget (Meet the CTL Staff and Request Support) — not gated by page. |
 | `buttonLabel` | Text | Label for the `websitePromo` button, falls back to "Visit My Website." Distinct from CtlService's `serviceButtonLabel`. |
 | `areasOfExpertise` | Textarea | One bullet per line (splits on `\n`). |
 | `howICanHelp` | Textarea | Same one-bullet-per-line convention. |
@@ -165,7 +178,7 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 
 ### CtlService — Request Support page service cards
 
-* **Base Type:** Content · No URL Map — all services render as cards on Get Help.
+* **Base Type:** Content · No URL Map — all services render as cards on Request Support.
 
 | Variable | Field Type | Note |
 |----|----|----|
@@ -183,15 +196,24 @@ No sort-order field — display order is whatever the pull returns.
 
 | Widget (dotCMS variable) | File | Content Type(s) | Status |
 |----|----|----|----|
-| `CtlWidgetActivityDetail` | `ctl-site_activity-detail.html` | CtlActivity | ✅ Live |
-| `EventCalendarWidget` | `ctl-site_event-parent.html` | CtlActivity | ⚠️ Live, Register button bug — see Known Issues |
-| `CtlWidgetOpportunitiesParent` | `ctl-site_opportunity-parent.html` | CtlActivity | ⚠️ Live, deadline/Apply button bug — see Known Issues |
-| `CtlWidgetInstructionalParent` (v8) | `ctl-site_instRes-parent.html` | CtlInstructionalResource | ✅ Live |
-| `CtlWidgetInstDetail` | `ctl-site_instRes-detail` | CtlInstructionalResource | ✅ Live |
-| `CtlWidgetAboutUs` | `ctl_site_about-us.html` | CtlPersonnel | ✅ Live |
-| `CtlWidgetGetHelp` | `ctl-site_get-help.html` | CtlService, CtlPersonnel | ✅ Live (leftover debug output pending cleanup) |
-| *(homepage widget)* | `ctl-site_home.html` | CtlActivity, CtlInstructionalResource | ✅ Live |
-| *(shared template)* | `ctl-site_page template.html` | — (page-level `showOnMenu` field) | ✅ Live |
+| `CtlWidgetActivityDetail` | `widgets/ctl-site_activity-detail.html` | CtlActivity | ✅ Live; vanity-URL routing updated 2026-08-04 for the Events/Funding IA revision — see CLAUDE.md |
+| *(Events, split 2026-08-04)* | `widgets/ctl-widget_upcoming-events_events.html` + `widgets/ctl-widget_past-events_events.html` | CtlActivity | ✅ Fixed in code; live migration pending (old `ctl-site_event-parent.html` is now a deprecation stub) — see CLAUDE.md Next Up |
+| *(Funding > Current Opportunities, split 2026-08-04, relocated same day)* | `widgets/ctl-widget_active-opportunities_current-opportunities.html` | CtlActivity | ✅ Fixed in code; live migration pending (old `ctl-site_opportunity-parent.html` is now a deprecation stub) — see CLAUDE.md Next Up |
+| *(Funding > Past Recipients, split 2026-08-04, relocated same day)* | `widgets/ctl-widget_missed-opportunities_past-recipients.html` + a not-yet-built past-award-recipients widget | CtlActivity | ✅ First widget fixed in code; second not yet built. Live migration pending — see CLAUDE.md Next Up |
+| `CtlWidgetInstructionalParent` (v8) | `widgets/ctl-site_instRes-parent.html` | CtlInstructionalResource | ✅ Live on "For Course Design" (formerly "Instructional Resources") — URL Map Pattern update still pending |
+| `CtlWidgetInstDetail` | `widgets/ctl-site_instRes-detail` | CtlInstructionalResource | ✅ Live — URL Map Pattern update still pending |
+| *(About the CTL, split 2026-08-04)* | `widgets/ctl-widget_ctl-staff-profiles.html` (Meet the CTL Staff) + `widgets/ctl-widget_fdc-member-grid_faculty-development-committee.html` (Faculty Development Committee) | CtlPersonnel | ✅ Code ready; live migration pending (old `ctl_site_about-us.html` is now a deprecation stub) — see CLAUDE.md Next Up. "Impact & Reports" subpage/widget not yet built |
+| *(Request Support, split 2026-08-04)* | `widgets/ctl-widget_our-services_request-support.html` + a second instance of `widgets/ctl-widget_ctl-staff-profiles.html` | CtlService, CtlPersonnel | ✅ Code ready; needs a `sectionHeading` field added to the CTL Staff profiles widget's content type, then live migration (old `ctl-site_get-help.html` is now a deprecation stub) — see CLAUDE.md Next Up |
+| *(Welcome to the CTL homepage, split 2026-08-04)* | `widgets/ctl-widget_home-nav-tiles_welcome-to-the-ctl.html` + `widgets/ctl-widget_upcoming-activities-carousel_welcome-to-the-ctl.html` + `widgets/ctl-widget_featured-instructional-resources_welcome-to-the-ctl.html` | CtlActivity, CtlInstructionalResource | ✅ Code ready (nav tiles updated to 5 tiles for the Funding/Resources restructure); live migration pending (old `ctl-site_home.html` is now a deprecation stub) — see CLAUDE.md Next Up |
+| *(shared template)* | `DEPRECATED/ctl-site_page template.html` | — (page-level `showOnMenu` field) | ✅ Live |
+| *(Funding overview — NEW, not yet built)* | not yet built | — | ⬜ L1 landing/overview content for Funding; see CLAUDE.md Next Up |
+| *(Impact & Reports — NEW, not yet built)* | not yet built | — | ⬜ L2 subpage under About the CTL; see CLAUDE.md Next Up |
+
+All widgets above were originally one file per page; each has been split into multiple
+standalone widgets in `widgets/` for reuse (dev-checklist.md: "split up sections into
+multiple widgets for potential reuse"). The old combined files are deprecation stubs
+pointing at their replacements, kept in the repo only until each page's live dotCMS
+migration is confirmed — see CLAUDE.md's Next Up section for per-page migration steps.
 
 For what each widget actually does section-by-section, read the widget file itself — the
 header comment block in each one is kept current as a purpose summary.
@@ -199,13 +221,6 @@ header comment block in each one is kept current as a purpose summary.
 
 ## Known Issues / Not Yet Built
 
-* `ctl-site_opportunity-parent.html` reads `$opp.oppSubmissionDeadline` /
-  `$opp.oppApplicationLink` — neither exists on CtlActivity. Real fields are
-  `signupDeadline` / `registerApplyLink` (already correct in `ctl-site_activity-detail.html`).
-  Deadline display and Apply button silently render blank until fixed.
-* `ctl-site_event-parent.html` reads `$item.eventRegistrationLink` — not a documented
-  or REST-confirmed field. Almost certainly the same bug as above; verify against a fresh
-  REST pull, likely fix is `registerApplyLink`.
 * `ctlAttachmentfile` (CtlAttachment) is accessed via `.rawUri`/`.thumbnailUri` in both
   `ctl-site_activity-detail.html` and `ctl-site_instRes-detail`. `videoFile` looked
   identical on paper and turned out to need `.path`/`.fileName` instead — `ctlAttachmentfile`
@@ -219,8 +234,8 @@ header comment block in each one is kept current as a purpose summary.
   `CTL_widget_opportunities_detail` — reference the deleted `CtlEventItem`/`CtlOpportunity`
   content types.
 * **Leftover** `$EDIT_MODE` debug output (invisible to real visitors, but not yet trimmed):
-  heaviest in `ctl-site_get-help.html` (visible debug panels with per-record Java-type
-  reflection output from the `rank`-sort investigation), lighter in `ctl-site_home.html`
-  and `ctl_site_about-us.html`.
+  heaviest in the deprecated `DEPRECATED/ctl-site_get-help.html` stub (visible debug panels
+  with per-record Java-type reflection output from the `rank`-sort investigation), lighter
+  in `DEPRECATED/ctl-site_home.html` and `DEPRECATED/ctl_site_about-us.html`.
 
 

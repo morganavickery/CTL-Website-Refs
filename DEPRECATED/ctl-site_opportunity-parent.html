@@ -1,0 +1,32 @@
+## ============================================================
+## DEPRECATED — split into two standalone widgets 2026-08-04 for reuse
+## (dev-checklist.md: "split up sections into multiple widgets for potential
+## reuse"). This file's content now lives in:
+##
+##   widgets/ctl-widget_active-opportunities_funded-opportunities.html  ("Opportunities" — active/open listing)
+##   widgets/ctl-widget_missed-opportunities_funded-opportunities.html   ("Missed Connections" — expired listing)
+##
+## Missed Connections was also redesigned during the split, per explicit
+## request: 2-column grid instead of single-column (space conservation),
+## amount (oppAmountPaid) hidden, shortDescription truncated to 2 lines via
+## CSS line-clamp. The active section's layout is unchanged.
+##
+## Both widgets also fix the same stale-field-name bug: this file read
+## $opp.oppSubmissionDeadline / $opp.oppApplicationLink, neither of which
+## exists on CtlActivity — same failure mode as ctl-site_event-parent.html's
+## eventRegistrationLink bug (fixed 2026-08-04 during that split). Real
+## fields: signupDeadline / registerApplyLink.
+##
+## Migration steps still pending in the live dotCMS instance:
+##   1. Create two new Widget content assets in dotCMS, pasting in the code
+##      from the two files above (one widget each).
+##   2. On the Opportunities listing page, replace this single widget with
+##      the two new ones, in order: active, then missed.
+##   3. Confirm the page renders correctly live (deadline/Apply link now
+##      populated correctly, Missed Connections toggle still works, 2-column
+##      grid, amount hidden, description clamped to 2 lines).
+##   4. Once confirmed, delete this widget's old code from dotCMS and remove
+##      this file from the repo (matches the existing "delete orphaned
+##      widgets" cleanup pattern already used for the home page, About Us,
+##      Get Help, and Event Calendar splits).
+## ============================================================

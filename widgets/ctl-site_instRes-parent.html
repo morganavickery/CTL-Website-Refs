@@ -1,6 +1,10 @@
 ## ============================================================
 ## CTL_widget_instructional_parent  (v8)
 ## dotCMS widget variable: CtlWidgetInstructionalParent
+## Lives on "For Course Design" (formerly the flat "Instructional Resources"
+## page, renamed 2026-08-04) under the new "Resources" folder — intended URL
+## /centers/ctl/resources/course-design (live URL Map Pattern update on
+## CtlInstructionalResource still pending; see CLAUDE.md's Next Up).
 ## Fixes from debug session:
 ##  - modality is a Checkbox field -> .selectedValues, mapped to labels
 ##  - featured is a Radio -> .selectValue only
@@ -158,7 +162,7 @@
                             #end
                         </div>
                         <h3 class="h5 card-title">
-                            <a href="/centers/ctl/instructional-resources/$!r.urlTitle" class="stretched-link">$!r.resourceTitle</a>
+                            <a href="/centers/ctl/resources/course-design/$!r.urlTitle" class="stretched-link">$!r.resourceTitle</a>
                         </h3>
                         #if($cardDesc != "")
                             <p class="card-text small">$cardDesc</p>

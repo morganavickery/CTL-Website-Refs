@@ -1,0 +1,38 @@
+## ============================================================
+## DEPRECATED — split into two widgets 2026-08-04 for reuse (dev-checklist.md:
+## "split up sections into multiple widgets for potential reuse"). This
+## file's content now lives in:
+##
+##   widgets/ctl-widget_our-services_request-support.html   ("Our Services" — CtlService)
+##   widgets/ctl-widget_ctl-staff-profiles.html       ("Make an Appointment" — REUSED,
+##                                                    not a new file; see that
+##                                                    file's header note)
+##
+## "Make an Appointment" is NOT a new widget — per user decision 2026-08-04,
+## it's a second content instance of the SAME CTL Staff widget already built
+## for About Us (identical CTL-affiliated personnel list + card layout), with
+## its `sectionHeading` field set to "Make an Appointment" instead of "CTL
+## Staff". This also means the "Visit My Website" button (websitePromo) now
+## appears on Get Help's staff cards too, which the old combined widget
+## intentionally omitted — an accepted tradeoff of sharing one widget instead
+## of maintaining near-duplicate code.
+##
+## Migration steps still pending in the live dotCMS instance:
+##   1. Add a Text field `sectionHeading` (variable: sectionHeading) to the
+##      CTL Staff widget's content type, if not already present.
+##   2. Create a new Widget content asset from
+##      widgets/ctl-widget_our-services_request-support.html.
+##   3. Create a SECOND content record of the CTL Staff widget type (same
+##      Code as the About Us instance), with sectionHeading = "Make an
+##      Appointment".
+##   4. On the Get Help page, replace this single widget with the two above,
+##      in order: our-services, then the CTL Staff / Make an Appointment
+##      instance.
+##   5. Confirm the page renders correctly live (service availability badges,
+##      description expand/collapse, staff rank sort, pronouns display, and
+##      the new website button on staff cards).
+##   6. Once confirmed, delete this widget's old code from dotCMS and remove
+##      this file from the repo (matches the existing "delete orphaned
+##      widgets" cleanup pattern already used for the home page, About Us,
+##      and Event Calendar splits).
+## ============================================================

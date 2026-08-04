@@ -7,9 +7,12 @@
 ## mirrors CTL_widget_activity-detail's pull-all + Velocity-side
 ## slug match instead of relying on native URL Map resolution.
 ## Requires: content type's URL Map Pattern set to
-##   /centers/ctl/instructional-resources/{urlTitle}
+##   /centers/ctl/resources/course-design/{urlTitle}
+## (updated 2026-08-04 for the Resources IA revision — formerly
+## /centers/ctl/resources/course-design/{urlTitle}; live URL Map Pattern
+## update on the content type itself still pending, see CLAUDE.md's Next Up)
 ## Detail Page: "Instructional Resource Detail"
-##   (/centers/ctl/instructional-resources/instructional-resource-detail)
+##   (/centers/ctl/resources/course-design/instructional-resource-detail)
 ## ============================================================
 
 #set($forwardUri = $request.getAttribute("javax.servlet.forward.request_uri"))
@@ -25,10 +28,10 @@
 
 #set($matchList = [])
 
-#if($slug == "" || $slug == "instructional-resources" || $slug == "instructional-resource-detail" || $slug == "index" || $slug == "index.dot")
+#if($slug == "" || $slug == "course-design" || $slug == "resources" || $slug == "instructional-resource-detail" || $slug == "index" || $slug == "index.dot")
     <div style="background: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 6px;">
         <h4 style="margin-top: 0;">🛠️ Editor System Template View</h4>
-        <p>No resource slug detected. To preview, publish this page and click a card from the Instructional Resources listing.</p>
+        <p>No resource slug detected. To preview, publish this page and click a card from the For Course Design listing.</p>
     </div>
 #else
     #set($allResources = $dotcontent.pull("+contentType:CtlInstructionalResource +languageId:1 +live:true", 500, "score"))
@@ -252,7 +255,7 @@
                                 <div class="card h-100 ctl-ir-related-card">
                                     <div class="card-body">
                                         <h4 class="h6 card-title">
-                                            <a href="/centers/ctl/instructional-resources/$!rel.urlTitle">$!rel.resourceTitle</a>
+                                            <a href="/centers/ctl/resources/course-design/$!rel.urlTitle">$!rel.resourceTitle</a>
                                         </h4>
                                         #if("$!rel.shortDescription" != "")
                                             <p class="card-text small">$rel.shortDescription</p>
@@ -284,7 +287,7 @@
             #end
 
             <p style="margin-top: 40px;">
-                <a href="/centers/ctl/instructional-resources" style="color: inherit;">&larr; Back to Instructional Resources</a>
+                <a href="/centers/ctl/resources/course-design" style="color: inherit;">&larr; Back to For Course Design</a>
             </p>
 
         </article>
@@ -293,7 +296,7 @@
         <div style="padding: 40px; text-align: center; color: #666;">
             <h2>Not Found</h2>
             <p>Sorry, this resource could not be found or may have been removed.</p>
-            <a href="/centers/ctl/instructional-resources" style="color: inherit;">Return to Instructional Resources</a>
+            <a href="/centers/ctl/resources/course-design" style="color: inherit;">Return to For Course Design</a>
         </div>
     #end
 #end
@@ -314,10 +317,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var parentLink = parentCrumb.querySelector('a');
         if (parentLink) {
-            parentLink.setAttribute('href', '/centers/ctl/instructional-resources');
-            parentLink.textContent = 'Instructional Resources';
+            parentLink.setAttribute('href', '/centers/ctl/resources/course-design');
+            parentLink.textContent = 'For Course Design';
         } else {
-            parentCrumb.textContent = 'Instructional Resources';
+            parentCrumb.textContent = 'For Course Design';
         }
 
         activeCrumb.textContent = '$item.resourceTitle';

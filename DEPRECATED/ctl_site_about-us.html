@@ -1,0 +1,21 @@
+## ============================================================
+## DEPRECATED — split into two standalone widgets 2026-08-04 for reuse
+## (dev-checklist.md: "split up sections into multiple widgets for potential
+## reuse"). This file's content now lives in:
+##
+##   widgets/ctl-widget_ctl-staff-profiles.html          (single-column CTL Staff section)    CTL Widget_About Us > CTL Staff
+##   widgets/ctl-widget_fdc-member-grid_faculty-development-committee.html (multi-column FDC Members / Other Affiliates)   CTL Widget_About-Us > Affiliate Personnel
+##
+## Migration steps still pending in the live dotCMS instance:
+##   1. Create two new Widget content assets in dotCMS, pasting in the code
+##      from the two files above (one widget each).
+##   2. On the About Us page, replace this single widget with the two new
+##      ones, in order: ctl-staff, then affiliate-personnel.
+##   3. Confirm the page renders correctly live (rank sort, pronouns display,
+##      affiliation gating all unchanged from the original combined widget).
+##   4. Once confirmed, delete this widget's old code from dotCMS and remove
+##      this file from the repo (matches the existing "delete orphaned
+##      widgets" cleanup pattern already used for
+##      ctl_widget_detail-router / CTL_widget_event-calendar_detail /
+##      CTL_widget_opportunities_detail, and the ctl-site_home.html split).
+## ============================================================

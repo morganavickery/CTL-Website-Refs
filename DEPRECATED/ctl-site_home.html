@@ -1,0 +1,23 @@
+## ============================================================
+## DEPRECATED — split into three standalone widgets 2026-08-04 for reuse
+## (dev-checklist.md item: "split up sections into multiple widgets for
+## potential reuse"). This file's content now lives in:
+##
+##   widgets/ctl-widget_home-nav-tiles_welcome-to-the-ctl.html         (welcome text + 6 nav tiles)
+##   widgets/ctl-widget_upcoming-activities-carousel_welcome-to-the-ctl.html (Upcoming Events & Opportunities)
+##   widgets/ctl-widget_featured-instructional-resources_welcome-to-the-ctl.html (Featured Resources)
+##
+## Migration steps still pending in the live dotCMS instance:
+##   1. Create three new Widget content assets in dotCMS, pasting in the code
+##      from the three files above (one widget each).
+##   2. On the Home page, replace this single widget with the three new ones,
+##      in order: nav-tiles, upcoming-carousel, featured-resources.
+##   3. Confirm the home page renders correctly live (both carousels present
+##      together — button-binding script in each widget guards against
+##      double-binding via a data attribute, so this is expected to be safe).
+##   4. Once confirmed, delete this widget's old code from dotCMS and remove
+##      this file from the repo (matches the existing "delete orphaned
+##      widgets" cleanup pattern already used for
+##      ctl_widget_detail-router / CTL_widget_event-calendar_detail /
+##      CTL_widget_opportunities_detail).
+## ============================================================

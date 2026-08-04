@@ -1,0 +1,133 @@
+## ============================================================
+## Active Opportunities — standalone widget (split out of the former
+## monolithic ctl-site_opportunity-parent.html, 2026-08-04, per
+## dev-checklist.md's "split up sections into multiple widgets for potential
+## reuse"). Single-column, full detail (thumbnail, categories, deadline,
+## amount, description, Apply/Details button) — unchanged layout from the
+## original active section. The expired/past section no longer lives here —
+## per the Funding IA revision (2026-08-04, same day), it moved to the new
+## "Past Recipients" page (widgets/ctl-widget_missed-opportunities_past-recipients.html),
+## alongside a new (not yet built) past-award-recipients widget. This widget
+## now lives on its own "Current Opportunities" subpage under the "Funding"
+## top-level page (formerly the flat "Funded Opportunities" page) — see the
+## Site Information Architecture table in CLAUDE.md.
+##
+## Fixed along the way: this file previously read $opp.oppSubmissionDeadline /
+## $opp.oppApplicationLink, neither of which exists on CtlActivity — same
+## stale-name failure mode as ctl-site_event-parent.html's
+## eventRegistrationLink bug (fixed 2026-08-04 during that split). Real
+## fields, confirmed against ctl-site_activity-detail.html and the dotCMS
+## Variable Map: signupDeadline (deadline) / registerApplyLink (apply link).
+## oppAmountPaid IS a real field (Text, numbers only, $ added by the
+## template) — that one was never wrong.
+## ============================================================
+
+#set($now = $date.getDate())
+#set($nowMs = $now.getTime())
+#set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1 +live:true +deleted:false", 100, "score"))
+#set($allOpps = [])
+#foreach($item in $allActivities)
+    #if($item.isOpportunity.selectedValues.contains("true"))
+        #set($dummy = $allOpps.add($item))
+    #end
+#end
+#set($activeList = [])
+#foreach($opp in $allOpps)
+    #if("$!opp.signupDeadline" != "")
+        #if($opp.signupDeadline.getTime() >= $nowMs)
+            #set($dummy = $activeList.add($opp))
+        #end
+    #else
+        ## No deadline - treat as active ("ongoing")
+        #set($dummy = $activeList.add($opp))
+    #end
+#end
+
+## Sort activeList by deadline ascending (soonest first)
+#set($sorted = $activeList)
+#foreach($i in [0..20])
+    #foreach($j in [0..20])
+        #set($k = $j + 1)
+        #if($k < $sorted.size())
+            #set($a = $sorted.get($j))
+            #set($b = $sorted.get($k))
+            #if("$!a.signupDeadline" != "" && "$!b.signupDeadline" != "")
+                #if($a.signupDeadline.getTime() > $b.signupDeadline.getTime())
+                    #set($dummy = $sorted.set($j, $b))
+                    #set($dummy = $sorted.set($k, $a))
+                #end
+            #end
+        #end
+    #end
+#end
+
+#if($EDIT_MODE)
+    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+        &#128027; DEBUG: $allOpps.size() opportunity record(s), $activeList.size() active.
+    </div>
+#end
+
+<h2 class="section-title">Current Opportunities</h2>
+<div class="opp-listing-group" style="display: flex; flex-direction: column; gap: 20px; margin-left: 10px;">
+    #if($activeList.size() > 0)
+        #foreach($opp in $sorted)
+            <div style="display: flex; gap: 24px; align-items: flex-start; border: 1px solid #e0e0e0; border-radius: 8px; padding: 28px; background: #fff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
+                #if("$!opp.thumbnail.fileName" != "")
+                    <div style="flex: 0 0 200px;">
+                        <img src="$opp.thumbnail.path$opp.thumbnail.fileName" alt="$opp.title" style="width: 200px; height: 150px; object-fit: cover; border-radius: 6px;" />
+                    </div>
+                #end
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; flex-direction: column; margin-bottom: 14px;">
+                        #if($opp.categories && $opp.categories.size() > 0)
+                            <div style="order: 1; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                                #foreach($cat in $opp.categories)
+                                    #if("$!cat.categoryName" != "")
+                                        <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; background-color: #f4f4f4; color: #444; border: 1px solid #ddd; border-radius: 4px; display: inline-block; line-height: 1;">$cat.categoryName</span>
+                                    #end
+                                #end
+                            </div>
+                        #end
+                        <h3 style="order: 2; margin: 0; font-size: 1.35rem; font-weight: 700; line-height: 1.3;">
+                            <a href="/centers/ctl/funding/current-opportunities/$opp.urlMapPattern" style="text-decoration: none; color: inherit;">$opp.title</a>
+                        </h3>
+                    </div>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.9rem; color: #666;">
+                        #if("$!opp.signupDeadline" != "")
+                            <span style="display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="bi bi-calendar-x" style="font-size: 0.95rem;"></i>
+                                <span><strong>Deadline:</strong> $date.format('MMMM d, yyyy', $opp.signupDeadline)</span>
+                            </span>
+                        #end
+
+                        #if("$!opp.oppAmountPaid" != "")
+                            #if("$!opp.signupDeadline" != "")
+                                <span style="color: #ccc;">|</span>
+                            #end
+                            <span style="display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="bi bi-cash-stack" style="font-size: 0.95rem;"></i>
+                                <span><strong>Amount:</strong> $ #if(!$opp.oppAmountPaid.startsWith("$"))$#end$opp.oppAmountPaid</span>
+                            </span>
+                        #end
+                    </div>
+                    <div style="border-top: 1px solid #e5e5e5; margin-top:14px; margin-bottom:14px"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
+                        #if("$!opp.shortDescription" != "")
+                            <div style="margin: 0; color: #444; font-size: 0.95rem; flex: 1; line-height: 1.4;">$opp.shortDescription</div>
+                        #end
+                        <div style="flex-shrink: 0;">
+                            #if("$!opp.registerApplyLink" != "" && "$!opp.registerApplyLink" != "http://")
+                                <a href="$opp.registerApplyLink" target="_blank" class="btn btn-default btn-sm">Apply</a>
+                            #else
+                                <a href="/centers/ctl/funding/current-opportunities/$opp.urlMapPattern" class="btn btn-default btn-sm">View Details</a>
+                            #end
+                        </div>
+                    </div>
+                </div>
+            </div>
+        #end
+    #else
+        <p style="color: #666; font-style: italic; padding: 12px 0;">No active opportunities at this time.</p>
+    #end
+</div>

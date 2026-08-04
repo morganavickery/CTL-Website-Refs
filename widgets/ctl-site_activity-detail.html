@@ -15,19 +15,28 @@
 #set($slug = $uri.substring($idxPlus))
 
 ## Determine which listing this request originally came in on (survives the vanity forward)
-#if($uri.contains("/opportunities/"))
-    #set($parentLabel = "Opportunities")
-    #set($parentUrl = "/centers/ctl/opportunities/")
+## Updated 2026-08-04 for the Funding IA revision: the old "/opportunities/"
+## vanity prefix split into two ("/funding/current-opportunities/" and
+## "/funding/past-recipients/", matching Current Opportunities and the
+## missed/expired half of Past Recipients respectively), and the old
+## "/event-calendar/" prefix is now "/events/". See the Site Information
+## Architecture table in CLAUDE.md.
+#if($uri.contains("/funding/current-opportunities/"))
+    #set($parentLabel = "Current Opportunities")
+    #set($parentUrl = "/centers/ctl/funding/current-opportunities/")
+#elseif($uri.contains("/funding/past-recipients/"))
+    #set($parentLabel = "Past Recipients")
+    #set($parentUrl = "/centers/ctl/funding/past-recipients/")
 #else
-    ## Default / fallback covers /event-calendar/ and any direct hits on /activities/
-    #set($parentLabel = "Event Calendar")
-    #set($parentUrl = "/centers/ctl/event-calendar/")
+    ## Default / fallback covers /events/ and any direct hits on /activities/
+    #set($parentLabel = "Events")
+    #set($parentUrl = "/centers/ctl/events/")
 #end
 
-#if($slug == "activity-detail" || $slug == "event-calendar" || $slug == "opportunities" || $slug == "index" || $slug == "index.dot" || $slug == "")
+#if($slug == "activity-detail" || $slug == "events" || $slug == "funding" || $slug == "current-opportunities" || $slug == "past-recipients" || $slug == "index" || $slug == "index.dot" || $slug == "")
     <div style="background: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 6px;">
         <h4 style="margin-top: 0;">🛠️ Editor System Template View</h4>
-        <p>No activity slug detected. To preview, publish this page and click a card from the Event Calendar or Opportunities page.</p>
+        <p>No activity slug detected. To preview, publish this page and click a card from the Events, Current Opportunities, or Past Recipients page.</p>
     </div>
 #else
     #set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1", 100, "score"))

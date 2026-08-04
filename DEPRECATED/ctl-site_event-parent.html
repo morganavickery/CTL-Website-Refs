@@ -1,0 +1,30 @@
+## ============================================================
+## DEPRECATED — split into two standalone widgets 2026-08-04 for reuse and to
+## give Past Events its own layout (dev-checklist.md items: "past events
+## should be less cluttered" / "multiple columns for past events"). This
+## file's content now lives in:
+##
+##   widgets/ctl-widget_upcoming-events_events.html (Upcoming Events, unchanged
+##                                                 single-column layout)
+##   widgets/ctl-widget_past-events_events.html      (Past Events, now a 2-column
+##                                                 grid; tiles pared down to
+##                                                 name/short description/date/
+##                                                 Details button only — no
+##                                                 thumbnail, time, or location)
+##
+## Also fixed along the way: the upcoming widget's Register button read
+## $item.eventRegistrationLink, which isn't a real CtlActivity field (same
+## stale-name failure mode as the opportunity-parent bug) — corrected to the
+## real field, registerApplyLink (confirmed against ctl-site_activity-detail.html).
+##
+## Migration steps still pending in the live dotCMS instance:
+##   1. Create two new Widget content assets in dotCMS, pasting in the code
+##      from the two files above (one widget each).
+##   2. On the Event Calendar listing page, replace this single widget with
+##      the two new ones, in order: upcoming, then past.
+##   3. Confirm the page renders correctly live (dates split correctly,
+##      past grid is 2-column, past tiles show no time/location).
+##   4. Once confirmed, delete this widget's old code from dotCMS and remove
+##      this file from the repo (matches the existing "delete orphaned
+##      widgets" cleanup pattern, and the ctl-site_home.html split before it).
+## ============================================================

@@ -1,0 +1,283 @@
+## ============================================================
+## Upcoming Events & Opportunities carousel — standalone widget (split out of
+## the former monolithic ctl-site_home.html for reuse, 2026-08-04).
+## Fixes from the original debug session (still applicable):
+##  - activityDate doesn't exist on CtlActivity -> branch per record:
+##    eventStartDate/eventEndDate for events, signupDeadline/submissionDeadline
+##    for opportunities
+##  - structureName -> contentType; isEvent/isOpportunity Lucene filter ->
+##    pull-all + Velocity-side .selectedValues.contains("true")
+##  - dropped a +path:/centers/ctl* query filter that was silently returning 0
+##    results — content item "path" doesn't mirror the live page URL structure
+##  - href uses /centers/ctl/activities/{urlMapPattern}, not the bare field
+##  - handles the both-event-and-opportunity case (badge + date priority)
+## THIS DOTCMS VELOCITY ENGINE SPECIFICALLY DOES NOT SUPPORT (confirmed via live
+## bisection debugging — avoid these anywhere in this project, not just here):
+##  - map literals: #set($x = {"k": v}) -> use parallel arrays instead
+##  - $foreach.count -> use a manually incremented counter instead
+##  - inline arithmetic inside a .get() call or [] index, e.g. .get($i - 1) or
+##    list[$i - 1] -> #set a variable to the computed index FIRST, then use
+##    that plain variable in the .get()/[] call
+##  - [m..n] range syntax is DESCENDING when m > n (e.g. [1..0] => [1, 0], two
+##    elements, not empty) -> never derive range bounds from a value that can
+##    reach zero/negative; use a fixed range + #if bounds guard instead
+## Uses a manual horizontally-scrolling row (CSS scroll-snap), not Bootstrap's
+## .carousel (single-slide, JS-driven, no partial "peek" of the next card).
+## .ctl-hscroll / .ctl-hscroll-item styles + the button-binding script below
+## are duplicated in ctl-widget_featured-instructional-resources_welcome-to-the-ctl.html on purpose, so each
+## widget is self-contained and can be dropped on any page independently. The
+## button-binding script guards against double-binding (via a data attribute)
+## in case both hscroll widgets end up on the same page together, as they do
+## on the home page.
+## ============================================================
+
+<style>
+    .ctl-hscroll-wrap {
+        position: relative;
+    }
+    .ctl-hscroll {
+        display: flex;
+        gap: 1rem;
+        overflow-x: scroll;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        padding-top: 0.5rem;
+        padding-bottom: 0.75rem;
+        scrollbar-width: thin;
+        scrollbar-color: #730A00 #eee;
+    }
+    /* Force a persistent, always-visible scrollbar on WebKit/Blink browsers
+       (Chrome/Edge/Safari) so the row's scrollability doesn't depend on the
+       OS-level "show scrollbars: when scrolling" trackpad setting -- mouse
+       users with no trackpad gesture support otherwise never see it appear. */
+    .ctl-hscroll::-webkit-scrollbar {
+        height: 10px;
+    }
+    .ctl-hscroll::-webkit-scrollbar-track {
+        background: #eee;
+        border-radius: 10px;
+    }
+    .ctl-hscroll::-webkit-scrollbar-thumb {
+        background-color: #730A00;
+        border-radius: 10px;
+    }
+    .ctl-hscroll-item {
+        flex: 0 0 88%;
+        scroll-snap-align: start;
+    }
+    @media (min-width: 576px) {
+        .ctl-hscroll-item { flex-basis: 62%; }
+    }
+    @media (min-width: 768px) {
+        .ctl-hscroll-item { flex-basis: 48%; }
+    }
+    @media (min-width: 992px) {
+        .ctl-hscroll-item { flex-basis: 44%; } /* ~2.3 cards visible -- 2 full + a peek of the 3rd, standard/max desktop width. Stays here at all wider widths too (no further breakpoints) since the container itself caps out. */
+    }
+    .ctl-activity-card .card-title a { color: inherit; text-decoration: none; }
+    .ctl-activity-card .card-title a:hover { color: #730A00; text-decoration: underline; }
+
+    /* Same lift/shadow/maroon-border hover as the top-of-page nav tiles
+       (.ctl-nav-tile), applied to the visible card inside each carousel
+       item rather than the wrapper, since the wrapper includes the flex gap. */
+    .ctl-hscroll-item .card {
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .ctl-hscroll-item .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border-color: #730A00;
+    }
+
+    .ctl-hscroll-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        color: #730A00;
+        font-size: 1.1rem;
+    }
+    .ctl-hscroll-btn:hover {
+        background: #730A00;
+        color: #fff;
+        border-color: #730A00;
+    }
+    .ctl-hscroll-btn.ctl-hscroll-prev { left: 0; }
+    .ctl-hscroll-btn.ctl-hscroll-next { right: 0; }
+    /* Reserve a side gutter (matches the button diameter + a little
+       breathing room) so the buttons sit beside the cards instead of
+       overlapping their text -- only added at widths where the buttons
+       are actually shown (see the max-width:575px rule below). */
+    @media (min-width: 576px) {
+        .ctl-hscroll-wrap { padding: 0 48px; }
+    }
+    /* Buttons crowd the peeking card on narrow screens where a single
+       item nearly fills the viewport -- scroll-snap + touch/trackpad
+       scrolling is still available, just without the button affordance. */
+    @media (max-width: 575px) {
+        .ctl-hscroll-btn { display: none; }
+    }
+</style>
+
+<div class="container py-4">
+  <h2 class="h3 fw-bold mb-4">Upcoming Events &amp; Opportunities</h2>
+
+#set($now = $date.getDate())
+#set($nowMs = $now.getTime())
+
+#set($activityQuery = "+contentType:CtlActivity +languageId:1 +live:true +deleted:false")
+#set($allActivities = $dotcontent.pull($activityQuery, 100, "score"))
+
+#if($EDIT_MODE)
+    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+        &#128027; DEBUG: $allActivities.size() CtlActivity record(s) pulled (pre-filter).
+    </div>
+#end
+
+## ---- build parallel arrays (item / relevantDateMs / isEvent / isOpp), skip anything
+##      without a usable future date ----
+#set($upcomingItems = [])
+#set($upcomingMs = [])
+#set($upcomingIsEvent = [])
+#set($upcomingIsOpp = [])
+#foreach($item in $allActivities)
+    #set($isEventItem = $item.isEvent.selectedValues.contains("true"))
+    #set($isOppItem = $item.isOpportunity.selectedValues.contains("true"))
+
+    #set($relevantMs = 0)
+    #if($isEventItem)
+        #if("$!item.eventStartDate" != "")
+            #set($relevantMs = $item.eventStartDate.getTime())
+        #elseif("$!item.eventEndDate" != "")
+            #set($relevantMs = $item.eventEndDate.getTime())
+        #end
+    #elseif($isOppItem)
+        #if("$!item.signupDeadline" != "")
+            #set($relevantMs = $item.signupDeadline.getTime())
+        #elseif("$!item.submissionDeadline" != "")
+            #set($relevantMs = $item.submissionDeadline.getTime())
+        #end
+    #end
+
+    #if($relevantMs > 0 && $relevantMs >= $nowMs)
+        #set($discard1 = $upcomingItems.add($item))
+        #set($discard2 = $upcomingMs.add($relevantMs))
+        #set($discard3 = $upcomingIsEvent.add($isEventItem))
+        #set($discard4 = $upcomingIsOpp.add($isOppItem))
+    #end
+#end
+
+#if($EDIT_MODE)
+    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+        &#128027; DEBUG: $upcomingItems.size() record(s) have a usable future date (isEvent/isOpportunity checked, date >= now).
+    </div>
+#end
+
+## ---- manual bubble sort ascending by relevantMs — fixed ranges + #if guards,
+##      never [1..$n]/[1..($n-$i)] (see the range-operator gotcha above) ----
+#set($n = $upcomingItems.size())
+#foreach($i in [0..99])
+  #if($i < $n)
+    #set($limit = $n - $i - 1)
+    #foreach($j in [0..99])
+      #if($j < $limit)
+        #set($jPlus1 = $j + 1)
+        #set($msA = $upcomingMs.get($j))
+        #set($msB = $upcomingMs.get($jPlus1))
+        #if($msA > $msB)
+          #set($itemTmp = $upcomingItems.get($j))
+          #set($msTmp = $upcomingMs.get($j))
+          #set($eventTmp = $upcomingIsEvent.get($j))
+          #set($oppTmp = $upcomingIsOpp.get($j))
+
+          #set($upcomingItems[$j] = $upcomingItems.get($jPlus1))
+          #set($upcomingMs[$j] = $upcomingMs.get($jPlus1))
+          #set($upcomingIsEvent[$j] = $upcomingIsEvent.get($jPlus1))
+          #set($upcomingIsOpp[$j] = $upcomingIsOpp.get($jPlus1))
+
+          #set($upcomingItems[$jPlus1] = $itemTmp)
+          #set($upcomingMs[$jPlus1] = $msTmp)
+          #set($upcomingIsEvent[$jPlus1] = $eventTmp)
+          #set($upcomingIsOpp[$jPlus1] = $oppTmp)
+        #end
+      #end
+    #end
+  #end
+#end
+
+#if($EDIT_MODE && $upcomingItems.size() > 0)
+    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+        &#128027; DEBUG: soonest upcoming item after sort = "$upcomingItems.get(0).title" ($upcomingMs.get(0) ms).
+    </div>
+#end
+
+#if($upcomingItems.size() > 0)
+  <div class="ctl-hscroll-wrap">
+  <button type="button" class="ctl-hscroll-btn ctl-hscroll-prev" aria-label="Scroll left"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+  <button type="button" class="ctl-hscroll-btn ctl-hscroll-next" aria-label="Scroll right"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+  <div class="ctl-hscroll">
+      #set($slideCount = 0)
+      #foreach($item in $upcomingItems)
+        #set($slideCount = $slideCount + 1)
+        #set($slideIdx = $slideCount - 1)
+        #set($isEventItem = $upcomingIsEvent.get($slideIdx))
+        #set($isOppItem = $upcomingIsOpp.get($slideIdx))
+
+        #set($badgeLabel = "Opportunity")
+        #set($badgeClass = "text-bg-success")
+        #if($isEventItem && $isOppItem)
+            #set($badgeLabel = "Event &amp; Opportunity")
+            #set($badgeClass = "text-bg-dark")
+        #elseif($isEventItem)
+            #set($badgeLabel = "Event")
+            #set($badgeClass = "text-bg-primary")
+        #end
+
+        <div class="ctl-hscroll-item">
+          <div class="card h-100 position-relative ctl-activity-card">
+            #if("$!item.thumbnail.fileName" != "")
+              <img src="$item.thumbnail.path$item.thumbnail.fileName" class="card-img-top" alt="$item.title" style="height: 160px; object-fit: cover;">
+            #end
+            <div class="card-body">
+              <span class="badge $badgeClass mb-2">$badgeLabel</span>
+              <h3 class="h5 card-title">
+                <a href="/centers/ctl/activities/$item.urlMapPattern" class="stretched-link">$item.title</a>
+              </h3>
+              <p class="card-text">$item.shortDescription</p>
+            </div>
+          </div>
+        </div>
+      #end
+  </div>
+  </div>
+#else
+  <p class="text-muted">No upcoming events or opportunities at this time.</p>
+#end
+</div>
+
+<script>
+(function () {
+    document.querySelectorAll('.ctl-hscroll-btn').forEach(function (btn) {
+        if (btn.dataset.ctlHscrollBound) { return; }
+        btn.dataset.ctlHscrollBound = '1';
+        btn.addEventListener('click', function () {
+            var wrap = btn.closest('.ctl-hscroll-wrap');
+            var scroller = wrap ? wrap.querySelector('.ctl-hscroll') : null;
+            if (!scroller) { return; }
+            var amount = scroller.clientWidth * 0.9;
+            var dir = btn.classList.contains('ctl-hscroll-next') ? 1 : -1;
+            scroller.scrollBy({ left: amount * dir, behavior: 'smooth' });
+        });
+    });
+})();
+</script>
