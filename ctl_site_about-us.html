@@ -2,8 +2,11 @@
 ## CTL_widget_about-us  (v1)
 ## dotCMS widget variable: CtlWidgetAboutUs
 ## Pulls CtlPersonnel content instead of hard-coded staff bio cards.
-## Bootstrap 5.3 + Cortland theme classes only — no custom CSS, matching
-## the markup this replaces.
+## Card markup/CSS (.ctl-gh-* classes) matches CTL_widget_get-help's Staff
+## section exactly (2026-07-29) — same compact card treatment (square
+## photo, name/title, "Expertise in:"/"Contact me for:" bullets, email +
+## "Meet with Me" absolutely positioned top-right) so personnel cards look
+## identical on both pages.
 ## Field map (CtlPersonnel): name, pronouns (RADIO field, NOT Text as first
 ## assumed -- confirmed 2026-07-28 via live render showing the raw
 ## RadioMap.toString(); access via .selectValue + values/options lookup,
@@ -16,7 +19,19 @@
 ## Deg2" — no longer appended to the name), emailCortlandEdu,
 ## bookWithMeFullLink, areasOfExpertise (textarea), howICanHelp (textarea),
 ## headshotPhoto (image), rank (whole number — display sort order, added
-## 2026-07-28)
+## 2026-07-28), websitePromo (URL) + buttonLabel (text, falls back to
+## "Visit My Website" when empty) -- About Us page ONLY, added 2026-07-29,
+## affiliations (Checkbox -- CheckboxMap, access via
+## .selectedValues.contains(...), same pattern as isCurrentlyAvailable in
+## CTL_widget_get-help. CONFIRMED via REST API pull 2026-07-29: option
+## VALUES are "CTL", "FDC", "Other" (capitalized -- NOT lowercase "ctl"/
+## "fdc"/"other" as first assumed, which silently matched nothing since
+## .contains() is case-sensitive -- same case-mismatch failure mode as the
+## format/category and pronouns bugs elsewhere in this project). Added
+## 2026-07-29: About Us now renders three separate personnel sections
+## gated by affiliation -- CTL Staff ('CTL'), FDC Members ('FDC'), Other
+## Affiliates ('Other') -- Get Help's Staff section only shows
+## 'CTL'-affiliated personnel.
 ## ROOT-CAUSED 2026-07-28 (attempt 1): rank used to be compared as a
 ## zero-padded STRING, which this Velocity engine's ">" does not evaluate
 ## the way Number ">" comparisons do (every other working Velocity-side
@@ -47,148 +62,304 @@
 ## nothing ever swapped. FIX: skip the round-trip — use $p.rank DIRECTLY
 ## (it's already a Long) as the sort key; only the blank-check needs the
 ## stringified "$!p.rank" version.
+## ============================================================
 
 #set($allPersonnel = $dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true", 500, "score"))
 
-## ---- sort ascending by rank (parallel array of Number keys, bubble sort) ----
-#set($sortedPersonnel = [])
-#set($rankKeys = [])
-#set($rankDebug = "")
-#foreach($p in $allPersonnel)
-    #set($dummy = $sortedPersonnel.add($p))
-    #set($rankRaw = "$!p.rank")
-    #if($rankRaw == "")
-        #set($rankKey = 999999)
-    #else
-        #set($rankKey = $p.rank)
-    #end
-    #set($dummy = $rankKeys.add($rankKey))
-    #set($rankDebug = "$rankDebug | $!p.name: raw=$rankRaw key=$rankKey")
-#end
+## ---- filter to one affiliation + sort ascending by rank (parallel array of
+## Number keys, bubble sort) -- duplicated per group rather than shared via a
+## Velocity macro, consistent with this project's preference for hand-rolled,
+## explicit loop logic over untested engine features (see rank-sort postmortem
+## above and the macro-avoidance note in CLAUDE.md's Velocity gotchas). ----
 
+#set($ctlPersonnel = [])
+#set($ctlRankKeys = [])
+#foreach($p in $allPersonnel)
+    #if($p.affiliations && $p.affiliations.selectedValues && $p.affiliations.selectedValues.contains("CTL"))
+        #set($dummy = $ctlPersonnel.add($p))
+        #set($rankRaw = "$!p.rank")
+        #if($rankRaw == "")
+            #set($rankKey = 999999)
+        #else
+            #set($rankKey = $p.rank)
+        #end
+        #set($dummy = $ctlRankKeys.add($rankKey))
+    #end
+#end
 #foreach($i in [0..20])
     #foreach($j in [0..20])
         #set($k = $j + 1)
-        #if($k < $sortedPersonnel.size())
-            #if($rankKeys.get($j) > $rankKeys.get($k))
-                #set($tmpP = $sortedPersonnel.get($j))
-                #set($tmpR = $rankKeys.get($j))
-                #set($dummy = $sortedPersonnel.set($j, $sortedPersonnel.get($k)))
-                #set($dummy = $rankKeys.set($j, $rankKeys.get($k)))
-                #set($dummy = $sortedPersonnel.set($k, $tmpP))
-                #set($dummy = $rankKeys.set($k, $tmpR))
+        #if($k < $ctlPersonnel.size())
+            #if($ctlRankKeys.get($j) > $ctlRankKeys.get($k))
+                #set($tmpP = $ctlPersonnel.get($j))
+                #set($tmpR = $ctlRankKeys.get($j))
+                #set($dummy = $ctlPersonnel.set($j, $ctlPersonnel.get($k)))
+                #set($dummy = $ctlRankKeys.set($j, $ctlRankKeys.get($k)))
+                #set($dummy = $ctlPersonnel.set($k, $tmpP))
+                #set($dummy = $ctlRankKeys.set($k, $tmpR))
+            #end
+        #end
+    #end
+#end
+
+#set($fdcPersonnel = [])
+#set($fdcRankKeys = [])
+#foreach($p in $allPersonnel)
+    #if($p.affiliations && $p.affiliations.selectedValues && $p.affiliations.selectedValues.contains("FDC"))
+        #set($dummy = $fdcPersonnel.add($p))
+        #set($rankRaw = "$!p.rank")
+        #if($rankRaw == "")
+            #set($rankKey = 999999)
+        #else
+            #set($rankKey = $p.rank)
+        #end
+        #set($dummy = $fdcRankKeys.add($rankKey))
+    #end
+#end
+#foreach($i in [0..20])
+    #foreach($j in [0..20])
+        #set($k = $j + 1)
+        #if($k < $fdcPersonnel.size())
+            #if($fdcRankKeys.get($j) > $fdcRankKeys.get($k))
+                #set($tmpP = $fdcPersonnel.get($j))
+                #set($tmpR = $fdcRankKeys.get($j))
+                #set($dummy = $fdcPersonnel.set($j, $fdcPersonnel.get($k)))
+                #set($dummy = $fdcRankKeys.set($j, $fdcRankKeys.get($k)))
+                #set($dummy = $fdcPersonnel.set($k, $tmpP))
+                #set($dummy = $fdcRankKeys.set($k, $tmpR))
+            #end
+        #end
+    #end
+#end
+
+#set($otherPersonnel = [])
+#set($otherRankKeys = [])
+#foreach($p in $allPersonnel)
+    #if($p.affiliations && $p.affiliations.selectedValues && $p.affiliations.selectedValues.contains("Other"))
+        #set($dummy = $otherPersonnel.add($p))
+        #set($rankRaw = "$!p.rank")
+        #if($rankRaw == "")
+            #set($rankKey = 999999)
+        #else
+            #set($rankKey = $p.rank)
+        #end
+        #set($dummy = $otherRankKeys.add($rankKey))
+    #end
+#end
+#foreach($i in [0..20])
+    #foreach($j in [0..20])
+        #set($k = $j + 1)
+        #if($k < $otherPersonnel.size())
+            #if($otherRankKeys.get($j) > $otherRankKeys.get($k))
+                #set($tmpP = $otherPersonnel.get($j))
+                #set($tmpR = $otherRankKeys.get($j))
+                #set($dummy = $otherPersonnel.set($j, $otherPersonnel.get($k)))
+                #set($dummy = $otherRankKeys.set($j, $otherRankKeys.get($k)))
+                #set($dummy = $otherPersonnel.set($k, $tmpP))
+                #set($dummy = $otherRankKeys.set($k, $tmpR))
             #end
         #end
     #end
 #end
 
 #if($EDIT_MODE)
-    <!-- DEBUG: pulled $allPersonnel.size() CtlPersonnel record(s) -->
-    <!-- DEBUG rank keys (pre-sort): $rankDebug -->
-    #set($sortedDebug = "")
-    #foreach($sp in $sortedPersonnel)
-        #set($sortedDebug = "$sortedDebug | $!sp.name (rank $!sp.rank)")
-    #end
-    <!-- DEBUG final sorted order: $sortedDebug -->
+    <!-- DEBUG: pulled $allPersonnel.size() CtlPersonnel record(s) total -- ctl=$ctlPersonnel.size() fdc=$fdcPersonnel.size() other=$otherPersonnel.size() -->
 #end
 
-#if($sortedPersonnel.size() == 0)
+<style>
+    /* Same "Add to Calendar" button treatment as CTL_widget_activity-detail's .ctl-btn,
+       reused here for Meet with Me / website button so buttons match across the site. */
+    .ctl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; padding: 6px 16px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; color: #730A00; background: transparent; border: 1px solid #730A00; border-radius: 4px; text-decoration: none; }
+    .ctl-btn:hover { background: #730A00; color: #fff; text-decoration: none; }
 
-    <div style="padding: 40px; text-align: center; color: #666;">
-        <p>Staff bios are coming soon &mdash; check back shortly.</p>
-    </div>
+    .ctl-gh-staff-list { display: flex; flex-direction: column; gap: 16px; }
+    .ctl-gh-staff-item { position: relative; }
+    .ctl-gh-staff-item .card-body { padding-right: 170px; }
+    .ctl-gh-staff-photo { width: 96px; height: 96px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+    .ctl-gh-staff-card { display: flex; gap: 16px; align-items: flex-start; }
+    .ctl-gh-staff-actions { position: absolute; top: 16px; right: 16px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; text-align: right; }
+    .ctl-gh-staff-actions .ctl-btn { padding: 4px 12px; font-size: 0.72rem; }
+    .ctl-gh-section + .ctl-gh-section { margin-top: 48px; }
 
-#else
+    /* Compact grid card treatment for FDC Members / Other Affiliates -- these
+       groups don't carry areasOfExpertise/howICanHelp, so they don't need the
+       wide single-column layout CTL Staff uses. Column count is dynamic via
+       auto-fill/minmax, not a fixed breakpoint count, so it adapts continuously
+       to viewport width instead of jumping between fixed 1/2/3-column states. */
+    .ctl-gh-staff-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .ctl-gh-grid-card { height: 100%; }
+    .ctl-gh-grid-card .card-body { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 16px; }
+    .ctl-gh-grid-photo { width: 88px; height: 88px; object-fit: cover; border-radius: 6px; margin-bottom: 12px; }
+    .ctl-gh-grid-actions { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 10px; width: 100%; }
+    .ctl-gh-grid-actions .ctl-btn { padding: 4px 12px; font-size: 0.72rem; }
+</style>
 
-    #foreach($p in $sortedPersonnel)
+## ---- render three affiliation-gated sections, sharing one copy of the
+## per-person prep logic via a group-of-lists loop (parallel arrays for
+## list/heading/empty-msg, since this Velocity engine has no map literals).
+## CTL Staff (group 0) keeps the full single-column card (expertise/help
+## bullets, absolutely-positioned actions) matching Get Help. FDC Members /
+## Other Affiliates (groups 1-2) use a compact dynamic-column grid card
+## instead, since those groups carry less content -- see $isListLayout below. ----
+#set($groupLists = [$ctlPersonnel, $fdcPersonnel, $otherPersonnel])
+#set($groupHeadings = ["CTL Staff", "FDC Members", "Other Affiliates"])
+#set($groupEmptyMsgs = ["CTL staff bios are coming soon", "FDC member bios are coming soon", "Affiliate bios are coming soon"])
 
-        #set($titleLine = "$!p.jobTitle")
-        #if("$!p.degrees" != "")
-            #if($titleLine != "")
-                #set($titleLine = "$titleLine | $!p.degrees")
+#set($gIdx = 0)
+#foreach($gList in $groupLists)
+    #set($gHeading = $groupHeadings.get($gIdx))
+    #set($gEmptyMsg = $groupEmptyMsgs.get($gIdx))
+    #set($isListLayout = ($gIdx == 0))
+
+    <div class="ctl-gh-section">
+        <h2 class="mb-4">$gHeading</h2>
+
+        #if($gList.size() == 0)
+
+            <div style="padding: 40px; text-align: center; color: #666;">
+                <p>$gEmptyMsg &mdash; check back shortly.</p>
+            </div>
+
+        #else
+
+            #if($isListLayout)
+                <div class="ctl-gh-staff-list">
             #else
-                #set($titleLine = "$!p.degrees")
+                <div class="ctl-gh-staff-grid">
             #end
-        #end
+            #foreach($p in $gList)
 
-        ## pronouns is a Radio field (RadioMap) -> .selectValue, mapped to its display
-        ## label via the parallel values/options arrays (same pattern as the modality
-        ## Checkbox elsewhere in this project). "dont show pronouns" is a real
-        ## selectable value, not a blank -- treated the same as blank (hidden).
-        #set($pronounsDisplay = "")
-        #if($p.pronouns && "$!p.pronouns.selectValue" != "" && "$!p.pronouns.selectValue" != "dont show pronouns")
-            #set($pVal = $p.pronouns.selectValue)
-            #set($pronounsDisplay = $pVal)
-            #set($pIdx = 0)
-            #foreach($pv in $p.pronouns.values)
-                #if("$pv" == "$pVal")
-                    #set($pronounsDisplay = $p.pronouns.options.get($pIdx))
-                #end
-                #set($pIdx = $pIdx + 1)
-            #end
-        #end
-
-        <div class="d-flex align-items-start gap-4 p-4 bg-light border rounded-3 mb-4">
-
-            #if("$!p.headshotPhoto.fileName" != "")
-                <img
-                    src="$p.headshotPhoto.path$p.headshotPhoto.fileName"
-                    alt="$!p.name"
-                    width="160"
-                    class="rounded flex-shrink-0 object-fit-cover"
-                />
-            #end
-
-            <div class="flex-grow-1">
-                <h3 class="fw-bold mb-0">$!p.name#if($pronounsDisplay != "") <span class="fw-normal text-muted" style="font-size: 0.8rem;">($pronounsDisplay)</span>#end</h3>
-
-                #if($titleLine != "")
-                    <p class="fst-italic text-muted mb-3">$titleLine</p>
+                #set($titleLine = "$!p.jobTitle")
+                #if("$!p.degrees" != "")
+                    #if($titleLine != "")
+                        #set($titleLine = "$titleLine | $!p.degrees")
+                    #else
+                        #set($titleLine = "$!p.degrees")
+                    #end
                 #end
 
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        #if("$!p.areasOfExpertise" != "")
-                            <p class="fw-bold mb-1">Expertise in:</p>
-                            <ul class="mb-0 lh-sm">
-                                #foreach($line in $p.areasOfExpertise.split("\n"))
-                                    #set($trimmedLine = $line.trim())
-                                    #if($trimmedLine != "")
-                                        <li class="mb-0">$trimmedLine</li>
-                                    #end
-                                #end
-                            </ul>
+                ## pronouns is a Radio field (RadioMap) -> .selectValue, mapped to its display
+                ## label via the parallel values/options arrays (same pattern as the modality
+                ## Checkbox elsewhere in this project). "dont show pronouns" is a real
+                ## selectable value, not a blank -- treated the same as blank (hidden).
+                #set($pronounsDisplay = "")
+                #if($p.pronouns && "$!p.pronouns.selectValue" != "" && "$!p.pronouns.selectValue" != "dont show pronouns")
+                    #set($pVal = $p.pronouns.selectValue)
+                    #set($pronounsDisplay = $pVal)
+                    #set($pIdx = 0)
+                    #foreach($pv in $p.pronouns.values)
+                        #if("$pv" == "$pVal")
+                            #set($pronounsDisplay = $p.pronouns.options.get($pIdx))
                         #end
-                    </div>
+                        #set($pIdx = $pIdx + 1)
+                    #end
+                #end
 
-                    <div class="col-12 col-md-6 d-flex flex-column justify-content-between">
-                        <div>
-                            #if("$!p.howICanHelp" != "")
-                                <p class="fw-bold mb-1">Contact me for:</p>
-                                <ul class="mb-3 lh-sm">
-                                    #foreach($line in $p.howICanHelp.split("\n"))
-                                        #set($trimmedLine = $line.trim())
-                                        #if($trimmedLine != "")
-                                            <li class="mb-0">$trimmedLine</li>
-                                        #end
-                                    #end
-                                </ul>
-                            #end
-                        </div>
+                ## websitePromo (URL) + buttonLabel (text, falls back to "Visit My Website"
+                ## when empty) -- About Us page ONLY. Get Help's staff cards intentionally
+                ## omit this button.
+                #set($websiteBtnLabel = "$!p.buttonLabel")
+                #if($websiteBtnLabel == "")
+                    #set($websiteBtnLabel = "Visit My Website")
+                #end
 
-                        <div class="d-flex align-items-center justify-content-end gap-3 mt-2">
+                #if($isListLayout)
+
+                <div class="card ctl-gh-card ctl-gh-staff-item">
+                    #if("$!p.emailCortlandEdu" != "" || "$!p.bookWithMeFullLink" != "" || "$!p.websitePromo" != "")
+                        <div class="ctl-gh-staff-actions">
                             #if("$!p.emailCortlandEdu" != "")
-                                <a href="mailto:$!p.emailCortlandEdu" class="text-body">$!p.emailCortlandEdu</a>
+                                <a href="mailto:$!p.emailCortlandEdu" class="text-body small">$!p.emailCortlandEdu</a>
                             #end
                             #if("$!p.bookWithMeFullLink" != "")
-                                <a class="btn btn-default text-nowrap" role="button" href="$!p.bookWithMeFullLink" target="_blank" rel="noopener">Meet with Me</a>
+                                <a class="ctl-btn" role="button" href="$!p.bookWithMeFullLink" target="_blank" rel="noopener">Meet with Me</a>
                             #end
+                            #if("$!p.websitePromo" != "")
+                                <a class="ctl-btn" role="button" href="$!p.websitePromo" target="_blank" rel="noopener">$websiteBtnLabel</a>
+                            #end
+                        </div>
+                    #end
+                    <div class="card-body ctl-gh-staff-card">
+                        #if("$!p.headshotPhoto.fileName" != "")
+                            <img src="$p.headshotPhoto.path$p.headshotPhoto.fileName" alt="$!p.name" class="ctl-gh-staff-photo" />
+                        #end
+
+                        <div class="flex-grow-1">
+                            <h3 class="h5 fw-bold mb-0">$!p.name#if($pronounsDisplay != "") <span class="fw-normal small text-muted">($pronounsDisplay)</span>#end</h3>
+
+                            #if($titleLine != "")
+                                <p class="fst-italic text-muted small mb-2">$titleLine</p>
+                            #end
+
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    #if("$!p.areasOfExpertise" != "")
+                                        <p class="small fw-semibold mb-1">Expertise in:</p>
+                                        <ul class="small mb-2 lh-sm">
+                                            #foreach($line in $p.areasOfExpertise.split("\n"))
+                                                #set($trimmedLine = $line.trim())
+                                                #if($trimmedLine != "")
+                                                    <li class="mb-0">$trimmedLine</li>
+                                                #end
+                                            #end
+                                        </ul>
+                                    #end
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    #if("$!p.howICanHelp" != "")
+                                        <p class="small fw-semibold mb-1">Contact me for:</p>
+                                        <ul class="small mb-2 lh-sm">
+                                            #foreach($line in $p.howICanHelp.split("\n"))
+                                                #set($trimmedLine = $line.trim())
+                                                #if($trimmedLine != "")
+                                                    <li class="mb-0">$trimmedLine</li>
+                                                #end
+                                            #end
+                                        </ul>
+                                    #end
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                #else
+
+                <div class="card ctl-gh-grid-card">
+                    <div class="card-body">
+                        #if("$!p.headshotPhoto.fileName" != "")
+                            <img src="$p.headshotPhoto.path$p.headshotPhoto.fileName" alt="$!p.name" class="ctl-gh-grid-photo" />
+                        #end
+
+                        <h3 class="h6 fw-bold mb-0">$!p.name#if($pronounsDisplay != "") <span class="fw-normal small text-muted d-block">($pronounsDisplay)</span>#end</h3>
+
+                        #if($titleLine != "")
+                            <p class="fst-italic text-muted small mb-0">$titleLine</p>
+                        #end
+
+                        #if("$!p.emailCortlandEdu" != "" || "$!p.bookWithMeFullLink" != "" || "$!p.websitePromo" != "")
+                            <div class="ctl-gh-grid-actions">
+                                #if("$!p.emailCortlandEdu" != "")
+                                    <a href="mailto:$!p.emailCortlandEdu" class="text-body small">$!p.emailCortlandEdu</a>
+                                #end
+                                #if("$!p.bookWithMeFullLink" != "")
+                                    <a class="ctl-btn" role="button" href="$!p.bookWithMeFullLink" target="_blank" rel="noopener">Meet with Me</a>
+                                #end
+                                #if("$!p.websitePromo" != "")
+                                    <a class="ctl-btn" role="button" href="$!p.websitePromo" target="_blank" rel="noopener">$websiteBtnLabel</a>
+                                #end
+                            </div>
+                        #end
+                    </div>
+                </div>
+
+                #end
+
+            #end
             </div>
-        </div>
 
-    #end
+        #end
+    </div>
 
+    #set($gIdx = $gIdx + 1)
 #end
