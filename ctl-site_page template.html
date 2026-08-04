@@ -39,9 +39,12 @@
                     <h3 class="hidden-lg hidden-md">Menu</h3>
                     <div class="cort-gray-warm">
 
-                      ## Build CTL nav from published pages
+                      ## Build CTL nav from published pages that are flagged to show on menu
                       #set($ctlPages = $dotcontent.pull("+contentType:htmlpageasset +path:/centers/ctl/* +live:true +deleted:false +languageId:1", 20, "htmlpageasset.sortOrder asc"))
                       #set($seen = [])
+                      #if($EDIT_MODE || $UtilMethods.isSet($request.getParameter('navdebug')))
+                          <p style="color:red;">DEBUG nav: ctlPages.size()=$ctlPages.size()</p>
+                      #end
                       <ul class="nav-secondary-list">
                           #foreach($page in $ctlPages)
                               #set($pageUrl = $page.url)
@@ -55,8 +58,19 @@
                               #set($isDirectChild = $linkUrl.matches("/centers/ctl/[^/]+/?") && $linkUrl != "/centers/ctl/")
                               ## Subfolder index page (e.g. /centers/ctl/event-calendar/index.dot)
                               #set($isSubfolderIndex = $pageUrl.matches("/centers/ctl/[^/]+/index\\.dot"))
+                              ## Respect the page's own "Show on Menu" checkbox (null-safe: never call
+                              ## .selectedValues unless showOnMenu is actually set, so a live-context
+                              ## hydration difference can't silently blank the whole loop)
+                              #set($isShowOnMenu = $isCtlHome)
+                              #if(!$isCtlHome && $UtilMethods.isSet($page.showOnMenu) && $UtilMethods.isSet($page.showOnMenu.selectedValues) && $page.showOnMenu.selectedValues.contains("true"))
+                                  #set($isShowOnMenu = true)
+                              #end
 
-                              #if(($isCtlHome || $isDirectChild || $isSubfolderIndex) && !$linkUrl.contains("event-detail") && !$seen.contains($linkUrl))
+                              #if($EDIT_MODE || $UtilMethods.isSet($request.getParameter('navdebug')))
+                                  <p style="color:red;">DEBUG nav: friendlyName=$!page.friendlyName | url=$!page.url | isCtlHome=$isCtlHome | showOnMenuSet=$UtilMethods.isSet($page.showOnMenu) | showOnMenu=$!page.showOnMenu | isShowOnMenu=$isShowOnMenu</p>
+                              #end
+
+                              #if(($isCtlHome || $isDirectChild || $isSubfolderIndex) && $isShowOnMenu && !$linkUrl.contains("event-detail") && !$seen.contains($linkUrl))
                                   #set($dummy = $seen.add($linkUrl))
                                   #set($navLabel = $page.friendlyName)
                                   #if($isCtlHome)
