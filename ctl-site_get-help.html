@@ -31,14 +31,29 @@
 ## to the name), emailCortlandEdu, bookWithMeFullLink, areasOfExpertise
 ## (textarea), howICanHelp (textarea), headshotPhoto (image, cropped square
 ## via CSS — NOT the circular crop used on the About Us page), rank (whole
-## number — sort order, ascending, blank sorts last)
+## number — sort order, ascending, blank sorts last), affiliations
+## (Checkbox — CheckboxMap, access via .selectedValues.contains(...), same
+## pattern as isCurrentlyAvailable above. CONFIRMED via REST API pull
+## 2026-07-29: option VALUES are "CTL", "FDC", "Other" (capitalized — NOT
+## lowercase, which first silently matched nothing since .contains() is
+## case-sensitive). Added 2026-07-29: Get Help's Staff section only shows
+## personnel with 'CTL' checked — About Us (CTL_widget_about-us) shows all
+## three as separate sections (CTL Staff / FDC Members / Other Affiliates))
 ## ============================================================
 
 #set($allServices = $dotcontent.pull("+contentType:CtlService +languageId:1 +live:true", 500, "score"))
-#set($allPersonnel = $dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true", 500, "score"))
+#set($allPersonnelRaw = $dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true", 500, "score"))
+
+## ---- filter to CTL-affiliated personnel only (Get Help shows CTL staff only) ----
+#set($allPersonnel = [])
+#foreach($p in $allPersonnelRaw)
+    #if($p.affiliations && $p.affiliations.selectedValues && $p.affiliations.selectedValues.contains("CTL"))
+        #set($dummy = $allPersonnel.add($p))
+    #end
+#end
 
 #if($EDIT_MODE)
-    <!-- DEBUG: pulled $allServices.size() CtlService record(s), $allPersonnel.size() CtlPersonnel record(s) -->
+    <!-- DEBUG: pulled $allServices.size() CtlService record(s), $allPersonnelRaw.size() CtlPersonnel record(s) total, $allPersonnel.size() with 'ctl' affiliation -->
 #end
 
 ## ---- sort personnel by rank (ascending, blank rank sorts last) ----
@@ -315,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         #end
 
                         <div class="flex-grow-1">
-                            <h3 class="h6 fw-bold mb-0">$!p.name#if($pronounsDisplay != "") <span class="fw-normal small text-muted">($pronounsDisplay)</span>#end</h3>
+                            <h3 class="h5 fw-bold mb-0">$!p.name#if($pronounsDisplay != "") <span class="fw-normal small text-muted">($pronounsDisplay)</span>#end</h3>
 
                             #if($titleLine != "")
                                 <p class="fst-italic text-muted small mb-2">$titleLine</p>
@@ -324,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="row">
                                 <div class="col-12 col-md-6">
                                     #if("$!p.areasOfExpertise" != "")
-                                        <p class="fw-bold small mb-1">Expertise in:</p>
+                                        <p class="small fw-semibold mb-1">Expertise in:</p>
                                         <ul class="small mb-2 lh-sm">
                                             #foreach($line in $p.areasOfExpertise.split("\n"))
                                                 #set($trimmedLine = $line.trim())
@@ -337,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                                 <div class="col-12 col-md-6">
                                     #if("$!p.howICanHelp" != "")
-                                        <p class="fw-bold small mb-1">Contact me for:</p>
+                                        <p class="small fw-semibold mb-1">Contact me for:</p>
                                         <ul class="small mb-2 lh-sm">
                                             #foreach($line in $p.howICanHelp.split("\n"))
                                                 #set($trimmedLine = $line.trim())
