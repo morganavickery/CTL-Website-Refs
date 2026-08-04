@@ -4,11 +4,27 @@
 
     We support faculty and staff in every unit to ensure that Cortland provides equitable, accessible learning environments, advancing the university’s principles through well-researched, data-driven design.
 </p>
+<style>
+    .ctl-nav-tile {
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .ctl-nav-tile:hover,
+    .ctl-nav-tile:focus-visible {
+        transform: translateY(-4px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border-color: #730A00;
+    }
+    .ctl-nav-tile:hover i,
+    .ctl-nav-tile:focus-visible i {
+        color: #730A00;
+    }
+</style>
+
 <div class="container py-4">
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 
     <div class="col">
-      <a href="/centers/ctl/instructional-resources" class="card h-100 text-decoration-none text-body">
+      <a href="/centers/ctl/instructional-resources" class="card h-100 text-decoration-none text-body ctl-nav-tile">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-2">
             <i class="bi bi-easel fs-3" aria-hidden="true"></i>
@@ -20,7 +36,7 @@
     </div>
 
     <div class="col">
-      <a href="/centers/ctl/technology-support" class="card h-100 text-decoration-none text-body">
+      <a href="/centers/ctl/technology-support" class="card h-100 text-decoration-none text-body ctl-nav-tile">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-2">
             <i class="bi bi-display fs-3" aria-hidden="true"></i>
@@ -32,7 +48,7 @@
     </div>
 
     <div class="col">
-      <a href="/centers/ctl/make-an-appointment" class="card h-100 text-decoration-none text-body">
+      <a href="/centers/ctl/make-an-appointment" class="card h-100 text-decoration-none text-body ctl-nav-tile">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-2">
             <i class="bi bi-chat-dots fs-3" aria-hidden="true"></i>
@@ -44,7 +60,7 @@
     </div>
 
     <div class="col">
-      <a href="/centers/ctl/event-calendar" class="card h-100 text-decoration-none text-body">
+      <a href="/centers/ctl/event-calendar" class="card h-100 text-decoration-none text-body ctl-nav-tile">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-2">
             <i class="bi bi-calendar-check fs-3" aria-hidden="true"></i>
@@ -56,7 +72,7 @@
     </div>
 
     <div class="col">
-      <a href="/centers/ctl/opportunities" class="card h-100 text-decoration-none text-body">
+      <a href="/centers/ctl/opportunities" class="card h-100 text-decoration-none text-body ctl-nav-tile">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-2">
             <i class="bi bi-stack fs-3" aria-hidden="true"></i>
@@ -68,7 +84,7 @@
     </div>
 
     <div class="col">
-      <a href="/centers/ctl/about-us" class="card h-100 text-decoration-none text-body">
+      <a href="/centers/ctl/about-us" class="card h-100 text-decoration-none text-body ctl-nav-tile">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-2">
             <i class="bi bi-info-circle fs-3" aria-hidden="true"></i>
@@ -114,14 +130,34 @@
 ## ============================================================
 
 <style>
+    .ctl-hscroll-wrap {
+        position: relative;
+    }
     .ctl-hscroll {
         display: flex;
         gap: 1rem;
-        overflow-x: auto;
+        overflow-x: scroll;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
+        padding-top: 0.5rem;
         padding-bottom: 0.75rem;
         scrollbar-width: thin;
+        scrollbar-color: #730A00 #eee;
+    }
+    /* Force a persistent, always-visible scrollbar on WebKit/Blink browsers
+       (Chrome/Edge/Safari) so the row's scrollability doesn't depend on the
+       OS-level "show scrollbars: when scrolling" trackpad setting -- mouse
+       users with no trackpad gesture support otherwise never see it appear. */
+    .ctl-hscroll::-webkit-scrollbar {
+        height: 10px;
+    }
+    .ctl-hscroll::-webkit-scrollbar-track {
+        background: #eee;
+        border-radius: 10px;
+    }
+    .ctl-hscroll::-webkit-scrollbar-thumb {
+        background-color: #730A00;
+        border-radius: 10px;
     }
     .ctl-hscroll-item {
         flex: 0 0 88%;
@@ -135,6 +171,59 @@
     }
     @media (min-width: 992px) {
         .ctl-hscroll-item { flex-basis: 44%; } /* ~2.3 cards visible -- 2 full + a peek of the 3rd, standard/max desktop width. Stays here at all wider widths too (no further breakpoints) since the container itself caps out. */
+    }
+    .ctl-activity-card .card-title a { color: inherit; text-decoration: none; }
+    .ctl-activity-card .card-title a:hover { color: #730A00; text-decoration: underline; }
+
+    /* Same lift/shadow/maroon-border hover as the top-of-page nav tiles
+       (.ctl-nav-tile), applied to the visible card inside each carousel
+       item rather than the wrapper, since the wrapper includes the flex gap. */
+    .ctl-hscroll-item .card {
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .ctl-hscroll-item .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border-color: #730A00;
+    }
+
+    .ctl-hscroll-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        color: #730A00;
+        font-size: 1.1rem;
+    }
+    .ctl-hscroll-btn:hover {
+        background: #730A00;
+        color: #fff;
+        border-color: #730A00;
+    }
+    .ctl-hscroll-btn.ctl-hscroll-prev { left: 0; }
+    .ctl-hscroll-btn.ctl-hscroll-next { right: 0; }
+    /* Reserve a side gutter (matches the button diameter + a little
+       breathing room) so the buttons sit beside the cards instead of
+       overlapping their text -- only added at widths where the buttons
+       are actually shown (see the max-width:575px rule below). */
+    @media (min-width: 576px) {
+        .ctl-hscroll-wrap { padding: 0 48px; }
+    }
+    /* Buttons crowd the peeking card on narrow screens where a single
+       item nearly fills the viewport -- scroll-snap + touch/trackpad
+       scrolling is still available, just without the button affordance. */
+    @media (max-width: 575px) {
+        .ctl-hscroll-btn { display: none; }
     }
 </style>
 
@@ -231,6 +320,9 @@
 #end
 
 #if($upcomingItems.size() > 0)
+  <div class="ctl-hscroll-wrap">
+  <button type="button" class="ctl-hscroll-btn ctl-hscroll-prev" aria-label="Scroll left"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+  <button type="button" class="ctl-hscroll-btn ctl-hscroll-next" aria-label="Scroll right"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
   <div class="ctl-hscroll">
       #set($slideCount = 0)
       #foreach($item in $upcomingItems)
@@ -250,19 +342,21 @@
         #end
 
         <div class="ctl-hscroll-item">
-          <div class="card h-100">
+          <div class="card h-100 position-relative ctl-activity-card">
             #if("$!item.thumbnail.fileName" != "")
               <img src="$item.thumbnail.path$item.thumbnail.fileName" class="card-img-top" alt="$item.title" style="height: 160px; object-fit: cover;">
             #end
             <div class="card-body">
               <span class="badge $badgeClass mb-2">$badgeLabel</span>
-              <h3 class="h5 card-title">$item.title</h3>
+              <h3 class="h5 card-title">
+                <a href="/centers/ctl/activities/$item.urlMapPattern" class="stretched-link">$item.title</a>
+              </h3>
               <p class="card-text">$item.shortDescription</p>
-              <a href="/centers/ctl/activities/$item.urlMapPattern" class="btn btn-outline-primary btn-sm">Learn more</a>
             </div>
           </div>
         </div>
       #end
+  </div>
   </div>
 #else
   <p class="text-muted">No upcoming events or opportunities at this time.</p>
@@ -330,6 +424,9 @@
 #end
 
 #if($featResources.size() > 0)
+  <div class="ctl-hscroll-wrap">
+  <button type="button" class="ctl-hscroll-btn ctl-hscroll-prev" aria-label="Scroll left"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+  <button type="button" class="ctl-hscroll-btn ctl-hscroll-next" aria-label="Scroll right"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
   <div class="ctl-hscroll">
       #set($topicParentNames = ["Course Policies, Norms, & Expectations", "Curriculum Design", "Student Engagement", "Assessment & Grading", "Course Materials & Tooling", "Classroom Climate & Student Voice"])
       #foreach($r in $featResources)
@@ -419,7 +516,23 @@
         </div>
       #end
   </div>
+  </div>
 #else
   <p class="text-muted">No featured resources at this time.</p>
 #end
 </div>
+
+<script>
+(function () {
+    document.querySelectorAll('.ctl-hscroll-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var wrap = btn.closest('.ctl-hscroll-wrap');
+            var scroller = wrap ? wrap.querySelector('.ctl-hscroll') : null;
+            if (!scroller) { return; }
+            var amount = scroller.clientWidth * 0.9;
+            var dir = btn.classList.contains('ctl-hscroll-next') ? 1 : -1;
+            scroller.scrollBy({ left: amount * dir, behavior: 'smooth' });
+        });
+    });
+})();
+</script>
