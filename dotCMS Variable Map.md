@@ -8,14 +8,14 @@ instance to get oriented quickly — not a debugging log.
 
 Field names ("Variable") are the Velocity variable used in templates/widgets, e.g.
 `$item.eventTitle`. Compiled from the dotCMS Content Type REST API plus a line-by-line
-audit of every widget file against that API data. Last full verification: 2026-08-04.
+audit of every widget file against that API data.
 
 
 ## Site Map
 
-Current IA (revised 2026-08-04, two rounds same day — see CLAUDE.md's "Site Information
-Architecture" section for the full hierarchy with levels and intended URL paths), all under
-`/centers/ctl/`, sharing one advanced template (`ctl-site_page template.html`):
+Current IA (see CLAUDE.md's "Site Information Architecture" section for the full hierarchy
+with levels and intended URL paths), all under `/centers/ctl/`, sharing one advanced
+template (`ctl-site_page template.html`):
 
 | Section | Listing Widget(s) | Detail Widget |
 |----|----|----|
@@ -30,8 +30,8 @@ Architecture" section for the full hierarchy with levels and intended URL paths)
 | About the CTL > Impact & Reports | not yet built | — |
 | Welcome to the CTL (homepage) | `widgets/ctl-widget_home-nav-tiles_welcome-to-the-ctl.html` + `widgets/ctl-widget_upcoming-activities-carousel_welcome-to-the-ctl.html` + `widgets/ctl-widget_featured-instructional-resources_welcome-to-the-ctl.html` | — |
 
-All of the above were split from single combined widgets into the standalone files listed
-2026-08-04, for reuse — see the Widgets Index below and CLAUDE.md's Next Up for live
+All of the above were split from single combined widgets into the standalone files listed,
+for reuse — see the Widgets Index below and CLAUDE.md's Next Up for live
 dotCMS migration status (code is done; several pages still need their old single widget
 swapped for the new ones in the live CMS, and the Funding/About the CTL restructure and
 Impact & Reports/past-award-recipients/Funding-overview widgets still need building).
@@ -58,39 +58,59 @@ doesn't evaluate Velocity in this instance.
 * **URL Map Pattern:** `/centers/ctl/activities/{urlMapPattern}` · **Detail Page ID:** `677c33a575e4ebbf53f573b51c23e87a`
 * One record can be an event, an opportunity, both, or neither — distinguished by `isEvent`/`isOpportunity`.
 
-| Variable | Field Type | Req? | Note |
-|----|----|----|----|
-| `title` | Text | Yes | Page title, cards, browser tab. |
-| `urlMapPattern` | Text | Yes | Slug, e.g. `workshop-udl-2026`. Not Lucene-indexed — filter in Velocity. |
-| `categories` | Category (multi) | Yes | Tree: `CTL_Activity_Types` (see below). |
-| `shortDescription` | Textarea | No | Card preview blurb. |
-| `thumbnail` | Image | No | FileAssetMap — `.path` + `.fileName`. |
-| `longDescription` | WYSIWYG | Yes | Full body. |
-| `primaryContact` | Text | No | "Name, email" format. |
-| `attachments` | Relationship → CtlAttachment | No | Parent side; download buttons. |
-| `isEvent` | Checkbox | No | Default checked. |
-| `isOpportunity` | Checkbox | No | Default unchecked. |
-| `signupType` | Radio | Yes | `open` / `registration` / `application`. |
-| `registerApplyLink` | Text (URL) | No | Real field for register/apply — see Known Issues for two widgets that don't use it. |
-| `signupDeadline` | Date | No | Blank = "ongoing." |
-| `acceptsSubmissions` | Checkbox | No | Separate from registering to attend (calls for proposals). |
-| `signupCapacityReached` | Checkbox | No | Manually close signup early. |
-| `submissionLabel` | Text | No | e.g. "Submit a Paper." Blank → "Submit to Present." |
-| `submissionLink` | Text (URL) | No | Only if `acceptsSubmissions`. |
-| `submissionDeadline` | Date-and-Time | No | Only if `acceptsSubmissions`. |
-| `eventLocation` | Text | No | e.g. "Moffett 208." |
-| `eventStartDate` / `eventEndDate` | Date | No | Blank end date = single-day event. |
-| `eventStartTime` / `eventEndTime` | Time | No | — |
-| `oppAmountPaid` | Text | No | Numbers only; `$` added by the template. |
-| `oppLaborExpectation` | Textarea | No | \~10 words, what earns the compensation. |
-| `sessionTimeBlockDefinitions` | Key-Value | No | Multi-track conferences only. Key = block number, Value = display label (e.g. "Concurrent Sessions 1 — 9-9:50 a.m."). |
-| `activitySessions` | Relationship → CtlActivitySession | No | Multi-track conferences only. |
+| Variable | Field Type | Req? | Note | Hint (editor-facing text) |
+|----|----|----|----|----|
+| `title` | Text | Yes | Page title, cards, browser tab. | Shown everywhere: page title, cards, browser tab |
+| `urlMapPattern` | Text | Yes | Slug, e.g. `workshop-udl-2026`. Not Lucene-indexed — filter in Velocity. | type-shortname-year (e.g. workshop-udl-2026) |
+| `categories` | Category (multi) | Yes | Tree: `CTL_Activity_Types` (see below). | Select all that apply |
+| `shortDescription` | Textarea | No | Card preview blurb. | 1–2 sentences MAX. For preview blurb. |
+| `thumbnail` | Image | No | FileAssetMap — `.path` + `.fileName`. | Landscape works best, avoid repeating thumbnails across activities |
+| `longDescription` | WYSIWYG | Yes | Full body. | No length max. Images/embeds welcome. For accessibility, use the built-in Heading styles (start at H2 — the page title is already H1) instead of just making text bold/large. |
+| `primaryContact` | Text | No | "Name, email" format. | Name + email, e.g. Jane Doe, jane.doe@cortland.edu |
+| `attachments` | Relationship → CtlAttachment | No | Parent side; download buttons. | Download button only, not embedded. PDFs preferred. For in-page images, use Full Description. |
+| `isEvent` | Checkbox | No | Default checked. | Is this something people attend? Should it appear on the calendar? |
+| `isConference` | Checkbox | No | Multi-session events (e.g. a conference); if checked, `isEvent` should also be checked. | Is this an event with multiple sessions? (i.e. a conference); if yes, ensure "Event" is also checked |
+| `isOpportunity` | Checkbox | No | Default unchecked. | For awards, stipends, fellowships, etc. Also fill in Opportunity Details tab. |
+| `signupType` | Radio | Yes | `open` / `registration` / `application`. | Open = none. Registration = headcount. Application = selective |
+| `registerApplyLink` | Text (URL) | No | Real field for register/apply — see Known Issues for two widgets that don't use it. | Only if Signup Type ≠ Open |
+| `signupDeadline` | Date | No | Blank = "ongoing." | Only if Signup Type ≠ Open. Blank defaults to "ongoing" |
+| `acceptsSubmissions` | Checkbox | No | Separate from registering to attend (calls for proposals). | Rare — separate from registering to attend; reserved for conferences where there's a call for submissions |
+| `signupCapacityReached` | Checkbox | No | Manually close signup early. | Only if full before the deadline |
+| `submissionLabel` | Text | No | e.g. "Submit a Paper." Blank → "Submit to Present." | e.g. "Submit a Paper." Blank = "Submit to Present" |
+| `submissionLink` | Text (URL) | No | Only if `acceptsSubmissions`. | Only if Accepts Submissions is checked |
+| `submissionDeadline` | Date-and-Time | No | Only if `acceptsSubmissions`. | Only if Accepts Submissions is checked. |
+| `eventLocation` | Text | No | e.g. "Moffett 208." | e.g. Moffett 208 |
+| `eventStartDate` | Date | No | Blank end date on `eventEndDate` = single-day event. | Only needed if "Show on Event Calendar?" is checked. |
+| `eventEndDate` | Date | No | Blank = single-day event. | Blank = single-day event |
+| `eventStartTime` | Time | No | — | e.g. 9:00 AM |
+| `eventEndTime` | Time | No | — | e.g. 3:00 PM |
+| `oppAmountPaid` | Text | No | Numbers only; `$` added by the template. | Numbers only — "$" added automatically |
+| `oppLaborExpectation` | Textarea | No | \~10 words, what earns the compensation. | <10 words — what earns the compensation? |
+| `sessiontimeblockdefinitions` | Key-Value | No | Live schema variable is all-lowercase `sessiontimeblockdefinitions`, not camelCase `sessionTimeBlockDefinitions`. No widget references this field yet (multi-track session display isn't built), so this hasn't caused a live bug, but any future Velocity code must use the lowercase form or it'll silently return empty (same failure mode as the format/category bug in CLAUDE.md). Multi-track conferences only; fill in FIRST. Key = block number, Value = display label. | Fill this in FIRST if this activity has multiple concurrent sessions. One row per time block: Key = block number (1, 2, 3…), Value = the label shown on the page, e.g. "Concurrent Sessions 1 — 9-9:50 a.m." |
+| `activitySessions` | Relationship → CtlActivitySession | No | Multi-track conferences only. | Only for multi-track conferences. Add one entry per individual talk/session. Leave empty for regular single-session activities. |
 
 #### CTL_Activity_Types (category tree)
 
-Award · Conference · Fellowship · Paid · Professional Development · Research Grant ·
-Service · Teaching Grant · Working Group · Workshop
-(name/key/variable are identical lowerCamelCase-or-plain strings for each, e.g. `workshop`)
+Top-level category — Name: `CTL_Activity_Types` · Key/Variable: `ctlactivitytypes` · 16 child categories.
+
+| Name | Key | Variable | Sort |
+|----|----|----|----|
+| Award | `award` | `award` | 0 |
+| Book Club | `bookClub` | `bookClub` | 0 |
+| Community of Practice | `communityOfPractice` | `communityOfPractice` | 0 |
+| Conference | `conference` | `conference` | 0 |
+| Fellowship | `fellowship` | `fellowship` | 0 |
+| Grant | `grant` | `grant` | 0 |
+| Information Session | `informationSession` | `informationSession` | 0 |
+| Paid | `paid` | `paid` | 0 |
+| Presentation | `presentation` | `presentation` | 0 |
+| Professional Development | `professionalDevelopment` | `professionalDevelopment` | 0 |
+| Research Grant | `researchGrant` | `researchGrant` | 0 |
+| Service | `service` | `service` | 0 |
+| Teaching Grant | `teachingGrant` | `teachingGrant` | 0 |
+| Working Group | `workingGroup` | `workingGroup` | 0 |
+| Working Session | `workingSession` | `workingSession` | 0 |
+| Workshop | `workshop` | `workshop` | 0 |
 
 
 ### CtlActivitySession — conference session sub-records
@@ -128,8 +148,8 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 
 * **Base Type:** Content · **Site:** www2.cortland.edu
 * No native URL Map field. Detail links are built manually: `/centers/ctl/resources/course-design/{urlTitle}`
-  (updated 2026-08-04 for the Resources IA revision — formerly `/centers/ctl/instructional-resources/{urlTitle}`;
-  live URL Map Pattern update on the content type itself still pending, see CLAUDE.md's Next Up).
+  (formerly `/centers/ctl/instructional-resources/{urlTitle}`; live URL Map Pattern update
+  on the content type itself still pending, see CLAUDE.md's Next Up).
 
 | Variable | Field Type | Req? | Note |
 |----|----|----|----|
@@ -138,7 +158,8 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 | `shortDescription` | Textarea | Yes | Listing-card blurb. |
 | `thumbnail` | Image | No | FileAssetMap — `.path` + `.fileName`. |
 | `body` | WYSIWYG | Yes | Main content. |
-| `videoFile` | File | No | FileAssetMap (not BinaryMap, despite field type "File") — `.path` + `.fileName`. |
+| `highlights` | Textarea | No | Up to 4 short "need to know" takeaway bullets, one per line. Rendered in a colored callout box at the top of the detail page, before `body`. |
+|    |    |    |    |
 | `embedUrl` | Text (URL) | No | YouTube/Vimeo URL, parsed into an embeddable iframe src. |
 | `citations` | WYSIWYG | No | Section hidden when empty. |
 | `downloadableAttachments` | Relationship → CtlAttachment | No | Renders a Downloads section. |
@@ -154,6 +175,81 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 | `relatedEvents` | Relationship → CtlActivity | No | — |
 | `relatedTechSupport` | Relationship → CtlTechSupport | No | Field exists on the schema but nothing renders it yet (CtlTechSupport itself isn't built). |
 
+#### CTL_Inst. Resource_Types (category tree)
+
+Top-level category — Name: `CTL_Inst. Resource_Types` · Key/Variable: `ctlInstResourceTypes` ·
+9 child categories. Drives `formatType`.
+
+| Name | Key | Variable | Sort |
+|----|----|----|----|
+| Course Template | `courseTemplate` | `courseTemplate` | 0 |
+| Deep Dive | `deepDive` | `deepDive` | 0 |
+| Listicles | `listicles` | `listicles` | 0 |
+| Material Template | `materialTemplate` | `materialTemplate` | 0 |
+| Presentation | `presentation-1` | `presentation` | 0 |
+| Recording | `recording` | `recording` | 0 |
+| Teaching Tip | `teachingTip` | `teachingTip` | 0 |
+| Slide Deck | `slide-deck` | `slideDeck` | 3 |
+| Guide | `guide` | `guide` | 5 |
+
+Note: this tree's "Presentation" key (`presentation-1`) is distinct from — and not to be
+confused with — `CTL_Activity_Types`' unrelated "Presentation" category (key `presentation`,
+no suffix); they're separate trees on separate content types that happen to share a display
+name.
+
+#### CTL_Inst. Resource_Topics (category tree)
+
+Top-level category — Name: `CTL_Inst. Resource_Topics` · Key/Variable: `ctlInstResourceTopics` ·
+6 child categories. Drives `topics` (the topic pill cloud's 6 parent-category headings).
+
+| Name | Key | Variable | Sort |
+|----|----|----|----|
+| Course Policies, Norms, & Expectations | `course-policies-norms-expectations` | `coursePoliciesNormsExpectations` | 1 |
+| Curriculum Design | `curriculum-design` | `curriculumDesign` | 2 |
+| Student Engagement | `student-engagement` | `studentEngagement` | 3 |
+| Assessment & Grading | `assessment-grading` | `assessmentGrading` | 4 |
+| Course Materials & Tooling | `course-materials-tooling` | `courseMaterialsTooling` | 5 |
+| Classroom Climate & Student Voice | `classroom-climate-student-voice` | `classroomClimateStudentVoice` | 6 |
+
+#### CTL_Inst. Resource_Frameworks (category tree)
+
+Top-level category — Name: `CTL_Inst. Resource_Frameworks` · Key/Variable:
+`ctlinstResourceframeworks` · 28 child categories. Drives `frameworks` (display-only badges).
+
+| Name | Key | Variable | Sort |
+|----|----|----|----|
+| Bloom's Taxonomy | `bloomsTaxonomy` | `bloomsTaxonomy` | 0 |
+| Motivation | `motivation` | `motivation` | 1 |
+| Intellectual Respect | `intellectual-respect-framework` | `intellectualRespectFramework` | 2 |
+| Cognitive Load | `cognitive-load` | `cognitiveLoad` | 3 |
+| Metacognition | `metacognition` | `metacognition` | 4 |
+| Cognitive Expertise | `cognitive-expertise` | `cognitiveExpertise` | 5 |
+| Transfer | `transfer` | `transfer` | 6 |
+| Asset-Based Approaches | `asset-based-approaches` | `assetBasedApproaches` | 7 |
+| Forms of Capital | `forms-of-capital` | `formsOfCapital` | 8 |
+| Self-Efficacy & Determination | `self-efficacy-determination` | `selfEfficacyDetermination` | 9 |
+| FoK / FoI | `fok-foi` | `fokFoi` | 10 |
+| Culturally Sustaining Pedagogy | `culturally-sustaining-pedagogy` | `culturallySustainingPedagogy` | 11 |
+| ZPD + Scaffolding | `zpd-scaffolding` | `zpdScaffolding` | 12 |
+| Cognitive Apprenticeship | `cognitive-apprenticeship` | `cognitiveApprenticeship` | 13 |
+| Problem-Based Learning | `problem-based-learning` | `problemBasedLearning` | 14 |
+| Inquiry-Based Learning | `inquiry-based-learning` | `inquiryBasedLearning` | 15 |
+| Maslow's Hierarchy | `maslows-hierarchy` | `maslowsHierarchy` | 16 |
+| Situated Cognition | `situated-cognition` | `situatedCognition` | 17 |
+| Social Model | `social-model` | `socialModel` | 18 |
+| Feminist + Queer Theories | `feminist-queer-theories` | `feministQueerTheories` | 19 |
+| Project-Based Learning | `project-based-learning` | `projectBasedLearning` | 20 |
+| Engineering Design Process | `engineering-design-process` | `engineeringDesignProcess` | 21 |
+| Achievement-Goal Theory | `achievement-goal-theory` | `achievementGoalTheory` | 22 |
+| UDL | `udl` | `udl` | 24 |
+| Communities of Practice | `communities-of-practice` | `communitiesOfPractice` | 25 |
+| Decolonize the Curriculum | `decolonize-the-curriculum` | `decolonizeTheCurriculum` | 26 |
+| Learning by Design | `learning-by-design` | `learningByDesign` | 27 |
+| Expectancy-Value Theory | `expectancy-value-theory` | `expectancyValueTheory` | 28 |
+
+Note: sort jumps from 22 to 24 (no 23) in the live data — not a doc error, just a gap in the
+source export.
+
 
 ### CtlPersonnel — CTL/FDC/Other staff and affiliates
 
@@ -167,7 +263,7 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 | `jobTitle` | Text | Combined with `degrees` on one line: "Job Title \| Deg1, Deg2." |
 | `degrees` | Text | e.g. "PhD," "MSEd." See `jobTitle`. |
 | `rank` | Text (whole number) | Sort key, ascending, blank sorts last. **Runtime type is already** `java.lang.Long` despite the "Text" editor label — use `$item.rank` directly, don't round-trip through a String (see CLAUDE.md). |
-| `affiliations` | Checkbox | Values are capitalized — `"CTL"`, `"FDC"`, `"Other"` — `.contains()` is case-sensitive. Historically drove three sections (CTL Staff / FDC Members / Other Affiliates) on the old combined About Us page; Other Affiliates was dropped from the IA entirely 2026-08-04, so only `CTL` (Meet the CTL Staff / Request Support) and `FDC` (Faculty Development Committee) are still used. |
+| `affiliations` | Checkbox | Values are capitalized — `"CTL"`, `"FDC"`, `"Other"` — `.contains()` is case-sensitive. Historically drove three sections (CTL Staff / FDC Members / Other Affiliates) on the old combined About Us page; Other Affiliates was dropped from the IA entirely, so only `CTL` (Meet the CTL Staff / Request Support) and `FDC` (Faculty Development Committee) are still used. |
 | `emailCortlandEdu` | Text | Rendered as `mailto:`; link hidden if empty. |
 | `bookWithMeFullLink` | Text | External booking URL; "Meet with Me" button hidden if empty. |
 | `websitePromo` | Text (URL) | Shown on both instances of the staff-profiles widget (Meet the CTL Staff and Request Support) — not gated by page. |
@@ -186,28 +282,65 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 | `serviceShortDescription` | Textarea | Card body; clamped to 2 lines with a "Read more" toggle. |
 | `serviceAccessLink` | Text | External URL; button hidden unless non-empty AND `isCurrentlyAvailable`. |
 | `serviceButtonLabel` | Text | Falls back to "Access this Service." |
+| `nextStepsNote` | WYSIWYG | **NEW, not yet added in dotCMS** (2026-08-06) — freeform "Next Steps" text: drop-in hours, a jump-link phrase pointing elsewhere on the page (e.g. "see Make an Appointment below"), etc. Renders alongside the access button (both if both are filled in); hidden unless non-empty AND `isCurrentlyAvailable`. |
 | `thumbnailImage` | Image | FileAssetMap — `.path` + `.fileName`. |
-| `isCurrentlyAvailable` | Checkbox | Values `yes`/`no`. Drives the availability badge; unavailable services still show, just without the access button. |
+| `isCurrentlyAvailable` | Checkbox | Values `yes`/`no`. No longer shows a badge (dropped as redundant 2026-08-06) — instead gates the whole "Next Steps" section (button + note); unavailable services still show their description, just with no Next Steps content beneath it. |
 
 No sort-order field — display order is whatever the pull returns.
+
+
+### CtlReport — annual reports (PROPOSED, not yet created in dotCMS)
+
+* Proposed 2026-08-06 for `widgets/ctl-widget_reports-grid.html` (About the CTL > Impact &
+  Reports). Not built against CtlAttachment because CtlAttachment has no parent-link field —
+  it's only reachable via a relationship from CtlActivity/CtlActivitySession/
+  CtlInstructionalResource, and a report isn't naturally a child of any of those. See that
+  widget file's header for the full reasoning.
+
+| Variable | Field Type | Req? | Note |
+|----|----|----|----|
+| `reportTitle` | Text | Yes | e.g. "2024-2025 Annual Report." |
+| `reportYearLabel` | Text | Yes | Display label, e.g. "2024-2025." |
+| `reportYearStart` | Text (whole number) | Yes | Sort key, e.g. `2024`. Same pattern as CtlPersonnel's `rank` — will already be a `java.lang.Long` at the Velocity layer despite the "Text" editor label; use directly, no String round-trip. |
+| `reportSummary` | Textarea | No | 1–2 sentence blurb. |
+| `reportThumbnail` | Image | No | FileAssetMap — `.path` + `.fileName`. |
+| `reportFile` | File | Yes | FileAssetMap (not BinaryMap, despite field type "File") — `.path` + `.fileName`, same pattern as `videoFile`. |
+
+
+### CtlPastRecipient — past award/grant/fellowship winners (PROPOSED, not yet created in dotCMS)
+
+* Proposed 2026-08-06 for `widgets/ctl-widget_past-award-recipients_past-recipients.html`
+  (Funding > Past Recipients). Distinct from CtlActivity, which models the call/opportunity
+  itself — this models the person who won it, optionally linking back to the CtlActivity
+  record via `relatedActivity`. See that widget file's header for the full reasoning.
+
+| Variable | Field Type | Req? | Note |
+|----|----|----|----|
+| `recipientName` | Text | Yes | — |
+| `awardYearLabel` | Text | Yes | Display label, e.g. "2024-2025." |
+| `awardYearStart` | Text (whole number) | Yes | Sort key, e.g. `2024`. Same `rank`-style runtime-Long pattern as CtlReport's `reportYearStart` above. |
+| `awardCategories` | Category (multi) | No | Reuses the existing `CTL_Activity_Types` tree (Award/Grant/Fellowship/etc.) rather than a new tree, so badges match Current Opportunities. |
+| `department` | Text | No | — |
+| `summary` | Textarea | No | What they did / won it for. |
+| `photo` | Image | No | FileAssetMap — `.path` + `.fileName`. |
+| `relatedActivity` | Relationship → CtlActivity | No | Links back to the original opportunity call, if it still exists as a live CtlActivity record. |
 
 
 ## Widgets Index
 
 | Widget (dotCMS variable) | File | Content Type(s) | Status |
 |----|----|----|----|
-| `CtlWidgetActivityDetail` | `widgets/ctl-site_activity-detail.html` | CtlActivity | ✅ Live; vanity-URL routing updated 2026-08-04 for the Events/Funding IA revision — see CLAUDE.md |
-| *(Events, split 2026-08-04)* | `widgets/ctl-widget_upcoming-events_events.html` + `widgets/ctl-widget_past-events_events.html` | CtlActivity | ✅ Fixed in code; live migration pending (old `ctl-site_event-parent.html` is now a deprecation stub) — see CLAUDE.md Next Up |
-| *(Funding > Current Opportunities, split 2026-08-04, relocated same day)* | `widgets/ctl-widget_active-opportunities_current-opportunities.html` | CtlActivity | ✅ Fixed in code; live migration pending (old `ctl-site_opportunity-parent.html` is now a deprecation stub) — see CLAUDE.md Next Up |
-| *(Funding > Past Recipients, split 2026-08-04, relocated same day)* | `widgets/ctl-widget_missed-opportunities_past-recipients.html` + a not-yet-built past-award-recipients widget | CtlActivity | ✅ First widget fixed in code; second not yet built. Live migration pending — see CLAUDE.md Next Up |
+| `CtlWidgetActivityDetail` | `widgets/ctl-site_activity-detail.html` | CtlActivity | ✅ Live; vanity-URL routing matches the Events/Funding IA — see CLAUDE.md |
+| *(Events, split for reuse)* | `widgets/ctl-widget_upcoming-events_events.html` + `widgets/ctl-widget_past-events_events.html` | CtlActivity | ✅ Fixed in code; live migration pending (old `ctl-site_event-parent.html` is now a deprecation stub) — see CLAUDE.md Next Up |
+| *(Funding > Current Opportunities, split for reuse, relocated under Funding)* | `widgets/ctl-widget_active-opportunities_current-opportunities.html` | CtlActivity | ✅ Fixed in code; live migration pending (old `ctl-site_opportunity-parent.html` is now a deprecation stub) — see CLAUDE.md Next Up |
+| *(Funding > Past Recipients, split for reuse, relocated under Funding)* | `widgets/ctl-widget_missed-opportunities_past-recipients.html` + `widgets/ctl-widget_past-award-recipients_past-recipients.html` | CtlActivity + CtlPastRecipient | ✅ Both in code; the second needs the CtlPastRecipient content type created in dotCMS first (see that section above) before either the type or the live migration can happen |
 | `CtlWidgetInstructionalParent` (v8) | `widgets/ctl-site_instRes-parent.html` | CtlInstructionalResource | ✅ Live on "For Course Design" (formerly "Instructional Resources") — URL Map Pattern update still pending |
 | `CtlWidgetInstDetail` | `widgets/ctl-site_instRes-detail` | CtlInstructionalResource | ✅ Live — URL Map Pattern update still pending |
-| *(About the CTL, split 2026-08-04)* | `widgets/ctl-widget_ctl-staff-profiles.html` (Meet the CTL Staff) + `widgets/ctl-widget_fdc-member-grid_faculty-development-committee.html` (Faculty Development Committee) | CtlPersonnel | ✅ Code ready; live migration pending (old `ctl_site_about-us.html` is now a deprecation stub) — see CLAUDE.md Next Up. "Impact & Reports" subpage/widget not yet built |
-| *(Request Support, split 2026-08-04)* | `widgets/ctl-widget_our-services_request-support.html` + a second instance of `widgets/ctl-widget_ctl-staff-profiles.html` | CtlService, CtlPersonnel | ✅ Code ready; needs a `sectionHeading` field added to the CTL Staff profiles widget's content type, then live migration (old `ctl-site_get-help.html` is now a deprecation stub) — see CLAUDE.md Next Up |
-| *(Welcome to the CTL homepage, split 2026-08-04)* | `widgets/ctl-widget_home-nav-tiles_welcome-to-the-ctl.html` + `widgets/ctl-widget_upcoming-activities-carousel_welcome-to-the-ctl.html` + `widgets/ctl-widget_featured-instructional-resources_welcome-to-the-ctl.html` | CtlActivity, CtlInstructionalResource | ✅ Code ready (nav tiles updated to 5 tiles for the Funding/Resources restructure); live migration pending (old `ctl-site_home.html` is now a deprecation stub) — see CLAUDE.md Next Up |
+| *(About the CTL, split for reuse)* | `widgets/ctl-widget_ctl-staff-profiles.html` (Meet the CTL Staff) + `widgets/ctl-widget_fdc-member-grid_faculty-development-committee.html` (Faculty Development Committee) | CtlPersonnel | ✅ Code ready; live migration pending (old `ctl_site_about-us.html` is now a deprecation stub) — see CLAUDE.md Next Up. "Impact & Reports" subpage/widget not yet built |
+| *(Request Support, split for reuse)* | `widgets/ctl-widget_our-services_request-support.html` + a second instance of `widgets/ctl-widget_ctl-staff-profiles.html` | CtlService, CtlPersonnel | ✅ Code ready; needs a `sectionHeading` field added to the CTL Staff profiles widget's content type, then live migration (old `ctl-site_get-help.html` is now a deprecation stub) — see CLAUDE.md Next Up |
+| *(Welcome to the CTL homepage, split for reuse)* | `widgets/ctl-widget_home-nav-tiles_welcome-to-the-ctl.html` + `widgets/ctl-widget_upcoming-activities-carousel_welcome-to-the-ctl.html` + `widgets/ctl-widget_featured-instructional-resources_welcome-to-the-ctl.html` | CtlActivity, CtlInstructionalResource | ✅ Code ready (nav tiles updated to 5 tiles for the Funding/Resources restructure); live migration pending (old `ctl-site_home.html` is now a deprecation stub) — see CLAUDE.md Next Up |
 | *(shared template)* | `DEPRECATED/ctl-site_page template.html` | — (page-level `showOnMenu` field) | ✅ Live |
-| *(Funding overview — NEW, not yet built)* | not yet built | — | ⬜ L1 landing/overview content for Funding; see CLAUDE.md Next Up |
-| *(Impact & Reports — NEW, not yet built)* | not yet built | — | ⬜ L2 subpage under About the CTL; see CLAUDE.md Next Up |
+| *(Impact & Reports > reports grid only — see Content Blocks Index below for its two sibling pieces)* | `widgets/ctl-widget_reports-grid.html` | CtlReport | ✅ In code (2026-08-06); needs the CtlReport content type created in dotCMS first (see that section above) before either the type or the live migration can happen |
 
 All widgets above were originally one file per page; each has been split into multiple
 standalone widgets in `widgets/` for reuse (dev-checklist.md: "split up sections into
@@ -217,6 +350,24 @@ migration is confirmed — see CLAUDE.md's Next Up section for per-page migratio
 
 For what each widget actually does section-by-section, read the widget file itself — the
 header comment block in each one is kept current as a purpose summary.
+
+
+## Content Blocks Index
+
+Static intro/overview/blurb copy — no `$dotcontent.pull()`, no listing/detail logic — split
+out of `widgets/` into its own `content blocks/` folder 2026-08-07, since in dotCMS these are
+authored as "Web Page Content" blocks rather than Widget content type/Code assets (see
+dev-checklist.md's naming-convention note for the parallel `CTL content_...` naming). Files
+below were renamed from `ctl-widget_...` to `ctl-content_...` in the same move.
+
+| Content block (dotCMS variable) | File | Page | Status |
+|----|----|----|----|
+| *(Funding overview)* | `content blocks/ctl-content_funding-overview_funding.html` | Funding | ✅ In code (2026-08-06); live migration pending |
+| *(Resources overview)* | `content blocks/ctl-content_resources-overview.html` | Resources | ✅ In code (2026-08-06); live migration pending |
+| *(Events overview)* | `content blocks/ctl-content_events-overview_events.html` | Events | ✅ In code (2026-08-06); live migration pending |
+| *(Impact & Reports intro + outcomes, split for reuse)* | `content blocks/ctl-content_impact-reports-intro.html` (static blurb) + `content blocks/ctl-content_outcomes-overview.html` (static stat tiles, placeholder numbers) | About the CTL > Impact & Reports | ✅ In code (2026-08-06); live migration pending. Third sibling piece, the reports grid itself, pulls live CtlReport data and stays a widget — see the Widgets Index above |
+| *(FDC description)* | `content blocks/ctl-content_fdc-description.html` | About the CTL > Faculty Development Committee | ⬜ Not yet built — empty file |
+| *(Services overview)* | `content blocks/ctl-content_services-overview.html` | Request Support | ⬜ Not yet built — empty file |
 
 
 ## Known Issues / Not Yet Built
@@ -237,5 +388,13 @@ header comment block in each one is kept current as a purpose summary.
   heaviest in the deprecated `DEPRECATED/ctl-site_get-help.html` stub (visible debug panels
   with per-record Java-type reflection output from the `rank`-sort investigation), lighter
   in `DEPRECATED/ctl-site_home.html` and `DEPRECATED/ctl_site_about-us.html`.
+* **CtlReport** and **CtlPastRecipient**: proposed content types (2026-08-06), not yet
+  created in dotCMS — see their sections above for full field lists. `ctl-widget_reports-grid.html`
+  and `ctl-widget_past-award-recipients_past-recipients.html` are written against these
+  schemas and will pull 0 records (rendering their "coming soon" / "none on record" fallback)
+  until the types + fields are created.
+* **Outcomes stat tiles** (`content blocks/ctl-content_outcomes-overview.html`, About the
+  CTL > Impact & Reports): all numbers are hardcoded PLACEHOLDERS — replace with real
+  figures before this goes live.
 
 
