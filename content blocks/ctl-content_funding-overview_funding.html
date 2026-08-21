@@ -1,0 +1,49 @@
+## ============================================================
+## Funding — L1 landing page overview (row 15 in dev-checklist.md's widget
+## table, new 2026-08-06; moved to `content blocks/` 2026-08-07 — static
+## copy like this is a content block, not a widget). Static welcome/overview
+## text + a 2-tile down-link grid to Funding's two subpages (Current
+## Opportunities, Past Recipients). Same hardcoded-copy convention as
+## widgets/ctl-widget_home-nav-tiles.html: no data pulls, just update the
+## text/tile hrefs/labels here directly if the IA changes. Reuses
+## .ctl-nav-tile (shared stylesheet) for the tile hover treatment rather
+## than defining a new tile class.
+## ============================================================
+
+<div class="ctl-landing-blurb">
+    <p>
+        The CTL offers internal awards, grants, and fellowships that support faculty and
+        staff in improving teaching and learning at Cortland. Browse current calls for
+        applications, or see who's received funding in past cycles.
+    </p>
+</div>
+
+<div class="container py-4">
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+
+    <div class="col">
+      <a href="/centers/ctl/funding/current-opportunities" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-cash-coin fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">Current Opportunities</h3>
+          </div>
+          <p class="card-text mb-0">Active calls, application guidelines, and open application windows.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/funding/past-recipients" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-trophy fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">Past Recipients & Missed Connections</h3>
+          </div>
+          <p class="card-text mb-0">See who's won past grants, fellowships, and awards, plus an archive of expired calls.</p>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</div>

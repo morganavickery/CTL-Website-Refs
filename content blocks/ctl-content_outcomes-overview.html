@@ -1,0 +1,60 @@
+## ============================================================
+## About the CTL > Impact & Reports — list-of-outcomes stat tiles (new
+## 2026-08-06; moved to `content blocks/` 2026-08-07 — static copy like this
+## is a content block, not a widget). Sits below
+## ctl-content_impact-reports-intro.html on the same page. Static/manually-
+## updated content, NOT pulled from a content type — institutional
+## accomplishment numbers like these are compiled once a year from external
+## sources (survey data, event logs, etc.), not authored per-record in
+## dotCMS, so there's no natural content type for them to live in. Same
+## "hardcode it, edit the file directly" convention as
+## widgets/ctl-widget_home-nav-tiles.html's welcome text and tile grid.
+##
+## Numbers below are PLACEHOLDERS — replace with real figures before this
+## goes live. Uses .ctl-outcomes-grid / .ctl-outcome-tile (shared
+## stylesheet, styles/ctl-widgets.css) — an auto-fill grid, so adding or
+## removing a tile doesn't require a breakpoint rewrite.
+## ============================================================
+
+<h2 class="mb-3">Our Outcomes</h2>
+<p style="color: var(--ctl-gray-text);">A snapshot of the CTL's reach over the past academic year.</p>
+
+<div class="ctl-outcomes-grid">
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-people-fill" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">000</span>
+        <span class="ctl-outcome-label">Faculty &amp; staff served</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-calendar-event-fill" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">000</span>
+        <span class="ctl-outcome-label">Workshops &amp; events hosted</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-book-half" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">000</span>
+        <span class="ctl-outcome-label">Courses redesigned</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-cash-coin" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">$000,000</span>
+        <span class="ctl-outcome-label">Awarded in grants &amp; fellowships</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-building" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">00</span>
+        <span class="ctl-outcome-label">Departments &amp; offices partnered with</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-emoji-smile-fill" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">00%</span>
+        <span class="ctl-outcome-label">Participant satisfaction rate</span>
+    </div>
+
+</div>

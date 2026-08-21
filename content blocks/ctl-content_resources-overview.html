@@ -1,0 +1,54 @@
+## ============================================================
+## Resources — L1 landing page overview (new 2026-08-06; moved to
+## `content blocks/` 2026-08-07 — static copy like this is a content block,
+## not a widget).
+## Static welcome/overview text + a 2-tile down-link grid to the Resources
+## folder's two subpages (For Course Design, For Technologies). Same
+## hardcoded-copy convention as widgets/ctl-widget_home-nav-tiles.html: no
+## data pulls, just update the text/tile hrefs/labels here directly if the
+## IA changes. Reuses .ctl-nav-tile (shared stylesheet) for the tile hover
+## treatment rather than defining a new tile class.
+##
+## "For Technologies" tile links to /centers/ctl/resources/technologies,
+## which is not yet built (CtlTechSupport content type doesn't exist yet —
+## see CLAUDE.md). The tile itself is safe to place now; the destination
+## page just won't have content until that work lands.
+## ============================================================
+
+<div class="ctl-landing-blurb">
+    <p>
+        Explore CTL's library of pedagogical guides, curriculum planning tools, and
+        instructional technology support &mdash; built to help you design, teach, and
+        troubleshoot with confidence.
+    </p>
+</div>
+
+<div class="container py-4">
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+
+    <div class="col">
+      <a href="/centers/ctl/resources/course-design" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-book fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">For Course Design</h3>
+          </div>
+          <p class="card-text mb-0">Browse our course design database for curriculum planning and design frameworks.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/resources/technologies" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-laptop fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">For Technologies</h3>
+          </div>
+          <p class="card-text mb-0">Get help with instructional technology tools and software.</p>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</div>

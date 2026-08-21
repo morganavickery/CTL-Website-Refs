@@ -1,0 +1,102 @@
+
+<!-- TEMPORARY local <style> block, added 2026-08-20. The shared
+     stylesheet (styles/ctl-widgets.css, loaded via <link> on every CTL
+     page) already contains .ctl-mission-toggle's rules, but the live copy
+     at /centers/ctl/ctl-widgets.css is stuck serving a stale version
+     (confirmed via direct fetch: missing everything added after early
+     August) — a dotCMS caching/publish issue independent of this content,
+     still being tracked down. Embedding the rules locally here matches how
+     every widget worked before the 2026-08-05 stylesheet consolidation, so
+     these collapsible pillars render correctly regardless of the stale
+     shared file. REMOVE this block once the live shared stylesheet is
+     confirmed serving current content again. -->
+<style>
+    .ctl-mission-toggle {
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        color: inherit;
+    }
+    .ctl-mission-toggle .bi-chevron-down {
+        transition: transform 0.2s ease;
+    }
+    .ctl-mission-toggle[aria-expanded="true"] .bi-chevron-down {
+        transform: rotate(180deg);
+    }
+</style>
+
+<h2 data-pm-slice="1 1 []">Mission</h2>
+<p data-pm-slice="1 1 []">The Center for Teaching and Learning (CTL) supports our community through developing and delivering engaging and innovative teaching resources for faculty and staff. We collaborate with offices, departments, and individual faculty members to improve teaching effectiveness and student success. We support faculty and staff in every unit to ensure that Cortland provides equitable, accessible learning environments, advancing the university&rsquo;s principles through well-researched, data-driven design</p>
+<h2><span class="heading-content">Strategic Vision</span></h2>
+
+<h3>
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlPillarAcademicEngagement" aria-expanded="false" aria-controls="ctlPillarAcademicEngagement">
+<span class="heading-content">Academic Engagement</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlPillarAcademicEngagement">
+<h4><span class="heading-content">Mission</span></h4>
+<p>Mission We partner with faculty to create inclusive, engaging, and equitable learning environments that support student success and persistence. Relying upon evidence-based, data-informed teaching practices, we help instructors foster meaningful student-faculty interaction, clarify expectations, and create a sense of belonging for all students.</p>
+<h4><span class="heading-content">Objectives</span></h4>
+<ul>
+<li>Support faculty in designing accessible, collaborative, and inclusive learning experiences.</li>
+<li>Promote early intervention and high-impact teaching practices that improve student achievement.</li>
+<li>Encourage the use of learning technologies and analytics to inform course design and student support.</li>
+</ul>
+</div>
+
+<h3>
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlPillarRedDragonWellness" aria-expanded="false" aria-controls="ctlPillarRedDragonWellness">
+<span class="heading-content">Red Dragon Wellness in Teaching and Learning</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlPillarRedDragonWellness">
+<h4><span class="heading-content">Mission</span></h4>
+<p>We support faculty and student well-being and resilience by promoting inclusive course design, supportive learning environments, and assignment structures that build confidence through low-stakes, iterative practice. Our work strengthens student persistence by helping faculty create spaces where all students feel they belong and will succeed.</p>
+<h4><span class="heading-content">Objectives</span></h4>
+<ul>
+<li>Support faculty in designing learning environments in multiple modalities that promote belonging and student agency.</li>
+<li>Promote high-impact, low-stakes, and iterative assessment strategies that help students build resilience.</li>
+<li>Provide faculty with tools, including learning technologies, to increase accessibility and offer timely feedback.</li>
+</ul>
+</div>
+
+<h3>
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlPillarLifeCareerFoundations" aria-expanded="false" aria-controls="ctlPillarLifeCareerFoundations">
+<span class="heading-content">Life and Career Foundations</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlPillarLifeCareerFoundations">
+<h4><span class="heading-content">Mission</span></h4>
+<p>We help prepare students for meaningful lives and careers by encouraging faculty to integrate skill development, reflection, and applied, experiential learning into their teaching. Our work supports students in connecting academic learning to personal growth, professional goals, and civic engagement.</p>
+<h4><span class="heading-content">Objectives</span></h4>
+<ul>
+<li>Help faculty design learning experiences that build transferable skills like critical thinking, collaboration, and communication.</li>
+<li>Promote reflective and applied learning activities that connect coursework to life and career readiness.</li>
+<li>Work with faculty to design resources that utilize new technologies and anticipate changes in the career world.</li>
+<li>Connect faculty to resources that empower students to be creative digital citizens.</li>
+</ul>
+</div>
+
+<h3>
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlPillarInstitutionalCollaboration" aria-expanded="false" aria-controls="ctlPillarInstitutionalCollaboration">
+<span class="heading-content">Institutional Collaboration and Capacity Building</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlPillarInstitutionalCollaboration">
+<h4><span class="heading-content">Mission</span></h4>
+<p>We collaborate with campus partners to align and amplify faculty development efforts, helping educators navigate and maximize existing resources. By streamlining support and improving visibility of opportunities, we build faculty capacity for effective, efficient, and evidenceinformed teaching.</p>
+<h4><span class="heading-content">Objectives</span></h4>
+<ul>
+<li>Partner with existing programs to clarify and expand faculty development opportunities.</li>
+<li>Promote the use of learning technologies and analytics to help faculty make datainformed decisions.</li>
+<li>Build institutional capacity for collaborative, coordinated, and sustainable teaching support.</li>
+<li>Build an institutional culture that embraces diversity and Universal Design for Learning (UDL).</li>
+<li>Collaborate with SUNY Online to enhance both Cortland and SUNY teaching and learning resources</li>
+</ul>
+</div>
