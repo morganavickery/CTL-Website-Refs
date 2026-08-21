@@ -1,3 +1,56 @@
+## ============================================================
+## Shared CtlActivity detail page — used for both Events and Funding
+## (Current Opportunities / Past Recipients), since CtlActivity is one
+## unified content type (isEvent/isOpportunity). Matches the URL slug
+## against urlMapPattern. Reached via vanity URL forwarding from three
+## listing prefixes; parentLabel/parentUrl below (used for the "Back to X"
+## link and breadcrumb) are set based on which prefix the request came in on.
+##
+## Concurrent Sessions (added 2026-08-20): conference activities
+## (isConference checked) relate to CtlActivitySession sub-records via
+## activitySessions. Grouped by sessionTimeBlock (Text field, 1-6) under
+## headings pulled from the parent's sessiontimeblockdefinitions Key-Value
+## field, sorted within each block by sessionrowsortorder, rendered as an
+## accordion (collapsed bar / expand-to-show-abstract, same toggle pattern
+## as Our Services' "Learn More"). This is the first code in this project
+## to touch a Key-Value field — no confirmed Velocity access pattern yet,
+## so the section still carries an EDIT_MODE debug panel dumping raw
+## values/class names, in case .containsKey()/.get() isn't the right call
+## for it either.
+##
+## Confirmed via a live REST pull of both content types 2026-08-20, two
+## bugs found and fixed on the first pass (both the same "quiet empty
+## looks identical to wrong accessor" trap as the format/category and
+## rank bugs elsewhere in this project — this is why the isConference
+## checkbox originally never gated the section at all):
+##   - isConference's checkbox VALUE is capitalized "True", not lowercase
+##     "true" like every other checkbox on CtlActivity ("values":
+##     "yes|True" vs. isEvent's "values": "Yes|true") — .contains("true")
+##     silently never matched.
+##   - CtlActivitySession's Row Sort Order and Abstract fields are
+##     all-lowercase at the schema layer — sessionrowsortorder and
+##     sessionabstract, NOT camelCase sessionRowSortOrder/sessionAbstract
+##     — same lowercase-schema-variable trap as the parent's
+##     sessiontimeblockdefinitions. sessionTimeBlock itself IS camelCase
+##     and IS a plain Text field (not Select/Dropdown as first assumed),
+##     so the direct-string-comparison accessor for it was already right.
+##
+## Third bug, root-caused 2026-08-20 with real published session content
+## (title/room/speaker/abstract all confirmed filled in) still rendering
+## blank: the render loop's variable was named $session, which collides
+## with a dotCMS/Velocity built-in context variable (the HTTP session
+## object — this project already reserves $request/$response/$user as
+## globals elsewhere). #foreach still iterated the correct number of
+## times, but every $session.xxx field reference inside the loop body
+## silently resolved against the wrong object and quiet-printed empty —
+## proven by a parallel debug loop using a differently-named variable
+## ($dbgS) over the identical list, which printed every field correctly.
+## Renamed the loop variable to $sessItem throughout. New standing rule
+## for this file (and worth checking in any future Velocity loop in this
+## project): never name a #foreach variable $session, $request,
+## $response, or $user.
+## ============================================================
+
 #set($now = $date.getDate())
 #set($nowMs = $now.getTime())
 
@@ -14,13 +67,7 @@
 #set($idxPlus = $idx.intValue() + 1)
 #set($slug = $uri.substring($idxPlus))
 
-## Determine which listing this request originally came in on (survives the vanity forward)
-## Updated 2026-08-04 for the Funding IA revision: the old "/opportunities/"
-## vanity prefix split into two ("/funding/current-opportunities/" and
-## "/funding/past-recipients/", matching Current Opportunities and the
-## missed/expired half of Past Recipients respectively), and the old
-## "/event-calendar/" prefix is now "/events/". See the Site Information
-## Architecture table in CLAUDE.md.
+## which listing did this request come in on? (survives the vanity forward)
 #if($uri.contains("/funding/current-opportunities/"))
     #set($parentLabel = "Current Opportunities")
     #set($parentUrl = "/centers/ctl/funding/current-opportunities/")
@@ -46,11 +93,59 @@
             #set($dummy = $matchList.add($a))
         #end
     #end
+    #if($EDIT_MODE)
+        <div style="background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+            &#128027; DEBUG (pipeline): slug="$slug" | $allActivities.size() total CtlActivity record(s) pulled | $matchList.size() matched this slug
+        </div>
+    #end
     #if($matchList.size() > 0)
         #set($item = $matchList.get(0))
 
         #set($isEventItem = $item.isEvent.selectedValues.contains("true"))
         #set($isOppItem = $item.isOpportunity.selectedValues.contains("true"))
+        ## isConference's checkbox VALUE is capitalized "True" (not lowercase "true"
+        ## like every other checkbox on this content type) — confirmed via REST pull
+        ## 2026-08-20: "values": "yes|True" vs. isEvent's "values": "Yes|true". Same
+        ## case-sensitive-.contains() trap as CtlPersonnel's affiliations field.
+        #set($isConferenceItem = $item.isConference.selectedValues.contains("True"))
+
+        ## ============================================================
+        ## Unconditional (EDIT_MODE-only, NOT gated on isConferenceItem)
+        ## Concurrent Sessions diagnostic — added 2026-08-20 to pinpoint
+        ## why the section wasn't appearing after live population. This
+        ## fires regardless of whether isConference/activitySessions check
+        ## out, so it tells us WHICH check is failing instead of just
+        ## "the section didn't render." The section's own debug panel
+        ## further down only fires once this gate already passes, so it
+        ## can't diagnose a gate failure by itself.
+        ## ============================================================
+        #if($EDIT_MODE)
+            #set($dbgIsConfRaw = "$!item.isConference.selectedValues")
+            #set($dbgIsConfClass = "unknown")
+            #if($item.isConference)
+                #set($dbgIsConfClass = $item.isConference.class.name)
+            #end
+            #set($dbgSessionsNull = true)
+            #set($dbgSessionsSize = -1)
+            #if($item.activitySessions)
+                #set($dbgSessionsNull = false)
+                #set($dbgSessionsSize = $item.activitySessions.size())
+            #end
+            #set($dbgDefsClass = "unknown")
+            #set($dbgDefsKeys = "n/a")
+            #if($item.sessiontimeblockdefinitions)
+                #set($dbgDefsClass = $item.sessiontimeblockdefinitions.class.name)
+                #set($dbgDefsKeys = $item.sessiontimeblockdefinitions.keySet())
+            #end
+            <div style="background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+                &#128027; DEBUG (Concurrent Sessions gate) for "$item.title" &mdash;<br/>
+                isConference.selectedValues: $dbgIsConfRaw (class: $dbgIsConfClass)<br/>
+                isConferenceItem (computed): $isConferenceItem<br/>
+                activitySessions field is null: $dbgSessionsNull | size: $dbgSessionsSize<br/>
+                sessiontimeblockdefinitions class: $dbgDefsClass | keys: $dbgDefsKeys<br/>
+                &rarr; Section will render only if isConferenceItem=true AND activitySessions size &gt; 0.
+            </div>
+        #end
 
         #set($isPastEvent = false)
         #if($isEventItem)
@@ -86,17 +181,10 @@
             #set($isSubmissionClosed = true)
         #end
 
-        <style>
-            .ctl-tag { display: inline-flex; align-items: center; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; background-color: #f4f4f4; color: #444; border: 1px solid #ddd; border-radius: 4px; }
-            .ctl-badge { display: inline-flex; align-items: center; font-size: 0.8rem; font-weight: 700; padding: 6px 14px; border-radius: 20px; white-space: nowrap; }
-            .ctl-badge-closed { display: inline-flex; align-items: center; background: #f8d7da; color: #842029; border-radius: 4px; padding: 4px 10px; font-size: 0.85rem; white-space: nowrap; }
-            .ctl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; padding: 6px 16px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; color: #730A00; background: transparent; border: 1px solid #730A00; border-radius: 4px; text-decoration: none; }
-            .ctl-btn:hover { background: #730A00; color: #fff; text-decoration: none; }
-            .ctl-info-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-size: 0.9rem; color: #555; }
-            .ctl-deadline-box { border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; }
-            .ctl-deadline-box-primary { border: 1px solid #e0e0e0; }
-            .ctl-deadline-box-optional { border: 1px dashed #ccc; background: #fafafa; }
-        </style>
+        <!-- .ctl-tag / .ctl-badge-closed / .ctl-btn / .ctl-info-row / .ctl-deadline-box*
+             now come from the shared stylesheet (styles/ctl-widgets.css), loaded via the
+             <link> tag added to the sitewide contact-info content block that already
+             renders on every CTL page. No local <style> block needed here anymore. -->
 
         <article style="max-width: 860px;">
 
@@ -114,7 +202,7 @@
                 </div>
             #end
 
-            <h1 style="margin-top: 0;">$item.title</h1>
+            <h2 style="margin-top: 0;">$item.title</h2>
 
             ## Event logistics: date/time/location/past-status/calendar action
             <div class="ctl-info-row" style="margin-bottom: 12px;">
@@ -172,16 +260,16 @@ END:VEVENT
 END:VCALENDAR")
                     #set($icsEncoded = $icsContent.replace(" ", "%20").replace("
 ", "%0A"))
-                    <a href="data:text/calendar;charset=utf8,${icsEncoded}" download="${slug}.ics" class="ctl-btn">
+                    <a href="data:text/calendar;charset=utf8,${icsEncoded}" download="${slug}.ics" class="ctl-btn" aria-label="Add $item.title to your calendar">
                         <i class="bi bi-calendar-plus"></i> Add to Calendar
                     </a>
                 #end
             </div>
 
             ## Compensation info: visually separated from logistics since it's a different
-            ## kind of detail (what you get, not when/where)
+            ## kind of detail (compensation, not date/time/location)
             #if("$!item.oppAmountPaid" != "" || "$!item.oppLaborExpectation" != "")
-                <div class="ctl-info-row" style="background: #f8f7f5; border-radius: 6px; padding: 10px 14px; margin-bottom: 24px;">
+                <div class="ctl-info-row" style="background: var(--ctl-gray-bg); border-radius: 6px; padding: 10px 14px; margin-bottom: 24px;">
                     #if("$!item.oppAmountPaid" != "")
                         <span><i class="bi bi-cash-stack"></i> <strong>#if(!$item.oppAmountPaid.startsWith("$"))$#end$item.oppAmountPaid</strong></span>
                     #end
@@ -198,7 +286,7 @@ END:VCALENDAR")
             #end
 
             #if("$!item.primaryContact" != "")
-                <dl style="font-size: 0.95rem; border-top: 1px solid #e0e0e0; padding-top: 20px; margin-bottom: 28px;">
+                <dl style="font-size: 0.95rem; border-top: 1px solid var(--ctl-border); padding-top: 20px; margin-bottom: 28px;">
                     <dt style="font-weight: 700;">Contact</dt>
                     <dd style="margin: 2px 0 0 0;">$item.primaryContact</dd>
                 </dl>
@@ -207,13 +295,13 @@ END:VCALENDAR")
             ## Primary signup box: registration or application only
             #if($showSignupRow)
                 #set($badgeText = "Registration Required")
-                #set($badgeBg = "#cfe2ff")
-                #set($badgeColor = "#084298")
+                #set($badgeBg = "var(--ctl-maroon-tint)")
+                #set($badgeColor = "var(--ctl-maroon)")
                 #set($ctaLabel = "Register")
                 #if($needsApplication)
                     #set($badgeText = "Application Required — Selective")
-                    #set($badgeBg = "#fff3cd")
-                    #set($badgeColor = "#856404")
+                    #set($badgeBg = "var(--ctl-maroon)")
+                    #set($badgeColor = "#fff")
                     #set($ctaLabel = "Apply")
                 #end
                 <div class="ctl-deadline-box ctl-deadline-box-primary">
@@ -227,7 +315,7 @@ END:VCALENDAR")
                         #if($isSignupClosed)
                             <span class="ctl-badge-closed">Closed</span>
                         #elseif("$!item.registerApplyLink" != "" && "$!item.registerApplyLink" != "http://")
-                            <a href="$item.registerApplyLink" target="_blank" class="ctl-btn">$ctaLabel</a>
+                            <a href="$item.registerApplyLink" target="_blank" class="ctl-btn" aria-label="$ctaLabel for $item.title (opens in new tab)">$ctaLabel</a>
                         #end
                     </div>
                 </div>
@@ -242,7 +330,7 @@ END:VCALENDAR")
                 #end
                 <div class="ctl-deadline-box ctl-deadline-box-optional">
                     <div class="ctl-info-row">
-                        <span class="ctl-badge" style="background-color: #eee; color: #555;">$submissionBadgeText</span>
+                        <span class="ctl-badge" style="background-color: var(--ctl-gray-bg); color: var(--ctl-gray-text);">$submissionBadgeText</span>
                         #if("$!item.submissionDeadline" != "")
                             <span style="flex: 1; min-width: 140px;">Deadline: $date.format('MMMM d, yyyy', $item.submissionDeadline)</span>
                         #else
@@ -251,23 +339,23 @@ END:VCALENDAR")
                         #if($isSubmissionClosed)
                             <span class="ctl-badge-closed">Closed</span>
                         #elseif("$!item.submissionLink" != "" && "$!item.submissionLink" != "http://")
-                            <a href="$item.submissionLink" target="_blank" class="ctl-btn">Submit</a>
+                            <a href="$item.submissionLink" target="_blank" class="ctl-btn" aria-label="Submit for $item.title (opens in new tab)">Submit</a>
                         #end
                     </div>
                 </div>
             #end
 
             #if($item.attachments && $item.attachments.size() > 0)
-                <div style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                <div style="margin-bottom: 32px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Downloads</h3>
                     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 500px;">
                         #foreach($file in $item.attachments)
                             #if("$!file.ctlAttachmentfile.rawUri" != "")
-                                <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="btn btn-default" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
-                                    <div style="width: 54px; height: 54px; flex-shrink: 0; background-color: #ffffff !important; color: #730A00 !important; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor;">
+                                <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="btn btn-default" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
+                                    <div style="width: 54px; height: 54px; flex-shrink: 0; background-color: #ffffff !important; color: var(--ctl-maroon) !important; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor;">
                                         #if("$!file.ctlAttachmentfile.thumbnailUri" != "")
                                             <img src="$file.ctlAttachmentfile.thumbnailUri" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: top; display: block;" />
-                                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(194, 0, 0, 0.2); z-index: 2; pointer-events: none;"></div>
+                                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(138, 42, 43, 0.2); z-index: 2; pointer-events: none;"></div>
                                         #else
                                             <div style="width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center;">
                                                 <i class="bi bi-file-earmark-pdf" style="font-size: 1.25rem; opacity: 0.5;"></i>
@@ -285,6 +373,322 @@ END:VCALENDAR")
                 </div>
             #end
 
+            ## Concurrent Sessions — see file header for the 2026-08-20 writeup.
+            ## Gated on isConference (not just activitySessions.size() > 0) so a
+            ## non-conference activity never shows this UI even if a session got
+            ## related to it by mistake.
+            #if($isConferenceItem && $item.activitySessions && $item.activitySessions.size() > 0)
+                #set($allSessions = [])
+                #foreach($s in $item.activitySessions)
+                    #set($dummy = $allSessions.add($s))
+                #end
+
+                #if($EDIT_MODE)
+                    #set($dbgFirst = $allSessions.get(0))
+                    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+                        &#128027; DEBUG: $allSessions.size() session(s) related.
+                        First session &mdash; sessionTimeBlock: "$!dbgFirst.sessionTimeBlock"
+                        (class: $dbgFirst.sessionTimeBlock.class.name) |
+                        sessionrowsortorder: "$!dbgFirst.sessionrowsortorder"
+                        (class: $dbgFirst.sessionrowsortorder.class.name) |
+                        sessiontimeblockdefinitions class: $item.sessiontimeblockdefinitions.class.name,
+                        keys: $item.sessiontimeblockdefinitions.keySet()
+                    </div>
+                    ## Per-session field dump, added 2026-08-20 after sessionTimeBlock
+                    ## kept resolving fine while sessionTitle/sessionRoom/sessionSpeakers/
+                    ## sessionabstract rendered empty even on a record the user manually
+                    ## confirmed has real published data. Prints identifier/inode/live/
+                    ## working/modDate alongside each field's raw value + class, so a
+                    ## genuinely-blank field (renders "" but class still resolves, e.g.
+                    ## java.lang.String) can be told apart from a stale/wrong-version
+                    ## object (identifier/modDate won't match what's in the content
+                    ## editor) or an unresolved reference (the WHOLE line fails to print
+                    ## and further lines after it vanish too, same tell as the rank bug).
+                    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.75rem; font-family: monospace;">
+                        &#128027; DEBUG (per-session field dump):<br/>
+                        #foreach($dbgS in $allSessions)
+                            id=$dbgS.identifier | inode=$dbgS.inode | live=$dbgS.live | working=$dbgS.working | modDate=$dbgS.modDate<br/>
+                            &nbsp;&nbsp;timeBlock="$!dbgS.sessionTimeBlock"
+                            title="$!dbgS.sessionTitle" (class: $dbgS.sessionTitle.class.name)
+                            room="$!dbgS.sessionRoom" (class: $dbgS.sessionRoom.class.name)
+                            speakers="$!dbgS.sessionSpeakers" (class: $dbgS.sessionSpeakers.class.name)
+                            abstract="$!dbgS.sessionabstract" (class: $dbgS.sessionabstract.class.name)<br/>
+                        #end
+                    </div>
+                #end
+
+                <!-- TEMPORARY local <style> block, added 2026-08-20. The
+                     shared stylesheet (styles/ctl-widgets.css, loaded via
+                     <link> on every CTL page) contains these exact rules
+                     already, but the live copy at
+                     /centers/ctl/ctl-widgets.css is stuck serving a stale
+                     version (confirmed via direct fetch: it's missing
+                     everything added after early August, including these
+                     .ctl-session-* rules) — this looks like a dotCMS
+                     caching/publish issue independent of this project's
+                     code, still being tracked down. Embedding the rules
+                     locally here matches how every widget worked before
+                     the 2026-08-05 stylesheet consolidation, so this page
+                     renders correctly regardless of the stale shared file.
+                     REMOVE this block once the live shared stylesheet is
+                     confirmed serving current content again — leaving both
+                     copies in place long-term risks them drifting apart. -->
+                <style>
+                    .ctl-session-block { margin-bottom: 24px; }
+                    .ctl-session-block:last-child { margin-bottom: 0; }
+                    .ctl-session-block-heading {
+                        font-size: 0.95rem;
+                        font-weight: 700;
+                        color: var(--ctl-maroon);
+                        margin-bottom: 10px;
+                    }
+                    .ctl-session-item {
+                        border: 1px solid var(--ctl-border);
+                        border-radius: 6px;
+                        margin-bottom: 8px;
+                        overflow: hidden;
+                    }
+                    .ctl-session-item:last-child { margin-bottom: 0; }
+                    .ctl-session-toggle {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                        width: 100%;
+                        padding: 12px 14px;
+                        border: none;
+                        background: var(--ctl-gray-bg);
+                        text-align: left;
+                        cursor: pointer;
+                    }
+                    .ctl-session-toggle:hover,
+                    .ctl-session-toggle:focus-visible {
+                        background: var(--ctl-navy-tint);
+                    }
+                    .ctl-session-toggle-main {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2px;
+                        min-width: 0;
+                    }
+                    .ctl-session-title {
+                        font-weight: 700;
+                        font-size: 0.95rem;
+                    }
+                    .ctl-session-meta {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 2px 12px;
+                        font-size: 0.82rem;
+                        color: var(--ctl-gray-text);
+                    }
+                    .ctl-session-meta-item {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                    }
+                    .ctl-session-summary {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 6px;
+                        padding: 0 14px 12px;
+                        background: var(--ctl-gray-bg);
+                    }
+                    .ctl-session-toggle-icon {
+                        flex-shrink: 0;
+                        font-size: 0.75rem;
+                        color: var(--ctl-maroon);
+                        transition: transform 0.15s ease;
+                    }
+                    .ctl-session-toggle[aria-expanded="true"] .ctl-session-toggle-icon {
+                        transform: rotate(180deg);
+                    }
+                    .ctl-session-body {
+                        padding: 14px;
+                        border-top: 1px solid var(--ctl-border);
+                        font-size: 0.9rem;
+                    }
+                    .ctl-session-abstract { line-height: 1.65; }
+                    .ctl-session-abstract p,
+                    .ctl-session-abstract ul,
+                    .ctl-session-abstract ol {
+                        margin-bottom: 0.85em;
+                    }
+                    .ctl-session-abstract p:last-child { margin-bottom: 0; }
+                    .ctl-session-materials {
+                        margin-top: 14px;
+                        padding-top: 12px;
+                        border-top: 1px dashed var(--ctl-border);
+                    }
+                    .ctl-session-materials-label {
+                        display: block;
+                        font-size: 0.68rem;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        color: var(--ctl-gray-text);
+                        margin-bottom: 8px;
+                    }
+                    .ctl-session-material-link {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        font-size: 0.85rem;
+                        color: var(--ctl-maroon);
+                        margin-right: 16px;
+                        margin-bottom: 6px;
+                    }
+                    .ctl-session-material-link:hover,
+                    .ctl-session-material-link:focus-visible {
+                        text-decoration: underline;
+                    }
+                </style>
+
+                <div class="ctl-sessions-section" style="margin-bottom: 32px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Concurrent Sessions</h3>
+
+                    ## Fixed range [1..20], NOT [1..6] — live-tested 2026-08-20 on
+                    ## Adjunct Development Day found a real session using time block 7,
+                    ## contradicting the Variable Map's documented "Values 1–6". 20 is a
+                    ## generous fixed ceiling (cheap to over-iterate; each pass is just an
+                    ## #if membership check) rather than trusting that documented cap.
+                    #set($sessionIdCounter = 0)
+                    #foreach($blockNum in [1..20])
+                        #set($blockNumStr = "$blockNum")
+                        #set($blockSessions = [])
+                        #foreach($s in $allSessions)
+                            #if("$!s.sessionTimeBlock" == $blockNumStr)
+                                #set($dummy = $blockSessions.add($s))
+                            #end
+                        #end
+
+                        #if($EDIT_MODE)
+                            <div style="background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; border-radius: 4px; padding: 4px 10px; margin-bottom: 4px; font-size: 0.72rem; font-family: monospace;">
+                                &#128027; DEBUG (block $blockNumStr): $blockSessions.size() session(s) matched this time block
+                            </div>
+                        #end
+
+                        #if($blockSessions.size() > 0)
+                            ## Bubble sort ascending by sessionrowsortorder (confirmed
+                            ## all-lowercase live schema variable via REST pull
+                            ## 2026-08-20 — same lowercase-schema trap as the parent's
+                            ## sessiontimeblockdefinitions). Fixed [0..99] bounds +
+                            ## explicit #if guards (not a range derived from
+                            ## blockSessions.size()) per the Velocity descending-range
+                            ## gotcha. Read directly as numeric, no String round-trip —
+                            ## same fix as the rank/reportYearStart bugs, since a
+                            ## "Text... number" editor label doesn't mean the
+                            ## Velocity-layer type is actually a String.
+                            #foreach($i in [0..99])
+                                #if($i < $blockSessions.size())
+                                    #foreach($j in [0..99])
+                                        #set($k = $j + 1)
+                                        #if($k < $blockSessions.size())
+                                            #set($a = $blockSessions.get($j))
+                                            #set($b = $blockSessions.get($k))
+                                            #set($aOrder = 999999)
+                                            #set($bOrder = 999999)
+                                            #if("$!a.sessionrowsortorder" != "")
+                                                #set($aOrder = $a.sessionrowsortorder)
+                                            #end
+                                            #if("$!b.sessionrowsortorder" != "")
+                                                #set($bOrder = $b.sessionrowsortorder)
+                                            #end
+                                            #if($aOrder > $bOrder)
+                                                #set($dummy = $blockSessions.set($j, $b))
+                                                #set($dummy = $blockSessions.set($k, $a))
+                                            #end
+                                        #end
+                                    #end
+                                #end
+                            #end
+
+                            #set($blockLabel = "")
+                            #if($item.sessiontimeblockdefinitions && $item.sessiontimeblockdefinitions.containsKey($blockNumStr))
+                                #set($blockLabel = $item.sessiontimeblockdefinitions.get($blockNumStr))
+                            #end
+                            #if("$!blockLabel" == "")
+                                #set($blockLabel = "Concurrent Sessions $blockNumStr")
+                            #end
+
+                            <div class="ctl-session-block">
+                                <h4 class="ctl-session-block-heading">$blockLabel</h4>
+
+                                ## Loop variable is $sessItem, NOT $session — root-caused
+                                ## 2026-08-20: $session collides with a dotCMS/Velocity
+                                ## built-in context variable (the HTTP session object,
+                                ## alongside $request/$response/$user already used
+                                ## elsewhere in this project). Using it as a #foreach
+                                ## variable name doesn't error and doesn't break iteration
+                                ## count, but every $session.xxx field reference inside the
+                                ## loop silently resolves against the wrong object and
+                                ## quiet-prints empty — while a debug loop using a
+                                ## differently-named variable ($dbgS) over the exact same
+                                ## list printed every field correctly. Same "quiet empty
+                                ## looks identical to a real bug" trap as the rest of this
+                                ## project's gotchas, just at the variable-naming layer
+                                ## instead of the field-naming layer.
+                                #foreach($sessItem in $blockSessions)
+                                    #set($sessionIdCounter = $sessionIdCounter + 1)
+                                    #set($sessionAnchorId = "ctlSession$sessionIdCounter")
+
+                                    #set($tagList = [])
+                                    #if("$!sessItem.sessionTags" != "")
+                                        #foreach($rawTag in $sessItem.sessionTags.split(","))
+                                            #set($trimmedTag = $rawTag.trim())
+                                            #if("$!trimmedTag" != "")
+                                                #set($dummy = $tagList.add($trimmedTag))
+                                            #end
+                                        #end
+                                    #end
+
+                                    <div class="ctl-session-item">
+                                        <button type="button" class="ctl-session-toggle" aria-expanded="false" aria-controls="$sessionAnchorId">
+                                            <span class="ctl-session-toggle-main">
+                                                <span class="ctl-session-title">$!sessItem.sessionTitle</span>
+                                                <span class="ctl-session-meta">
+                                                    #if("$!sessItem.sessionRoom" != "")<span class="ctl-session-meta-item"><i class="bi bi-geo-alt"></i> $sessItem.sessionRoom</span>#end
+                                                    #if("$!sessItem.sessionSpeakers" != "")<span class="ctl-session-meta-item"><i class="bi bi-people"></i> $sessItem.sessionSpeakers</span>#end
+                                                </span>
+                                            </span>
+                                            <span class="ctl-session-toggle-icon" aria-hidden="true">&#9662;</span>
+                                        </button>
+                                        ## Always-visible summary row (tags) — sits outside the
+                                        ## collapsible body per 2026-08-20 request: title/room/
+                                        ## speakers/tags should show even when collapsed, only
+                                        ## abstract/materials should require expanding.
+                                        #if($tagList.size() > 0)
+                                            <div class="ctl-session-summary">
+                                                #foreach($tag in $tagList)
+                                                    <span class="ctl-tag">$tag</span>
+                                                #end
+                                            </div>
+                                        #end
+                                        <div class="ctl-session-body" id="$sessionAnchorId" hidden>
+                                            #if("$!sessItem.sessionabstract" != "")
+                                                <div class="ctl-session-abstract">$sessItem.sessionabstract</div>
+                                            #end
+                                            #if($sessItem.sessionAttachments && $sessItem.sessionAttachments.size() > 0)
+                                                <div class="ctl-session-materials">
+                                                    <span class="ctl-session-materials-label">Session Materials</span>
+                                                    #foreach($file in $sessItem.sessionAttachments)
+                                                        #if("$!file.ctlAttachmentfile.rawUri" != "")
+                                                            <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="ctl-session-material-link" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)">
+                                                                <i class="bi bi-download"></i> $file.ctlAttachmentlabel
+                                                            </a>
+                                                        #end
+                                                    #end
+                                                </div>
+                                            #end
+                                        </div>
+                                    </div>
+                                #end
+                            </div>
+                        #end
+                    #end
+                </div>
+            #end
+
             <p style="margin-top: 40px;">
                 <a href="$parentUrl" style="color: inherit;">&larr; Back to $parentLabel</a>
             </p>
@@ -292,7 +696,7 @@ END:VCALENDAR")
         </article>
 
     #else
-        <div style="padding: 40px; text-align: center; color: #666;">
+        <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
             <h2>Not Found</h2>
             <p>Sorry, this item could not be found or may have been removed.</p>
             <a href="$parentUrl" style="color: inherit;">Return to $parentLabel</a>
@@ -323,5 +727,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
         activeCrumb.textContent = '$item.title';
     }
+});
+
+/* Session accordion toggle -- independent of the title/breadcrumb script
+   above (that block assumes $item exists; the Not Found / editor-preview
+   branches don't render this markup at all, so this binds safely either
+   way). Double-bind guard matches ctl-widget_our-services.html's
+   ctl-gh-svc-toggle pattern. */
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.ctl-session-toggle').forEach(function(btn) {
+        if (btn.dataset.ctlSessionBound) { return; }
+        btn.dataset.ctlSessionBound = '1';
+        btn.addEventListener('click', function() {
+            var item = btn.closest('.ctl-session-item');
+            var body = item ? item.querySelector('.ctl-session-body') : null;
+            var expanded = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            if (body) { body.hidden = expanded; }
+        });
+    });
 });
 </script>

@@ -1,0 +1,129 @@
+## ============================================================
+## Funding > Past Recipients — actual award/grant/fellowship WINNERS list
+## (row 13 in dev-checklist.md's widget table, new 2026-08-06). Sits
+## alongside ctl-widget_missed-opportunities_past-recipients.html on the
+## same page — that widget lists expired CALLS (opportunities nobody won
+## yet, or that closed), this one lists who actually WON. Distinct concept,
+## per CLAUDE.md; was explicitly flagged "not yet scoped" going into this.
+##
+## ⚠ NOT YET BUILDABLE LIVE — proposes a new content type, CtlPastRecipient,
+## that does not exist in dotCMS yet. This widget's Velocity assumes that
+## schema; nothing will render until the type + fields below are created.
+##
+## Why a new content type instead of extending CtlActivity: a recipient
+## record describes a PERSON and what they won, not the call/opportunity
+## itself — CtlActivity already represents the call. Modeling recipients as
+## their own type (with an optional relationship back to the CtlActivity
+## they won) keeps "the opportunity" and "who won it" as separate concerns,
+## and lets one opportunity have multiple winners without duplicating the
+## opportunity record.
+##
+## Proposed CtlPastRecipient fields (create in dotCMS before this goes live):
+##   recipientName    | Text                  | Required.
+##   awardYearLabel    | Text                  | Required. Display label, e.g. "2024-2025"
+##   awardYearStart   | Text (whole number)   | Required. Sort key, e.g. 2024 — same
+##                                               pattern as CtlPersonnel's `rank` /
+##                                               CtlReport's reportYearStart: already a
+##                                               java.lang.Long at the Velocity layer
+##                                               despite the "Text" editor label, use
+##                                               directly, no String round-trip (see
+##                                               CLAUDE.md gotchas).
+##   awardCategories  | Category (multi)      | Optional. Reuses the existing
+##                                               CTL_Activity_Types tree (Award / Grant /
+##                                               Fellowship / etc.) instead of a new tree,
+##                                               so badges match Current Opportunities'
+##                                               category pills.
+##   department       | Text                  | Optional.
+##   summary          | Textarea              | Optional. What they did / won it for.
+##   photo            | Image                 | Optional. FileAssetMap — .path + .fileName.
+##   relatedActivity  | Relationship -> CtlActivity | Optional. Links back to the
+##                                               original opportunity call, if it still
+##                                               exists as a CtlActivity record.
+##
+## Sorted descending by awardYearStart (most recent first) — bubble sort
+## with a fixed-bound range ([0..99] + explicit #if guards), NOT a range
+## derived from $sorted.size(), per the CLAUDE.md gotcha on Velocity's
+## [m..n] descending-when-m>n behavior crashing the last outer pass.
+## Uses .ctl-past-recipients-grid / .ctl-listing-card / .ctl-recipient-photo
+## (shared stylesheet) — same 2-col/1-col-under-768px breakpoint as the
+## Missed Connections grid this sits beside, so the two sections line up.
+## ============================================================
+
+#set($allRecipients = $dotcontent.pull("+contentType:CtlPastRecipient +languageId:1 +live:true +deleted:false", 100, "score"))
+
+#set($sorted = [])
+#foreach($r in $allRecipients)
+    #set($dummy = $sorted.add($r))
+#end
+#foreach($i in [0..99])
+    #if($i < $sorted.size())
+        #foreach($j in [0..99])
+            #set($k = $j + 1)
+            #if($k < $sorted.size())
+                #set($a = $sorted.get($j))
+                #set($b = $sorted.get($k))
+                #set($aYear = 0)
+                #set($bYear = 0)
+                #if("$!a.awardYearStart" != "")
+                    #set($aYear = $a.awardYearStart)
+                #end
+                #if("$!b.awardYearStart" != "")
+                    #set($bYear = $b.awardYearStart)
+                #end
+                #if($aYear < $bYear)
+                    #set($dummy = $sorted.set($j, $b))
+                    #set($dummy = $sorted.set($k, $a))
+                #end
+            #end
+        #end
+    #end
+#end
+
+#if($EDIT_MODE)
+    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+        &#128027; DEBUG: $allRecipients.size() CtlPastRecipient record(s). If this is
+        always 0, the content type likely hasn't been created in dotCMS yet — see this
+        file's header.
+    </div>
+#end
+
+<div style="margin-top: 56px;">
+    <h2 class="section-title mb-2">Past Award Recipients</h2>
+    <p style="color: var(--ctl-gray-text); font-size: 0.9rem; margin-bottom: 24px;">Faculty and staff who've received CTL grants, fellowships, and awards.</p>
+
+    #if($sorted.size() == 0)
+        <p style="color: var(--ctl-gray-text); font-style: italic; padding: 12px 0;">No past recipients on record yet.</p>
+    #else
+        <div class="ctl-past-recipients-grid">
+            #foreach($rec in $sorted)
+                <div class="ctl-listing-card">
+                    #if("$!rec.photo.fileName" != "")
+                        <img src="$rec.photo.path$rec.photo.fileName" alt="" class="ctl-recipient-photo" />
+                    #end
+                    <div style="flex: 1; min-width: 0;">
+                        #if($rec.awardCategories && $rec.awardCategories.size() > 0)
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
+                                #foreach($cat in $rec.awardCategories)
+                                    #if("$!cat.categoryName" != "")
+                                        <span class="ctl-tag">$cat.categoryName</span>
+                                    #end
+                                #end
+                            </div>
+                        #end
+                        <h3 style="margin: 0 0 4px; font-size: 1.1rem; font-weight: 700;">$!rec.recipientName</h3>
+                        #if("$!rec.awardYearLabel" != "" || "$!rec.department" != "")
+                            <p style="margin: 0 0 10px; font-size: 0.85rem; color: var(--ctl-gray-text);">
+                                #if("$!rec.awardYearLabel" != "")$rec.awardYearLabel#end
+                                #if("$!rec.awardYearLabel" != "" && "$!rec.department" != "") &middot; #end
+                                #if("$!rec.department" != "")$rec.department#end
+                            </p>
+                        #end
+                        #if("$!rec.summary" != "")
+                            <p style="margin: 0; font-size: 0.95rem; line-height: 1.4;">$rec.summary</p>
+                        #end
+                    </div>
+                </div>
+            #end
+        </div>
+    #end
+</div>

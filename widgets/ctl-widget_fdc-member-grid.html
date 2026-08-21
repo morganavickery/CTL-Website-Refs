@@ -1,0 +1,137 @@
+## ============================================================
+## Faculty Development Committee — compact multi-column grid cards (square
+## photo, name/title, actions — no expertise/help bullets) for CtlPersonnel
+## where affiliations contains "FDC". Sorted ascending by rank.
+## Full single-column staff cards live separately in
+## ctl-widget_ctl-staff-profiles.html (different layout).
+##
+## Need to know:
+## - pronouns is a RADIO field -> .selectValue + values/options lookup.
+##   "dont show pronouns" is a real option, treated as blank.
+## - rank is already a java.lang.Long at the Velocity layer (despite the
+##   "Text ... whole number" editor label) — use $p.rank directly as the sort
+##   key, don't round-trip it through a String.
+## - affiliations is a Checkbox -> .selectedValues.contains(...); values are
+##   capitalized ("CTL"/"FDC"/"Other").
+## ============================================================
+
+#set($allPersonnel = $dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true", 500, "score"))
+
+## filter to FDC affiliation, bubble-sort ascending by rank
+#set($fdcPersonnel = [])
+#set($fdcRankKeys = [])
+#foreach($p in $allPersonnel)
+    #if($p.affiliations && $p.affiliations.selectedValues && $p.affiliations.selectedValues.contains("FDC"))
+        #set($dummy = $fdcPersonnel.add($p))
+        #set($rankRaw = "$!p.rank")
+        #if($rankRaw == "")
+            #set($rankKey = 999999)
+        #else
+            #set($rankKey = $p.rank)
+        #end
+        #set($dummy = $fdcRankKeys.add($rankKey))
+    #end
+#end
+#foreach($i in [0..20])
+    #foreach($j in [0..20])
+        #set($k = $j + 1)
+        #if($k < $fdcPersonnel.size())
+            #if($fdcRankKeys.get($j) > $fdcRankKeys.get($k))
+                #set($tmpP = $fdcPersonnel.get($j))
+                #set($tmpR = $fdcRankKeys.get($j))
+                #set($dummy = $fdcPersonnel.set($j, $fdcPersonnel.get($k)))
+                #set($dummy = $fdcRankKeys.set($j, $fdcRankKeys.get($k)))
+                #set($dummy = $fdcPersonnel.set($k, $tmpP))
+                #set($dummy = $fdcRankKeys.set($k, $tmpR))
+            #end
+        #end
+    #end
+#end
+
+#if($EDIT_MODE)
+    <!-- DEBUG: pulled $allPersonnel.size() CtlPersonnel record(s) total -- fdc=$fdcPersonnel.size() -->
+#end
+
+<!-- .ctl-btn / .ctl-gh-grid-* classes (compact FDC grid card treatment -- this
+     group doesn't carry areasOfExpertise/howICanHelp, so it doesn't need the
+     wide single-column layout CTL Staff uses) now come from the shared
+     stylesheet (styles/ctl-widgets.css), loaded via the <link> tag added to the
+     sitewide contact-info content block that already renders on every CTL page.
+     No local <style> block needed here anymore. -->
+
+<div class="ctl-gh-section">
+    <h2 class="mb-4">Faculty Development Committee</h2>
+
+    #if($fdcPersonnel.size() == 0)
+
+        <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
+            <p>FDC member bios are coming soon &mdash; check back shortly.</p>
+        </div>
+
+    #else
+
+        <div class="ctl-gh-staff-grid">
+        #foreach($p in $fdcPersonnel)
+
+            #set($titleLine = "$!p.jobTitle")
+            #if("$!p.degrees" != "")
+                #if($titleLine != "")
+                    #set($titleLine = "$titleLine | $!p.degrees")
+                #else
+                    #set($titleLine = "$!p.degrees")
+                #end
+            #end
+
+            #set($pronounsDisplay = "")
+            #if($p.pronouns && "$!p.pronouns.selectValue" != "" && "$!p.pronouns.selectValue" != "dont show pronouns")
+                #set($pVal = $p.pronouns.selectValue)
+                #set($pronounsDisplay = $pVal)
+                #set($pIdx = 0)
+                #foreach($pv in $p.pronouns.values)
+                    #if("$pv" == "$pVal")
+                        #set($pronounsDisplay = $p.pronouns.options.get($pIdx))
+                    #end
+                    #set($pIdx = $pIdx + 1)
+                #end
+            #end
+
+            #set($websiteBtnLabel = "$!p.buttonLabel")
+            #if($websiteBtnLabel == "")
+                #set($websiteBtnLabel = "Visit My Website")
+            #end
+
+            <div class="card ctl-gh-grid-card">
+                <div class="card-body">
+                    #if("$!p.headshotPhoto.fileName" != "")
+                        <img src="$p.headshotPhoto.path$p.headshotPhoto.fileName" alt="$!p.name" class="ctl-gh-grid-photo" />
+                    #end
+
+                    <div class="ctl-gh-grid-info">
+                        <h3 class="h6 fw-bold mb-0">$!p.name#if($pronounsDisplay != "") <span class="fw-normal small text-muted d-block">($pronounsDisplay)</span>#end</h3>
+
+                        #if($titleLine != "")
+                            <p class="fst-italic text-muted small mb-0">$titleLine</p>
+                        #end
+
+                        #if("$!p.emailCortlandEdu" != "" || "$!p.bookWithMeFullLink" != "" || "$!p.websitePromo" != "")
+                            <div class="ctl-gh-grid-actions">
+                                #if("$!p.emailCortlandEdu" != "")
+                                    <a href="mailto:$!p.emailCortlandEdu" class="text-body small">$!p.emailCortlandEdu</a>
+                                #end
+                                #if("$!p.bookWithMeFullLink" != "")
+                                    <a class="ctl-btn" role="button" href="$!p.bookWithMeFullLink" target="_blank" rel="noopener" aria-label="Schedule a meeting with $!p.name (opens in new tab)">Meet with Me</a>
+                                #end
+                                #if("$!p.websitePromo" != "")
+                                    <a class="ctl-btn" role="button" href="$!p.websitePromo" target="_blank" rel="noopener" aria-label="$websiteBtnLabel: $!p.name (opens in new tab)">$websiteBtnLabel</a>
+                                #end
+                            </div>
+                        #end
+                    </div>
+                </div>
+            </div>
+
+        #end
+        </div>
+
+    #end
+</div>

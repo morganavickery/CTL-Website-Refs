@@ -1,18 +1,9 @@
 ## ============================================================
-## CTL_widget_inst-detail
+## Resources > For Course Design — single CtlInstructionalResource detail page.
 ## dotCMS widget variable: CtlWidgetInstDetail
-## Renders a single CtlInstructionalResource record.
-## Matches the URL slug (last path segment) against urlTitle —
-## CtlInstructionalResource has no urlMapPattern field, so this
-## mirrors CTL_widget_activity-detail's pull-all + Velocity-side
-## slug match instead of relying on native URL Map resolution.
-## Requires: content type's URL Map Pattern set to
-##   /centers/ctl/resources/course-design/{urlTitle}
-## (updated 2026-08-04 for the Resources IA revision — formerly
-## /centers/ctl/resources/course-design/{urlTitle}; live URL Map Pattern
-## update on the content type itself still pending, see CLAUDE.md's Next Up)
-## Detail Page: "Instructional Resource Detail"
-##   (/centers/ctl/resources/course-design/instructional-resource-detail)
+## Matches the URL slug (last path segment) against urlTitle via pull-all +
+## Velocity-side filter (no native urlMapPattern field on this content type).
+## URL Map Pattern: /centers/ctl/resources/course-design/{urlTitle}
 ## ============================================================
 
 #set($forwardUri = $request.getAttribute("javax.servlet.forward.request_uri"))
@@ -109,6 +100,18 @@
             #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h2>", "</h3>"))
         #end
 
+        ## --- highlights: Textarea, one bullet per line, capped at 4 ---
+        #set($highlightsList = [])
+        #set($rawHighlights = "$!item.highlights")
+        #if($rawHighlights != "")
+            #foreach($line in $rawHighlights.split("\r?\n"))
+                #set($trimmedLine = $line.trim())
+                #if($trimmedLine != "" && $highlightsList.size() < 4)
+                    #set($dummy4 = $highlightsList.add($trimmedLine))
+                #end
+            #end
+        #end
+
         ## --- embedUrl: build a native embeddable src (YouTube/Vimeo) so video plays inline
         ## instead of opening a new tab. Falls back to the raw URL for unrecognized hosts. ---
         #set($embedSrc = "")
@@ -140,23 +143,10 @@
             #end
         #end
 
-        <style>
-            .ctl-ir-tag { display: inline-flex; align-items: center; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; background-color: #f4f4f4; color: #444; border: 1px solid #ddd; border-radius: 4px; margin-right: 6px; margin-bottom: 6px; }
-            .ctl-ir-modality-tag { display: inline-flex; align-items: center; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; background-color: #730A00; color: #fff; border: 1px solid #730A00; border-radius: 20px; margin-right: 6px; margin-bottom: 6px; }
-            .ctl-ir-topic-chip { display: inline-block; font-size: 0.75rem; padding: 3px 10px; background: #fff; color: #666; border: 1px solid #ccc; border-radius: 20px; margin-right: 6px; margin-bottom: 6px; }
-            .ctl-ir-framework-chip { display: inline-block; font-size: 0.75rem; padding: 3px 10px; background: #f0ece9; color: #730A00; border: 1px solid #e0d6d2; border-radius: 20px; margin-right: 6px; margin-bottom: 6px; }
-            .ctl-ir-byline { font-size: 0.9rem; color: #666; margin-bottom: 24px; }
-            .ctl-ir-related-card .card-title a { color: inherit; text-decoration: none; }
-            .ctl-ir-related-card .card-title a:hover { color: #730A00; text-decoration: underline; }
-            ## --- shared horizontally-scrolling carousel, same pattern as the homepage's
-            ## Upcoming Events / Featured Resources rows (ctl-site_home.html) — not a
-            ## Bootstrap .carousel, which can't peek a partial next card or free-scroll ---
-            .ctl-ir-hscroll { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 0.75rem; scrollbar-width: thin; }
-            .ctl-ir-hscroll-item { flex: 0 0 88%; scroll-snap-align: start; }
-            @media (min-width: 576px) { .ctl-ir-hscroll-item { flex-basis: 62%; } }
-            @media (min-width: 768px) { .ctl-ir-hscroll-item { flex-basis: 48%; } }
-            @media (min-width: 992px) { .ctl-ir-hscroll-item { flex-basis: 44%; } }
-        </style>
+        <!-- .ctl-ir-* tag/chip/byline/related-card/hscroll classes now come from the
+             shared stylesheet (styles/ctl-widgets.css), loaded via the <link> tag added
+             to the sitewide contact-info content block that already renders on every CTL
+             page. No local <style> block needed here anymore. -->
 
         <article style="max-width: 860px;">
 
@@ -164,27 +154,7 @@
                 <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.resourceTitle" style="width: 100%; max-height: 360px; object-fit: cover; border-radius: 8px; margin-bottom: 24px;" />
             #end
 
-            #if($fmtStr != "" || $modStr != "")
-                <div style="margin-bottom: 10px;">
-                    #foreach($f in $fmtStr.split("\|"))
-                        #if($f != "")<span class="ctl-ir-tag">$f</span>#end
-                    #end
-                    #if($modAllSelected)
-                        <span class="ctl-ir-modality-tag">All Modalities</span>
-                    #else
-                        #foreach($m in $modStr.split("\|"))
-                            #if($m != "")<span class="ctl-ir-modality-tag">$m</span>#end
-                        #end
-                    #end
-                </div>
-            #end
-
-            <h1 style="margin-top: 0;">$item.resourceTitle</h1>
-
-            <p class="ctl-ir-byline">
-                #if("$!item.author" != "")By $item.author#end
-                #if("$!item.lastUpdated" != "")#if("$!item.author" != "") &middot; #end Updated $date.format('MMMM d, yyyy', $item.lastUpdated)#end
-            </p>
+            <h2 style="margin-top: 0;">$item.resourceTitle</h2>
 
             #if(!$frameworksList.isEmpty())
                 <div style="margin-bottom: 20px;">
@@ -194,8 +164,19 @@
                 </div>
             #end
 
+            #if(!$highlightsList.isEmpty())
+                <div class="ctl-ir-highlights">
+                    <h3>Need to Know</h3>
+                    <ul>
+                        #foreach($h in $highlightsList)
+                            <li>$h</li>
+                        #end
+                    </ul>
+                </div>
+            #end
+
             #if($bodyHtml != "")
-                <div style="line-height: 1.7; font-size: 1rem; color: #333; margin-bottom: 28px;">$bodyHtml</div>
+                <div class="ctl-ir-body" style="line-height: 1.7; font-size: 1rem; color: #333; margin-bottom: 28px;">$bodyHtml</div>
             #end
 
             #if("$!item.videoFile.fileName" != "")
@@ -210,16 +191,16 @@
             #end
 
             #if($item.downloadableAttachments && $item.downloadableAttachments.size() > 0)
-                <div style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                <div style="margin-bottom: 32px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Downloads</h3>
                     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 500px;">
                         #foreach($file in $item.downloadableAttachments)
                             #if("$!file.ctlAttachmentfile.rawUri" != "")
-                                <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="btn btn-default" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
-                                    <div style="width: 54px; height: 54px; flex-shrink: 0; background-color: #ffffff !important; color: #730A00 !important; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor;">
+                                <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="btn btn-default" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
+                                    <div style="width: 54px; height: 54px; flex-shrink: 0; background-color: #ffffff !important; color: var(--ctl-maroon) !important; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor;">
                                         #if("$!file.ctlAttachmentfile.thumbnailUri" != "")
                                             <img src="$file.ctlAttachmentfile.thumbnailUri" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: top; display: block;" />
-                                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(194, 0, 0, 0.2); z-index: 2; pointer-events: none;"></div>
+                                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(138, 42, 43, 0.2); z-index: 2; pointer-events: none;"></div>
                                         #else
                                             <div style="width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center;">
                                                 <i class="bi bi-file-earmark-pdf" style="font-size: 1.25rem; opacity: 0.5;"></i>
@@ -237,25 +218,47 @@
                 </div>
             #end
 
-            #if(!$topicsList.isEmpty())
-                <div style="margin-bottom: 28px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
-                    <h3 style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; color: #730A00; margin-bottom: 10px;">Topics</h3>
-                    #foreach($tp in $topicsList)
-                        <span class="ctl-ir-topic-chip">$tp</span>
+            #if($fmtStr != "" || $modStr != "" || "$!item.author" != "" || !$topicsList.isEmpty())
+                <div style="margin-bottom: 28px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
+                    #if("$!item.author" != "" || "$!item.lastUpdated" != "")
+                        <p class="ctl-ir-byline" style="margin-bottom: 14px;">
+                            #if("$!item.author" != "")By $item.author#end
+                            #if("$!item.lastUpdated" != "")#if("$!item.author" != "") &middot; #end Updated $date.format('MMMM d, yyyy', $item.lastUpdated)#end
+                        </p>
+                    #end
+                    #if($fmtStr != "" || $modStr != "")
+                        <div style="margin-bottom: 14px;">
+                            #foreach($f in $fmtStr.split("\|"))
+                                #if($f != "")<span class="ctl-ir-tag">$f</span>#end
+                            #end
+                            #if($modAllSelected)
+                                <span class="ctl-ir-modality-tag">All Modalities</span>
+                            #else
+                                #foreach($m in $modStr.split("\|"))
+                                    #if($m != "")<span class="ctl-ir-modality-tag">$m</span>#end
+                                #end
+                            #end
+                        </div>
+                    #end
+                    #if(!$topicsList.isEmpty())
+                        <h3 style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ctl-maroon); margin-bottom: 10px;">Topics</h3>
+                        #foreach($tp in $topicsList)
+                            <span class="ctl-ir-topic-chip">$tp</span>
+                        #end
                     #end
                 </div>
             #end
 
             #if($item.relatedInstructionalResources && $item.relatedInstructionalResources.size() > 0)
-                <div style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                <div style="margin-bottom: 32px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Related Resources</h3>
                     <div class="ctl-ir-hscroll">
                         #foreach($rel in $item.relatedInstructionalResources)
                             <div class="ctl-ir-hscroll-item">
-                                <div class="card h-100 ctl-ir-related-card">
+                                <div class="card h-100 ctl-ir-related-card ctl-hover-lift">
                                     <div class="card-body">
                                         <h4 class="h6 card-title">
-                                            <a href="/centers/ctl/resources/course-design/$!rel.urlTitle">$!rel.resourceTitle</a>
+                                            <a href="/centers/ctl/resources/course-design/$!rel.urlTitle" class="stretched-link">$!rel.resourceTitle</a>
                                         </h4>
                                         #if("$!rel.shortDescription" != "")
                                             <p class="card-text small">$rel.shortDescription</p>
@@ -269,7 +272,7 @@
             #end
 
             #if($item.relatedEvents && $item.relatedEvents.size() > 0)
-                <div style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                <div style="margin-bottom: 32px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Related Events &amp; Opportunities</h3>
                     <ul style="padding-left: 20px;">
                         #foreach($rel in $item.relatedEvents)
@@ -280,7 +283,7 @@
             #end
 
             #if($citationsHtml != "")
-                <div style="margin-bottom: 28px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                <div style="margin-bottom: 28px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">Citations &amp; Further Reading</h3>
                     <div style="font-size: 0.9rem; color: #444; line-height: 1.6;">$citationsHtml</div>
                 </div>
@@ -293,7 +296,7 @@
         </article>
 
     #else
-        <div style="padding: 40px; text-align: center; color: #666;">
+        <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
             <h2>Not Found</h2>
             <p>Sorry, this resource could not be found or may have been removed.</p>
             <a href="/centers/ctl/resources/course-design" style="color: inherit;">Return to For Course Design</a>

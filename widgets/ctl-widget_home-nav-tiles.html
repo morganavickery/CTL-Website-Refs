@@ -1,16 +1,16 @@
 ## ============================================================
-## ctl-widget_home-nav-tiles_welcome-to-the-ctl (split out of the former
-## monolithic ctl-site_home.html, 2026-08-04)
-## Welcome text + a nav tile grid linking to all top-level CTL site sections.
-## Updated for the IA revision (2026-08-04, same day as the split) that added
-## Funding (replacing the old flat "Opportunities" page) and folded the old
-## "Instructional Resources"/"Technology Support" tiles into a single
-## "Resources" folder tile, and the old "About Us"/"Make an Appointment"
-## tiles into "About the CTL" / "Request Support". Tile count dropped from
-## 6 to 5 to match the 5 non-home top-level pages in the new IA (see the
-## "Site Information Architecture" table in CLAUDE.md for the full hierarchy).
-## Live URL paths below are the intended new paths per that table — actual
-## dotCMS page moves/renames are still pending (see CLAUDE.md's Next Up).
+## Welcome to the CTL — homepage widget.
+## Static welcome text + a 6-tile nav grid (full 2x3 on desktop) linking to
+## the other top-level site sections (Request Support, Events, Funding,
+## Instructional Design Resources, Technology Resources, About the CTL).
+## Resources' two subpages get their own tiles instead of one combined
+## "Resources" tile. Tile labels below are hardcoded on purpose, NOT pulled
+## from the target page's own htmlpageasset title — "For Course Design" and
+## "For Technologies" are those pages' actual IA/page titles (see
+## CLAUDE.md's Site Information Architecture), but this widget intentionally
+## overrides that with different display copy ("Instructional Design
+## Resources" / "Technology Resources") for the homepage tile only.
+## No data pulls — just update the tile hrefs/labels here if the IA changes.
 ## ============================================================
 
 <h2>Welcome to the CTL!</h2>
@@ -19,21 +19,6 @@
 
     We support faculty and staff in every unit to ensure that Cortland provides equitable, accessible learning environments, advancing the university’s principles through well-researched, data-driven design.
 </p>
-<style>
-    .ctl-nav-tile {
-        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-    }
-    .ctl-nav-tile:hover,
-    .ctl-nav-tile:focus-visible {
-        transform: translateY(-4px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        border-color: #730A00;
-    }
-    .ctl-nav-tile:hover i,
-    .ctl-nav-tile:focus-visible i {
-        color: #730A00;
-    }
-</style>
 
 <div class="container py-4">
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -75,13 +60,25 @@
     </div>
 
     <div class="col">
-      <a href="/centers/ctl/resources" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+      <a href="/centers/ctl/resources/course-design" class="card h-100 text-decoration-none text-body ctl-nav-tile">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-2">
-            <i class="bi bi-collection fs-3" aria-hidden="true"></i>
-            <h3 class="h5 fw-bold mb-0 card-title">Resources</h3>
+            <i class="bi bi-book fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">Instructional Design Resources</h3>
           </div>
-          <p class="card-text mb-0">Browse our course design database and get help with instructional technology.</p>
+          <p class="card-text mb-0">Browse our course design database for curriculum planning and design frameworks.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/resources/technologies" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-laptop fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">Technology Resources</h3>
+          </div>
+          <p class="card-text mb-0">Get help with instructional technology tools and software.</p>
         </div>
       </a>
     </div>

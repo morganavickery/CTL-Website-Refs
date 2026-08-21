@@ -1,8 +1,7 @@
 ## ============================================================
-## DEPRECATED — split into two standalone widgets 2026-08-04 for reuse and to
-## give Past Events its own layout (dev-checklist.md items: "past events
-## should be less cluttered" / "multiple columns for past events"). This
-## file's content now lives in:
+## DEPRECATED — split into two standalone widgets for reuse and to
+## give Past Events its own less-cluttered, multi-column layout. This file's
+## content now lives in:
 ##
 ##   widgets/ctl-widget_upcoming-events_events.html (Upcoming Events, unchanged
 ##                                                 single-column layout)
@@ -15,7 +14,7 @@
 ## Also fixed along the way: the upcoming widget's Register button read
 ## $item.eventRegistrationLink, which isn't a real CtlActivity field (same
 ## stale-name failure mode as the opportunity-parent bug) — corrected to the
-## real field, registerApplyLink (confirmed against ctl-site_activity-detail.html).
+## real field, registerApplyLink, matching ctl-site_activity-detail.html.
 ##
 ## Migration steps still pending in the live dotCMS instance:
 ##   1. Create two new Widget content assets in dotCMS, pasting in the code

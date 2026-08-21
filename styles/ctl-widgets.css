@@ -1,0 +1,1415 @@
+/* ============================================================
+   CTL Website — Shared Widget Stylesheet
+   ============================================================
+   One shared stylesheet for every widget under widgets/, replacing the
+   <style> block each widget used to carry on its own. Uploaded to dotCMS as
+   a plain static file (not the File Asset content type — that path is
+   unreliable for asset serving in this dotCMS instance) and loaded via a
+   <link rel="stylesheet"> tag placed in the sitewide contact-info content
+   block that already renders on every CTL page, so one file update reaches
+   every page at once.
+
+   HOW TO USE THIS FILE:
+   Each section below is labeled with the page(s)/widget(s) it renders on —
+   use that to find the right rule when a page's styling needs a change.
+   Class prefixes hint at origin but aren't fully reliable on their own:
+   `.ctl-gh-*` = the old "Get Help" widget lineage (now Our Services + the
+   staff/FDC personnel cards), `.ctl-res-*` = the For Course Design resource
+   listing + its homepage carousel twin, `.ctl-ir-*` = the resource DETAIL
+   page specifically (its own separate copies of similar-looking classes —
+   see the mismatch note further down). When a section says a class isn't
+   used by any widget yet, that means it's drafted here but the widget HTML
+   still needs an edit before it takes effect — inline style="..." on the
+   HTML always wins over a class of the same intent.
+   ============================================================ */
+
+/* Design tokens reused throughout below: CTL's brand maroon (SUNY Cortland
+   Secondary color "Deep Red", #8A2A2B), the brand's Warm Gray 1 / Cool Gray 1
+   / Cool Gray 8 repurposed for borders/backgrounds/secondary text, plus the
+   "closed or expired" status colors (Bootstrap's default danger-alert
+   palette — a functional UI-state color, not part of the brand palette, and
+   left as-is on purpose, since "closed" isn't a brand-identity concern the
+   way an active call-to-action badge is).
+
+   FIXED 2026-08-07 (dev-checklist "Colors used for events should be within
+   our brand identity"): the Registration/Application status badges on
+   Activity Detail previously used Bootstrap's info-blue/warning-yellow here
+   too (`#cfe2ff`/`#084298`, `#fff3cd`/`#856404`) — those are now set inline
+   per-instance to `--ctl-maroon-tint`/`--ctl-maroon` (Registration) and
+   `--ctl-maroon`/`#fff` (Application, filled solid to read as the more
+   selective/urgent of the two) directly in ctl-site_activity-detail.html,
+   so the former `--ctl-warn-*` tokens below were removed as unused.
+
+   FIXED 2026-08-07 (dev-checklist "Side scroll cards" — carousel type-badge
+   colors, the still-open half of the same brand-color issue above): the
+   homepage carousel's Event/Opportunity/"Event & Opportunity" type badges
+   (`ctl-widget_upcoming-activities-carousel.html`) used Bootstrap's
+   `text-bg-success`/`text-bg-primary`/`text-bg-dark`, none of which are
+   brand colors. Two type labels sharing one card meant the existing
+   tint-maroon/solid-maroon pair (see above) couldn't tell all three states
+   apart on its own, so this introduces one additional brand-safe hue —
+   Secondary color "Deep Navy" (`#04202E`, listed alongside Deep Red in the
+   brand style guide's secondary palette) — for Opportunity, mirroring the
+   maroon tint/solid tokens as `--ctl-navy`/`--ctl-navy-tint`. Combined
+   Event & Opportunity keeps the solid-maroon/white treatment (most
+   emphasis, same logic as "Application Required" above); Event alone uses
+   maroon tint; Opportunity alone uses navy tint. See the badge assignment
+   in ctl-widget_upcoming-activities-carousel.html. */
+:root {
+  --ctl-maroon: #8A2A2B;
+  --ctl-maroon-tint: rgba(138, 42, 43, 0.05);
+  --ctl-navy: #04202E;
+  --ctl-navy-tint: rgba(4, 32, 46, 0.06);
+  --ctl-border: #E7E3DB;
+  --ctl-gray-bg: #EFEEED;
+  --ctl-gray-text: #95959C;
+  --ctl-closed-bg: #f8d7da;
+  --ctl-closed-text: #842029;
+  --ctl-closed-border: #f5c2c7;
+}
+
+/* ============================================================
+   Buttons — the maroon-outline CTA button (fills solid maroon on hover)
+   Used on: Activity Detail (Add to Calendar / Register / Apply / Submit),
+   Meet the CTL Staff + Faculty Development Committee + Request Support's
+   Make an Appointment section (Meet with Me / Visit My Website), and
+   Request Support's Our Services (Access this Service).
+   ============================================================ */
+.ctl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  color: var(--ctl-maroon);
+  background: transparent;
+  border: 1px solid var(--ctl-maroon);
+  border-radius: 4px;
+  text-decoration: none;
+}
+.ctl-btn:hover {
+  background: var(--ctl-maroon);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ============================================================
+   Status badges — pill/tag labels signaling an item's state
+   ============================================================ */
+/* Activity Detail only — "Registration Required" / "Application Required" /
+   submission-track pill. Background/text color is set per-instance inline
+   via $badgeBg/$badgeColor in the widget since it varies by state. */
+.ctl-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* Activity Detail only — "Closed" (registration/application) and
+   "Past Event" badges. */
+.ctl-badge-closed,
+.ctl-badge-closed-compact {
+  display: inline-flex;
+  align-items: center;
+  background: var(--ctl-closed-bg);
+  color: var(--ctl-closed-text);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.ctl-badge-closed {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+}
+
+/* Not wired into any widget yet — drafted as a smaller/bolder variant to
+   replace the "Expired" badge on Past Recipients (Missed Connections
+   section), which currently uses its own inline style instead of a class. */
+.ctl-badge-closed-compact {
+  border: 1px solid var(--ctl-closed-border);
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+/* ============================================================
+   Category tags — small grey pills naming an activity's category
+   ============================================================ */
+/* Activity Detail only — the category pills above the title. */
+.ctl-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background-color: var(--ctl-gray-bg);
+  color: #444;
+  border: 1px solid var(--ctl-border);
+  border-radius: 4px;
+}
+
+/* Not wired into any widget yet — drafted as a dimmed variant for expired
+   items on Past Recipients (Missed Connections section), which currently
+   uses its own inline-styled grey pill instead of a class. */
+.ctl-tag-muted {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background-color: var(--ctl-gray-bg);
+  color: var(--ctl-gray-text);
+  border: 1px solid var(--ctl-border);
+  border-radius: 4px;
+  line-height: 1;
+}
+
+/* ============================================================
+   Meta info row — Activity Detail only: the date/time/location/badge
+   strip directly under the title.
+   ============================================================ */
+.ctl-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.9rem;
+  color: var(--ctl-gray-text);
+}
+
+/* ============================================================
+   Deadline boxes — Activity Detail only: the "Register/Apply by [date]"
+   box, plus the dashed-border optional submission-track box below it.
+   ============================================================ */
+.ctl-deadline-box {
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.ctl-deadline-box-primary {
+  border: 1px solid var(--ctl-border);
+}
+.ctl-deadline-box-optional {
+  border: 1px dashed var(--ctl-border);
+  background: var(--ctl-gray-bg);
+}
+
+/* Wired in (2026-08-07) on the two single-column listing widgets: Current
+   Opportunities (ctl-widget_active-opportunities.html) and Events Upcoming
+   (ctl-widget_upcoming-events.html) — both now use class="ctl-listing-card
+   ctl-hover-lift" in place of the identical copy-pasted inline style="..."
+   they used to carry. Moving border/box-shadow out of inline is required,
+   not cosmetic — .ctl-hover-lift:hover changes border-color/box-shadow, and
+   an inline style always beats a stylesheet :hover rule on specificity, so
+   the hover state was invisible until this swap.
+   position:relative added 2026-08-07 (whole-tile-clickable pass) so the
+   title link's .stretched-link overlay can anchor to the card itself, same
+   as .ctl-res-card/.ctl-ir-related-card above. */
+.ctl-listing-card {
+  position: relative;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  border: 1px solid var(--ctl-border);
+  border-radius: 8px;
+  padding: 28px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Same border/radius/shadow as .ctl-listing-card above, but for the two
+   pared-down 2-column-grid cards (Past Events, Missed Connections) whose
+   layout differs (column not row, 24px padding not 28px, no gap — they
+   space children with margin-bottom instead). Wired in 2026-08-07 alongside
+   .ctl-listing-card, same reason: border/box-shadow can't stay inline once
+   .ctl-hover-lift is applied. ctl-widget_missed-opportunities.html pairs
+   this with .ctl-listing-card-muted (below) for its grayed-out expired look.
+   position:relative added 2026-08-07, same reason as .ctl-listing-card above. */
+.ctl-listing-card-compact {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ctl-border);
+  border-radius: 8px;
+  padding: 24px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Whole-tile-clickable pass (2026-08-07): every .ctl-hover-lift tile that
+   also carries a real button (Apply/Register/Details/View Details) needs
+   that button to stay independently clickable ON TOP of the title's
+   Bootstrap .stretched-link overlay (which stretches to z-index:1 across
+   the whole card — see .ctl-listing-title-link below). Without this, the
+   button becomes visually present but dead — the overlay eats the click and
+   always routes to the title's href instead. Scoped to the two card shapes
+   that pair a stretched title with a separate button
+   (.ctl-listing-card/-compact); .ctl-res-card, .ctl-ir-related-card, and
+   .ctl-activity-card have no second link inside them, so they don't need this. */
+.ctl-listing-card .btn,
+.ctl-listing-card-compact .btn {
+  position: relative;
+  z-index: 2;
+}
+
+/* Declared AFTER .ctl-listing-card / .ctl-listing-card-compact on purpose —
+   ctl-widget_missed-opportunities.html pairs this with
+   .ctl-listing-card-compact on the same element, and since both are
+   single-class selectors of equal specificity, the `background` property
+   needs source order (not just selector weight) to decide the tie: this
+   rule must come later so its gray background wins over compact's white
+   one. Reorder with care if this ever gets touched again. */
+.ctl-listing-card-muted {
+  background: var(--ctl-gray-bg);
+  opacity: 0.85;
+}
+
+
+/* Used on: Events page (Past Events section) and Past Recipients page
+   (Missed Connections section) — 2-column card grid, collapses to 1 column
+   under 768px. */
+.ctl-past-events-grid,
+.ctl-missed-opps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+@media (max-width: 767px) {
+  .ctl-past-events-grid,
+  .ctl-missed-opps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 2-line text clamp. Used on: Past Recipients (expired opportunity
+   description, no expand control). Was also used on Request Support > Our
+   Services (with a "Read more" toggle, via .ctl-gh-svc-desc/.is-expanded) —
+   removed 2026-08-07 per user feedback; service tiles now show their full
+   description with no truncation, so that variant and its toggle button/JS
+   are gone. */
+.ctl-missed-opp-desc {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* ============================================================
+   Horizontal scroll-snap carousel — Welcome to the CTL homepage only,
+   both the Featured Resources and Upcoming Events & Opportunities
+   carousels. A flex row with scroll-snap, not a Bootstrap .carousel —
+   arrow buttons scroll it, there's no auto-play/slide transition.
+   ============================================================ */
+.ctl-hscroll-wrap {
+  position: relative;
+}
+.ctl-hscroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-top: 0.5rem;
+  padding-bottom: 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ctl-maroon) var(--ctl-gray-bg);
+}
+.ctl-hscroll::-webkit-scrollbar {
+  height: 10px;
+}
+.ctl-hscroll::-webkit-scrollbar-track {
+  background: var(--ctl-gray-bg);
+  border-radius: 10px;
+}
+.ctl-hscroll::-webkit-scrollbar-thumb {
+  background-color: var(--ctl-maroon);
+  border-radius: 10px;
+}
+.ctl-hscroll-item {
+  flex: 0 0 88%;
+  scroll-snap-align: start;
+}
+@media (min-width: 576px) {
+  .ctl-hscroll-item {
+    flex-basis: 62%;
+  }
+}
+@media (min-width: 768px) {
+  .ctl-hscroll-item {
+    flex-basis: 48%;
+  }
+}
+@media (min-width: 992px) {
+  /* ~2.3 cards visible -- 2 full + a peek of the 3rd, standard/max desktop
+     width. Stays here at all wider widths too since the container caps out. */
+  .ctl-hscroll-item {
+    flex-basis: 44%;
+  }
+}
+.ctl-hscroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid var(--ctl-border);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  color: var(--ctl-maroon);
+  font-size: 1.1rem;
+}
+.ctl-hscroll-btn:hover {
+  background: var(--ctl-maroon);
+  color: #fff;
+  border-color: var(--ctl-maroon);
+}
+.ctl-hscroll-btn.ctl-hscroll-prev {
+  left: 0;
+}
+.ctl-hscroll-btn.ctl-hscroll-next {
+  right: 0;
+}
+@media (min-width: 576px) {
+  .ctl-hscroll-wrap {
+    padding: 0 48px;
+  }
+}
+@media (max-width: 575px) {
+  .ctl-hscroll-btn {
+    display: none;
+  }
+}
+/* Lift-on-hover (rises slightly, adds shadow + maroon border). Used on:
+   homepage nav tiles (.ctl-nav-tile, defined further down), the For Course
+   Design resource listing page (.ctl-res-card, added 2026-08-07 — the
+   homepage's Featured Resources carousel twin does NOT get it, same card
+   markup otherwise), the resource DETAIL page's own "Related Resources"
+   row (.ctl-ir-related-card, added 2026-08-07 alongside a Bootstrap
+   .stretched-link on the title so the whole card is clickable, not just
+   the title text), and, via .ctl-hscroll-item .card, the Upcoming Events
+   & Opportunities carousel card. Also added 2026-08-07 to all 4 event/
+   opportunity LISTING widgets (Current Opportunities, Past Recipients'
+   Missed Connections, Events Upcoming, Events Past) so those tiles get the
+   same hover treatment as the carousel/nav-tile/resource cards above — see
+   .ctl-listing-card / .ctl-listing-card-compact just above, which those 4
+   widgets now pair this with (moving border/box-shadow out of inline was
+   required for the hover state to actually show, see those classes'
+   comments). .ctl-hover-lift is the reusable name — grouped here with the
+   older .ctl-hscroll-item .card selector so both keep working; apply
+   .ctl-hover-lift directly to any new card that wants the same effect. */
+.ctl-hover-lift,
+.ctl-hscroll-item .card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.ctl-hover-lift:hover,
+.ctl-hscroll-item .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border-color: var(--ctl-maroon);
+}
+
+/* Same scroll-snap technique as .ctl-hscroll above, under its own
+   .ctl-ir-hscroll* name. Used on: For Course Design resource detail page,
+   the "Related Resources" row. .ctl-ir-hscroll-btn/-wrap below are defined
+   but NOT currently referenced by that widget — it has no prev/next button
+   markup yet, so its row scrolls by touch/trackpad only (see mismatch note
+   further down for why this differs from the homepage carousels). */
+.ctl-ir-hscroll-wrap {
+  position: relative;
+}
+.ctl-ir-hscroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-top: 0.5rem;
+  padding-bottom: 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ctl-maroon) var(--ctl-gray-bg);
+}
+.ctl-ir-hscroll::-webkit-scrollbar {
+  height: 10px;
+}
+.ctl-ir-hscroll::-webkit-scrollbar-track {
+  background: var(--ctl-gray-bg);
+  border-radius: 10px;
+}
+.ctl-ir-hscroll::-webkit-scrollbar-thumb {
+  background-color: var(--ctl-maroon);
+  border-radius: 10px;
+}
+.ctl-ir-hscroll-item {
+  flex: 0 0 88%;
+  scroll-snap-align: start;
+}
+@media (min-width: 576px) {
+  .ctl-ir-hscroll-item {
+    flex-basis: 62%;
+  }
+}
+@media (min-width: 768px) {
+  .ctl-ir-hscroll-item {
+    flex-basis: 48%;
+  }
+}
+@media (min-width: 992px) {
+  .ctl-ir-hscroll-item {
+    flex-basis: 44%;
+  }
+}
+/* Round prev/next arrow buttons — same look for both hscroll variants
+   above so a button added to the resource-detail row (see note above)
+   would match the homepage carousels with no extra styling. */
+.ctl-hscroll-btn,
+.ctl-ir-hscroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid var(--ctl-border);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  color: var(--ctl-maroon);
+  font-size: 1.1rem;
+}
+.ctl-hscroll-btn:hover,
+.ctl-ir-hscroll-btn:hover {
+  background: var(--ctl-maroon);
+  color: #fff;
+  border-color: var(--ctl-maroon);
+}
+.ctl-hscroll-btn.ctl-hscroll-prev,
+.ctl-hscroll-btn.ctl-ir-hscroll-prev,
+.ctl-ir-hscroll-btn.ctl-hscroll-prev,
+.ctl-ir-hscroll-btn.ctl-ir-hscroll-prev {
+  left: 0;
+}
+.ctl-hscroll-btn.ctl-hscroll-next,
+.ctl-hscroll-btn.ctl-ir-hscroll-next,
+.ctl-ir-hscroll-btn.ctl-hscroll-next,
+.ctl-ir-hscroll-btn.ctl-ir-hscroll-next {
+  right: 0;
+}
+@media (min-width: 576px) {
+  .ctl-ir-hscroll-wrap {
+    padding: 0 48px;
+  }
+}
+@media (max-width: 575px) {
+  .ctl-hscroll-btn,
+  .ctl-ir-hscroll-btn {
+    display: none;
+  }
+}
+
+
+/* ============================================================
+   Resource cards — For Course Design listing page and its homepage
+   "Featured Resources" carousel twin (same card markup on purpose, so a
+   featured card looks identical in both places). The listing page's cards
+   also carry .ctl-hover-lift (added 2026-08-07, see that class above) —
+   the carousel twin intentionally does not, so featured cards only lift on
+   hover when viewed on the listing page itself.
+   ============================================================ */
+.ctl-res-card,
+.ctl-ir-related-card {
+  position: relative;
+}
+
+/* Card title link: plain text until hovered, then maroon + underline.
+   Grouped across three different card scopes that all want this same
+   treatment: .ctl-res-card (resource listing/carousel, above),
+   .ctl-ir-related-card (resource DETAIL page's own "Related Resources"
+   row), and .ctl-activity-card (homepage's Upcoming Events & Opportunities
+   carousel). */
+.ctl-res-card .card-title a,
+.ctl-ir-related-card .card-title a,
+.ctl-activity-card .card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.ctl-res-card .card-title a:hover,
+.ctl-ir-related-card .card-title a:hover,
+.ctl-activity-card .card-title a:hover {
+  color: var(--ctl-maroon);
+  text-decoration: underline;
+}
+
+/* Same "plain until hovered, then maroon + underline" treatment as the
+   .ctl-activity-card title links above, applied directly (no card-title
+   wrapper) to the 4 single/2-column listing widgets: Current Opportunities,
+   Past Recipients, Events (Upcoming), Events (Past). Added 2026-08-07 —
+   these headings were already wrapped in a link but had no hover state, so
+   they didn't visually read as clickable. As of the whole-tile-clickable
+   pass (2026-08-07, same day), this link also carries Bootstrap's
+   .stretched-link so the entire .ctl-listing-card/-compact tile is
+   clickable to the same href, not just the title text — see the
+   position:relative + .btn z-index rules on .ctl-listing-card above. */
+.ctl-listing-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+.ctl-listing-title-link:hover {
+  color: var(--ctl-maroon);
+  text-decoration: underline;
+}
+.ctl-res-card img.ctl-res-thumb {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+/* Format badge (e.g. "Video", "Article") on resource cards. */
+.ctl-res-fmt-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  background: var(--ctl-gray-bg);
+  color: #444;
+  border: 1px solid var(--ctl-border);
+  border-radius: 4px;
+  margin-right: 4px;
+  margin-bottom: 6px;
+}
+/* Topic chip (e.g. "Rubric Design") on resource cards. */
+.ctl-res-topic-chip {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 2px 9px;
+  background: #fff;
+  color: var(--ctl-gray-text);
+  border: 1px solid var(--ctl-border);
+  border-radius: 20px;
+  margin-right: 4px;
+  margin-top: 4px;
+}
+
+/* For Course Design listing page only — maroon border + tint on the top 3
+   pinned "featured" cards (sorted by last-modified date). Not needed on
+   the homepage carousel since that only ever shows featured items. */
+.ctl-res-card.is-featured {
+  border: 2px solid var(--ctl-maroon);
+  background: var(--ctl-maroon-tint);
+}
+.ctl-res-featured-flag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--ctl-maroon);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  z-index: 2;
+}
+
+/* .ctl-ir-tag and .ctl-res-fmt-badge both style a format badge; .ctl-ir-topic-chip
+   and .ctl-res-topic-chip both style a topic chip. ctl-site_instRes-detail uses the
+   .ctl-ir-* classes below; the listing page and homepage carousel use the .ctl-res-*
+   classes instead, with different sizing/shape:
+     format badge:  .ctl-res-fmt-badge  0.68rem / 3px 8px padding / mr 4px
+                     .ctl-ir-tag        0.7rem  / 4px 8px padding / mr 6px
+     topic chip:    .ctl-res-topic-chip  pill, border-radius 20px, white bg
+                     .ctl-ir-topic-chip   tag,  border-radius 4px,  grey bg
+   All .ctl-ir-* classes below are used on the resource detail page only. */
+.ctl-ir-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background-color: var(--ctl-gray-bg);
+  color: #444;
+  border: 1px solid var(--ctl-border);
+  border-radius: 4px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+/* Solid-maroon variant of .ctl-ir-tag, for modality (e.g. "In-Person"). */
+.ctl-ir-modality-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background-color: var(--ctl-maroon);
+  color: #fff;
+  border: 1px solid var(--ctl-maroon);
+  border-radius: 4px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+.ctl-ir-topic-chip {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  background: var(--ctl-gray-bg);
+  color: var(--ctl-gray-text);
+  border: 1px solid var(--ctl-border);
+  border-radius: 4px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+/* Teaching-framework chip (e.g. "UDL") — tinted maroon/tan, distinct from
+   the format/topic tags above so frameworks read as their own category. */
+/* Background/border here are a hand-picked tan tint, hand-tuned to the old
+   maroon (#730A00) and not yet recalculated for the current brand maroon
+   (#8A2A2B, see :root) — a known lingering mismatch, not part of the brand
+   color pass that updated --ctl-maroon and the gray scale above. */
+.ctl-ir-framework-chip {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  background: #f0ece9;
+  color: var(--ctl-maroon);
+  border: 1px solid #e0d6d2;
+  border-radius: 4px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+/* "By [author] · Updated [date]" line under the resource title. */
+.ctl-ir-byline {
+  font-size: 0.9rem;
+  color: var(--ctl-gray-text);
+  margin-bottom: 24px;
+}
+
+/* "Need to Know" highlights callout — resource detail page only, rendered
+   above the article body from the `highlights` Textarea field (up to 4
+   short bullets, one per line). Maroon-tint box + left accent bar, same
+   tint token as the listing page's featured-card treatment
+   (.ctl-res-featured, see below) so the callout reads as "important" using
+   the same visual language as the rest of the site rather than a new color. */
+.ctl-ir-highlights {
+  background: var(--ctl-maroon-tint);
+  border-left: 4px solid var(--ctl-maroon);
+  border-radius: 6px;
+  padding: 18px 24px;
+  margin-bottom: 28px;
+}
+.ctl-ir-highlights h3 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-maroon);
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+.ctl-ir-highlights ul {
+  margin: 0;
+  padding-left: 20px;
+}
+.ctl-ir-highlights li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.ctl-ir-highlights li:last-child {
+  margin-bottom: 0;
+}
+
+/* Resource detail page's WYSIWYG `body` field (wrapped in .ctl-ir-body, see
+   ctl-site_instRes-detail) — dev-checklist flagged that image captions
+   added via the editor's "caption" option rendered identically to the
+   surrounding body copy, making them hard to distinguish/read. Confirmed
+   via live view-source 2026-08-06: the editor wraps a captioned image as
+   `<figure class="image"><img>...<figcaption>...</figcaption></figure>`,
+   so figcaption is targeted directly (no fallback selectors needed). */
+.ctl-ir-body figure {
+  margin: 0 0 20px;
+}
+.ctl-ir-body figure img {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+}
+.ctl-ir-body figcaption {
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--ctl-gray-text);
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* ============================================================
+   Filter bar + topic pill cloud — For Course Design LISTING page only
+   (not the detail page, not the homepage carousel): the Format/Modality
+   radio filters and the collapsible Topics pill cloud above the grid.
+   ============================================================ */
+.ctl-res-count {
+  font-size: 0.85rem;
+  color: var(--ctl-gray-text);
+  margin-bottom: 12px;
+}
+.ctl-res-filterbar {
+  background: var(--ctl-gray-bg);
+  border: 1px solid var(--ctl-border);
+  border-radius: 10px;
+  padding: 18px 20px 20px;
+  margin-bottom: 32px;
+}
+.ctl-res-subpanel {
+  background: #fff;
+  border: 1px solid var(--ctl-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.ctl-res-filter-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-gray-text);
+  margin-bottom: 6px;
+}
+.ctl-res-radio-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.ctl-res-radio-list label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #444;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.ctl-res-radio-list input[type="radio"] {
+  accent-color: var(--ctl-maroon);
+  margin: 0;
+}
+.ctl-res-dimmed {
+  opacity: 0.4;
+}
+.ctl-res-partial-divider {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-gray-text);
+  padding-top: 6px;
+}
+.ctl-res-pill {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  border: 1px solid var(--ctl-border);
+  border-radius: 20px;
+  background: #fff;
+  color: #444;
+  cursor: pointer;
+}
+.ctl-res-pill:hover {
+  border-color: var(--ctl-maroon);
+  color: var(--ctl-maroon);
+}
+.ctl-res-pill.active {
+  background: var(--ctl-maroon);
+  border-color: var(--ctl-maroon);
+  color: #fff;
+}
+#ctlResTopicCloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+}
+.ctl-res-topic-group {
+  flex: 1 1 300px;
+  max-width: 100%;
+}
+.ctl-res-topic-group-heading {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-maroon);
+  margin-bottom: 2px;
+}
+
+/* ============================================================
+   Personnel cards — "gh" prefix is a naming holdover from this widget's
+   original name (the old combined "Get Help" page); has nothing to do
+   with current content.
+   .ctl-gh-staff-* below: full single-column bio card. Used on: About the
+   CTL > Meet the CTL Staff, AND Request Support > Make an Appointment
+   (same widget file, ctl-widget_ctl-staff-profiles.html, reused with a
+   different section heading on each page).
+   .ctl-gh-grid-* further below: compact multi-column card (no bio text).
+   Used on: About the CTL > Faculty Development Committee only
+   (ctl-widget_fdc-member-grid.html).
+   .ctl-gh-section is an intentionally-empty CSS hook, present in both
+   widgets' markup for possible future use.
+   ============================================================ */
+.ctl-gh-section {
+}
+.ctl-gh-staff-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ctl-gh-staff-item {
+  position: relative;
+}
+.ctl-gh-staff-item .card-body {
+  padding-right: 170px;
+}
+.ctl-gh-staff-photo {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.ctl-gh-staff-card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.ctl-gh-staff-actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  text-align: right;
+}
+.ctl-gh-staff-actions .ctl-btn {
+  padding: 4px 12px;
+  font-size: 0.72rem;
+}
+/* FDC compact grid — 2 columns (was auto-fill/minmax(220px), which packed in
+   ~4 narrow columns on desktop; widened 2026-08-14 to give each member card
+   more horizontal room), collapsing to 1 column under 576px. */
+.ctl-gh-staff-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+@media (max-width: 576px) {
+  .ctl-gh-staff-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ctl-gh-grid-card {
+  height: 100%;
+}
+.ctl-gh-grid-card .card-body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  gap: 16px;
+  padding: 20px 16px;
+}
+.ctl-gh-grid-photo {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.ctl-gh-grid-info {
+  min-width: 0;
+}
+.ctl-gh-grid-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 10px;
+}
+.ctl-gh-grid-actions .ctl-btn {
+  padding: 4px 12px;
+  font-size: 0.72rem;
+}
+
+/* ============================================================
+   Service cards — originally Request Support > Our Services only; also
+   reused statically (no $dotcontent.pull()) by the REACH content block's
+   "Book a Consultation" tiles (content blocks/ctl-content_reach.html,
+   added 2026-08-20) for a matching look. Tile grid plus the
+   "Next Steps" section (button and/or freeform note text, gated on
+   isCurrentlyAvailable — replaces the old "Available Now" / "Currently
+   Unavailable" badge, which was dropped as redundant). Converted from a
+   single-column list to tiles 2026-08-07 — .ctl-gh-svc-list (flex column
+   list) is gone; matches .ctl-res-thumb's full-width-top-image treatment
+   below instead of the old side-by-side thumbnail.
+
+   Grid switched from Bootstrap row-cols-1/md-2/lg-3 to plain CSS Grid
+   (.ctl-gh-svc-grid) 2026-08-12 when expand/collapse was added: a tile can
+   now grow to the full row width via .is-expanded (grid-column: 1 / -1)
+   while the rest keep their normal size — flexbox row-cols has no clean way
+   to do that for a single item. Same 2-breakpoint pattern as
+   .ctl-past-events-grid/.ctl-missed-opps-grid, just 3 columns wide instead
+   of 2.
+
+   Legibility pass (2026-08-14): the raw WYSIWYG longDescription had no
+   line-height/paragraph spacing of its own (Velocity just prints the HTML
+   as-is), and once a tile expands to the full grid row the text ran
+   edge-to-edge with no line-length limit — both read as a "wall of text."
+   Fixed by: line-height/spacing rules on the long-desc's child elements
+   (p/ul/ol, since we don't control the WYSIWYG markup itself), a
+   newspaper-style `columns` layout on .ctl-gh-svc-long-desc so wide expanded
+   tiles reflow into readable ~320px-wide columns instead of one full-width
+   paragraph block, and a small uppercase label + chevron on the toggle to
+   make expand/collapse read as a distinct section rather than more running
+   text.
+   ============================================================ */
+.ctl-gh-svc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 991px) {
+  .ctl-gh-svc-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 767px) {
+  .ctl-gh-svc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ctl-gh-svc-tile {
+  min-width: 0;
+}
+.ctl-gh-svc-tile.is-expanded {
+  grid-column: 1 / -1;
+}
+.ctl-gh-svc-thumb {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+.ctl-gh-svc-lead {
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+.ctl-gh-svc-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  margin-bottom: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ctl-maroon);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+}
+.ctl-gh-svc-toggle:hover,
+.ctl-gh-svc-toggle:focus-visible {
+  text-decoration: underline;
+}
+.ctl-gh-svc-toggle-icon {
+  display: inline-block;
+  font-size: 0.7rem;
+  transition: transform 0.15s ease;
+}
+.ctl-gh-svc-tile.is-expanded .ctl-gh-svc-toggle-icon {
+  transform: rotate(180deg);
+}
+.ctl-gh-svc-long-desc {
+  margin-bottom: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ctl-border);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.ctl-gh-svc-long-desc-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-gray-text);
+  margin-bottom: 8px;
+}
+/* Newspaper-style columns so a wide, full-row-width expanded tile still
+   reads at a comfortable line length instead of one edge-to-edge paragraph
+   block; below ~700px the tile is narrow enough that a single column is
+   already readable, so let it fall back naturally. */
+@media (min-width: 700px) {
+  .ctl-gh-svc-tile.is-expanded .ctl-gh-svc-long-desc {
+    column-width: 320px;
+    column-gap: 32px;
+    column-rule: 1px solid var(--ctl-border);
+  }
+}
+.ctl-gh-svc-long-desc p,
+.ctl-gh-svc-long-desc ul,
+.ctl-gh-svc-long-desc ol {
+  margin-bottom: 0.85em;
+  break-inside: avoid;
+}
+.ctl-gh-svc-long-desc p:last-child {
+  margin-bottom: 0;
+}
+.ctl-gh-svc-long-desc li {
+  margin-bottom: 0.3em;
+}
+.ctl-gh-svc-next-steps {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ctl-border);
+}
+.ctl-gh-svc-next-steps-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-gray-text);
+  margin-bottom: 6px;
+}
+.ctl-gh-svc-next-steps-note {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+.ctl-gh-svc-next-steps-note:last-child {
+  margin-bottom: 0;
+}
+.ctl-gh-svc-btn {
+  padding: 4px 12px;
+  font-size: 0.72rem;
+}
+
+/* ============================================================
+   Concurrent Sessions — ctl-site_activity-detail.html only, added
+   2026-08-20. Accordion list of CtlActivitySession sub-records, grouped
+   under a .ctl-session-block per sessionTimeBlock. Toggle treatment
+   (chevron rotate, uppercase label) mirrors .ctl-gh-svc-toggle above;
+   .ctl-session-abstract's p/ul/ol spacing mirrors .ctl-gh-svc-long-desc,
+   minus the newspaper-column layout (this accordion body is never as
+   wide as a full-row-expanded service tile, so a single column reads
+   fine at any width it's likely to appear at).
+   ============================================================ */
+.ctl-session-block {
+  margin-bottom: 24px;
+}
+.ctl-session-block:last-child {
+  margin-bottom: 0;
+}
+.ctl-session-block-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ctl-maroon);
+  margin-bottom: 10px;
+}
+.ctl-session-item {
+  border: 1px solid var(--ctl-border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.ctl-session-item:last-child {
+  margin-bottom: 0;
+}
+.ctl-session-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: var(--ctl-gray-bg);
+  text-align: left;
+  cursor: pointer;
+}
+.ctl-session-toggle:hover,
+.ctl-session-toggle:focus-visible {
+  background: var(--ctl-navy-tint);
+}
+.ctl-session-toggle-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.ctl-session-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.ctl-session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-size: 0.82rem;
+  color: var(--ctl-gray-text);
+}
+.ctl-session-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ctl-session-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px 12px;
+  background: var(--ctl-gray-bg);
+}
+.ctl-session-toggle-icon {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--ctl-maroon);
+  transition: transform 0.15s ease;
+}
+.ctl-session-toggle[aria-expanded="true"] .ctl-session-toggle-icon {
+  transform: rotate(180deg);
+}
+.ctl-session-body {
+  padding: 14px;
+  border-top: 1px solid var(--ctl-border);
+  font-size: 0.9rem;
+}
+.ctl-session-abstract {
+  line-height: 1.65;
+}
+.ctl-session-abstract p,
+.ctl-session-abstract ul,
+.ctl-session-abstract ol {
+  margin-bottom: 0.85em;
+}
+.ctl-session-abstract p:last-child {
+  margin-bottom: 0;
+}
+.ctl-session-materials {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--ctl-border);
+}
+.ctl-session-materials-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-gray-text);
+  margin-bottom: 8px;
+}
+.ctl-session-material-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--ctl-maroon);
+  margin-right: 16px;
+  margin-bottom: 6px;
+}
+.ctl-session-material-link:hover,
+.ctl-session-material-link:focus-visible {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Homepage nav tiles — Welcome to the CTL only: the 5-tile section-link
+   grid (Request Support / Events / Funding / Resources / About the CTL).
+   ============================================================ */
+.ctl-nav-tile {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.ctl-nav-tile:hover,
+.ctl-nav-tile:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border-color: var(--ctl-maroon);
+}
+.ctl-nav-tile:hover i,
+.ctl-nav-tile:focus-visible i {
+  color: var(--ctl-maroon);
+}
+
+/* ⚠ NOTE: .ctl-nav-tile duplicates the same three transition/hover
+   properties as .ctl-hover-lift (defined earlier, in the carousel
+   section) instead of using it directly — left as its own rule since it
+   also needs the extra `i` (icon) color-on-hover selector below, which
+   .ctl-hover-lift doesn't have. Worth collapsing into
+   `.ctl-hover-lift` + this icon rule in a future cleanup pass. */
+
+/* ============================================================
+   Section landing blurbs — Funding, Resources (both new 2026-08-06) and
+   the Events top-of-page intro (new 2026-08-06). Reuses .ctl-nav-tile
+   as-is for the down-links to each section's own subpages (same card/hover
+   treatment as the homepage grid, just fewer tiles and scoped under
+   .ctl-landing-blurb instead of full page width). No new tile class needed.
+   ============================================================ */
+.ctl-landing-blurb {
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   Impact & Reports — outcomes stat tiles (new 2026-08-06). Static/manual
+   content (institutional accomplishment numbers), not pulled from a
+   content type — same "hardcode it, edit the file directly" convention as
+   the homepage nav tiles' welcome text. Auto-fill grid so tile count can
+   change year to year without a breakpoint rewrite.
+   ============================================================ */
+.ctl-outcomes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 24px 0 40px;
+}
+.ctl-outcome-tile {
+  border: 1px solid var(--ctl-border);
+  border-radius: 8px;
+  padding: 24px 20px;
+  text-align: center;
+  background: #fff;
+}
+.ctl-outcome-tile i {
+  font-size: 1.6rem;
+  color: var(--ctl-maroon);
+  margin-bottom: 10px;
+  display: inline-block;
+}
+.ctl-outcome-stat {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ctl-maroon);
+}
+.ctl-outcome-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--ctl-gray-text);
+  margin-top: 4px;
+}
+
+/* ============================================================
+   Impact & Reports — reports grid (new 2026-08-06, CtlReport content type
+   proposed but not yet created — see ctl-widget_reports-grid.html header).
+   Auto-fill card grid, cover thumbnail optional.
+   ============================================================ */
+.ctl-reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+.ctl-report-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.ctl-report-thumb {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 6px 6px 0 0;
+}
+.ctl-report-card .card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.ctl-report-summary {
+  flex: 1;
+}
+
+/* ============================================================
+   Funding > Past Recipients — award-winners grid (new 2026-08-06,
+   CtlPastRecipient content type proposed but not yet created — see
+   ctl-widget_past-award-recipients_past-recipients.html header). Same
+   2-column/1-column-under-768px breakpoint as the Missed Connections grid
+   it sits alongside, so both sections line up. First widget to actually
+   use .ctl-listing-card (drafted earlier, previously unreferenced) instead
+   of copy-pasted inline style="...", per the "future pass" note above —
+   deliberate choice since this is a new file with no legacy inline-style
+   debt to work around.
+   ============================================================ */
+.ctl-past-recipients-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+@media (max-width: 767px) {
+  .ctl-past-recipients-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ctl-recipient-photo {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   About the CTL — Strategic Vision collapsible pillars (added
+   2026-08-20). Each h3 pillar name is a Bootstrap native collapse
+   trigger (data-bs-toggle="collapse") wrapping its Mission/Objectives
+   content — no custom JS needed, since Bootstrap's bundle.js is already
+   loaded sitewide via the theme. This is unlike the hand-rolled
+   addEventListener toggles used elsewhere in this project (e.g. Past
+   Recipients' Missed Connections section), which exist because those
+   predate/duplicate non-Bootstrap show/hide behavior — a plain
+   Bootstrap collapse didn't fit those cases the way it does here.
+   Chevron rotates via the trigger's aria-expanded state.
+   ============================================================ */
+.ctl-mission-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+.ctl-mission-toggle .bi-chevron-down {
+  transition: transform 0.2s ease;
+}
+.ctl-mission-toggle[aria-expanded="true"] .bi-chevron-down {
+  transform: rotate(180deg);
+}

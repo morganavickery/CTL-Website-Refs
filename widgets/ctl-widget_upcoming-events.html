@@ -1,15 +1,17 @@
 ## ============================================================
-## Upcoming Events — standalone widget (split out of the former monolithic
-## ctl-site_event-parent.html, 2026-08-04, per dev-checklist.md's "multiple
-## columns for past events" / "past events should be less cluttered" items —
-## upcoming and past needed different layouts, so they're now separate widgets
-## instead of one file with two sections).
-## Single-column, full detail (thumbnail, date, time, location, description,
-## Register/Details button) — unchanged from the original upcoming section.
-## Fixed along the way: Register button read $item.eventRegistrationLink,
-## which isn't a real CtlActivity field (same stale-name failure mode as the
-## opportunity-parent oppSubmissionDeadline/oppApplicationLink bug) — the real
-## field, confirmed against ctl-site_activity-detail.html, is registerApplyLink.
+## Events — upcoming events listing.
+## Pulls CtlActivity, filters to isEvent + end/start date >= today (or blank
+## = ongoing). Single-column cards: thumbnail, categories, date, time,
+## location, description, Register/Details button. Links to the shared
+## activity-detail page. Past events live separately in
+## ctl-widget_past-events_events.html.
+## Card structure (tags-above-title, categories) matches
+## ctl-widget_active-opportunities.html for listing-page consistency. Cards
+## use .ctl-listing-card + .ctl-hover-lift (styles/ctl-widgets.css) for the
+## same lift-on-hover animation as the home nav tiles / resource cards
+## (added 2026-08-07). Whole tile is clickable to the detail page (title link
+## carries .stretched-link, same day) — the Register button still works
+## independently on top of it via a z-index rule in the shared stylesheet.
 ## ============================================================
 
 #set($now = $date.getDate())
@@ -45,17 +47,28 @@
 <div class="event-listing-group" style="display: flex; flex-direction: column; gap: 20px; margin-left: 10px;">
     #if($upcomingList.size() > 0)
         #foreach($item in $upcomingList)
-            <div style="display: flex; gap: 24px; align-items: flex-start; border: 1px solid #e0e0e0; border-radius: 8px; padding: 28px; background: #fff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
+            <div class="ctl-listing-card ctl-hover-lift">
                 #if("$!item.thumbnail.fileName" != "")
                     <div style="flex: 0 0 200px;">
                         <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" style="width: 200px; height: 150px; object-fit: cover; border-radius: 6px;" />
                     </div>
                 #end
                 <div style="flex: 1; min-width: 0;">
-                    <h3 style="margin: 0 0 14px 0; font-size: 1.35rem; font-weight: 700; line-height: 1.3;">
-                        <a href="/centers/ctl/events/$item.urlMapPattern" style="text-decoration: none; color: inherit;">$item.title</a>
-                    </h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.9rem; color: #666;">
+                    <div style="display: flex; flex-direction: column; margin-bottom: 14px;">
+                        #if($item.categories && $item.categories.size() > 0)
+                            <div style="order: 1; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                                #foreach($cat in $item.categories)
+                                    #if("$!cat.categoryName" != "")
+                                        <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; background-color: var(--ctl-gray-bg); color: #444; border: 1px solid var(--ctl-border); border-radius: 4px; display: inline-block; line-height: 1;">$cat.categoryName</span>
+                                    #end
+                                #end
+                            </div>
+                        #end
+                        <h3 style="order: 2; margin: 0; font-size: 1.35rem; font-weight: 700; line-height: 1.3;">
+                            <a href="/centers/ctl/activities/$item.urlMapPattern" class="ctl-listing-title-link stretched-link">$item.title</a>
+                        </h3>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.9rem; color: var(--ctl-gray-text);">
                         #if("$!item.eventStartDate" != "")
                             <span style="display: inline-flex; align-items: center; gap: 6px;">
                                 <i class="bi bi-calendar-event" style="font-size: 0.95rem;"></i>
@@ -63,30 +76,30 @@
                             </span>
                         #end
                         #if("$!item.eventStartDate" != "")
-                            <span style="color: #ccc;">|</span>
+                            <span style="color: var(--ctl-border);">|</span>
                             <span style="display: inline-flex; align-items: center; gap: 6px;">
                                 <i class="bi bi-clock" style="font-size: 0.95rem;"></i>
                                 <span>$date.format('h:mma', $item.eventStartDate).toLowerCase()#if("$!item.eventEndDate" != "") &ndash; $date.format('h:mma', $item.eventEndDate).toLowerCase()#end</span>
                             </span>
                         #end
                         #if("$!item.eventLocation" != "")
-                            <span style="color: #ccc;">|</span>
+                            <span style="color: var(--ctl-border);">|</span>
                             <span style="display: inline-flex; align-items: center; gap: 6px;">
                                 <i class="bi bi-geo-alt" style="font-size: 0.95rem;"></i>
                                 <span>$item.eventLocation</span>
                             </span>
                         #end
                     </div>
-                    <div style="border-top: 1px solid #e5e5e5; margin-top: 14px; margin-bottom: 14px;"></div>
+                    <div style="border-top: 1px solid var(--ctl-border); margin-top: 14px; margin-bottom: 14px;"></div>
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
                         #if("$!item.shortDescription" != "")
                             <div style="margin: 0; color: #444; font-size: 0.95rem; flex: 1; line-height: 1.4;">$item.shortDescription</div>
                         #end
                         <div style="flex-shrink: 0;">
                             #if("$!item.registerApplyLink" != "" && "$!item.registerApplyLink" != "http://")
-                                <a href="$item.registerApplyLink" target="_blank" class="btn btn-default btn-sm">Register</a>
+                                <a href="$item.registerApplyLink" target="_blank" class="btn btn-default btn-sm" aria-label="Register for $item.title (opens in new tab)">Register</a>
                             #else
-                                <a href="/centers/ctl/events/$item.urlMapPattern" class="btn btn-default btn-sm">Details</a>
+                                <a href="/centers/ctl/activities/$item.urlMapPattern" class="btn btn-default btn-sm" aria-label="View details for $item.title">Details</a>
                             #end
                         </div>
                     </div>
@@ -94,6 +107,6 @@
             </div>
         #end
     #else
-        <p style="color: #666; font-style: italic;">No upcoming events scheduled at this time.</p>
+        <p style="color: var(--ctl-gray-text); font-style: italic;">No upcoming events scheduled at this time.</p>
     #end
 </div>

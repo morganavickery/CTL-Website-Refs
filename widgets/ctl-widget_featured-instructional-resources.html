@@ -1,118 +1,21 @@
 ## ============================================================
-## Featured Resources carousel — standalone widget (split out of the former
-## monolithic ctl-site_home.html for reuse, 2026-08-04).
-## Fixes from the original debug session (still applicable):
-##  - $featuredResources was never set anywhere (typo for $featResources) ->
-##    this whole block previously could never show real data
-##  - resourceUrl / resourceThumbnail don't exist on CtlInstructionalResource ->
-##    build link from urlTitle, thumbnail is just "thumbnail"
-##  - dropped the Lucene +featured:yes query (featured is a Radio field) in
-##    favor of the same pull-all + .selectValue pattern already proven in
-##    the Instructional Resources listing widget, for consistency/safety
-##  - also applies the same reviewedBy QC gate as the listing widget, so an
-##    unreviewed item can't surface on the homepage even if marked Featured
-## Uses card markup/classes (ctl-res-card, format badges, topic chips minus
-## the 6 parent-category names) identical to the Instructional Resources
-## listing widget, so featured cards look the same there and here. Holds ALL
-## featured + reviewed resources (no cap). No auto-play; user scrolls manually.
-## .ctl-hscroll / .ctl-hscroll-item styles + the button-binding script below
-## are duplicated in ctl-widget_upcoming-activities-carousel_welcome-to-the-ctl.html on purpose, so each
-## widget is self-contained and can be dropped on any page independently. The
-## button-binding script guards against double-binding (via a data attribute)
-## in case both hscroll widgets end up on the same page together, as they do
-## on the home page.
+## Welcome to the CTL — Featured Resources carousel.
+## Pulls CtlInstructionalResource, filters to featured.selectValue == "yes"
+## AND non-empty reviewedBy (QC gate), renders in a horizontal-scroll row
+## (.ctl-hscroll) using the same card markup as the For Course Design listing
+## widget. No cap on item count; no auto-play, user scrolls manually.
+## featured is a Radio field — filtered in Velocity via pull-all + .selectValue,
+## not a Lucene query.
+## Note: .ctl-hscroll CSS/JS is duplicated in
+## ctl-widget_upcoming-activities-carousel_welcome-to-the-ctl.html on purpose
+## (each carousel widget is self-contained); its button-binding script guards
+## against double-binding since both carousels can appear on the same page.
 ## ============================================================
 
-<style>
-    .ctl-hscroll-wrap {
-        position: relative;
-    }
-    .ctl-hscroll {
-        display: flex;
-        gap: 1rem;
-        overflow-x: scroll;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        padding-top: 0.5rem;
-        padding-bottom: 0.75rem;
-        scrollbar-width: thin;
-        scrollbar-color: #730A00 #eee;
-    }
-    /* Force a persistent, always-visible scrollbar on WebKit/Blink browsers
-       (Chrome/Edge/Safari) so the row's scrollability doesn't depend on the
-       OS-level "show scrollbars: when scrolling" trackpad setting -- mouse
-       users with no trackpad gesture support otherwise never see it appear. */
-    .ctl-hscroll::-webkit-scrollbar {
-        height: 10px;
-    }
-    .ctl-hscroll::-webkit-scrollbar-track {
-        background: #eee;
-        border-radius: 10px;
-    }
-    .ctl-hscroll::-webkit-scrollbar-thumb {
-        background-color: #730A00;
-        border-radius: 10px;
-    }
-    .ctl-hscroll-item {
-        flex: 0 0 88%;
-        scroll-snap-align: start;
-    }
-    @media (min-width: 576px) {
-        .ctl-hscroll-item { flex-basis: 62%; }
-    }
-    @media (min-width: 768px) {
-        .ctl-hscroll-item { flex-basis: 48%; }
-    }
-    @media (min-width: 992px) {
-        .ctl-hscroll-item { flex-basis: 44%; } /* ~2.3 cards visible -- 2 full + a peek of the 3rd, standard/max desktop width. Stays here at all wider widths too (no further breakpoints) since the container itself caps out. */
-    }
-
-    .ctl-hscroll-btn {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 2;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #fff;
-        border: 1px solid #ccc;
-        border-radius: 50%;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        cursor: pointer;
-        color: #730A00;
-        font-size: 1.1rem;
-    }
-    .ctl-hscroll-btn:hover {
-        background: #730A00;
-        color: #fff;
-        border-color: #730A00;
-    }
-    .ctl-hscroll-btn.ctl-hscroll-prev { left: 0; }
-    .ctl-hscroll-btn.ctl-hscroll-next { right: 0; }
-    /* Reserve a side gutter (matches the button diameter + a little
-       breathing room) so the buttons sit beside the cards instead of
-       overlapping their text -- only added at widths where the buttons
-       are actually shown (see the max-width:575px rule below). */
-    @media (min-width: 576px) {
-        .ctl-hscroll-wrap { padding: 0 48px; }
-    }
-    /* Buttons crowd the peeking card on narrow screens where a single
-       item nearly fills the viewport -- scroll-snap + touch/trackpad
-       scrolling is still available, just without the button affordance. */
-    @media (max-width: 575px) {
-        .ctl-hscroll-btn { display: none; }
-    }
-
-    .ctl-res-card { position: relative; }
-    .ctl-res-fmt-badge { display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; background: #f4f4f4; color: #444; border: 1px solid #ddd; border-radius: 4px; margin-right: 4px; margin-bottom: 6px; }
-    .ctl-res-topic-chip { display: inline-block; font-size: 0.7rem; padding: 2px 9px; background: #fff; color: #666; border: 1px solid #ccc; border-radius: 20px; margin-right: 4px; margin-top: 4px; }
-    .ctl-res-card .card-title a { color: inherit; text-decoration: none; }
-    .ctl-res-card .card-title a:hover { color: #730A00; text-decoration: underline; }
-    .ctl-res-card img.ctl-res-thumb { width: 100%; height: 160px; object-fit: cover; }
-</style>
+<!-- .ctl-hscroll* / .ctl-res-* classes now come from the shared stylesheet
+     (styles/ctl-widgets.css), loaded via the <link> tag added to the sitewide
+     contact-info content block that already renders on every CTL page. No local
+     <style> block needed here anymore. -->
 
 <div class="container py-4">
   <h2 class="h3 fw-bold mb-4">Featured Resources</h2>

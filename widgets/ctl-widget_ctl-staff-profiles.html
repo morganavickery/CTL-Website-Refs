@@ -1,65 +1,21 @@
 ## ============================================================
-## ctl-widget_ctl-staff-profiles (split out of ctl_site_about-us.html, 2026-08-04)
-## Renders a full single-column bio card list (photo, expertise/help bullets,
-## absolutely-positioned actions) for CTL-affiliated CtlPersonnel. The
-## abbreviated multi-column FDC/Other Affiliates sections live in the
-## separate widgets/ctl-widget_fdc-member-grid_faculty-development-committee.html widget instead
-## — the two were split apart because they use different card layouts
-## (single-column list vs. compact grid) and only ever needed to share code
-## via the now-removed group-loop abstraction, which added complexity without
-## buying reuse once each widget only renders one layout.
+## CTL Staff profiles — full single-column bio cards for CtlPersonnel where
+## affiliations contains "CTL". Placed on About the CTL > Meet the CTL Staff,
+## and reused as a 2nd content instance on Request Support ("Make an
+## Appointment" section) — the $sectionHeading widget field (Text, falls back
+## to "Meet the CTL Staff") is what differs between the two instances.
+## Compact FDC/grid cards live separately in ctl-widget_fdc-member-grid_
+## faculty-development-committee.html.
 ##
-## REUSED AS-IS on the Request Support page (formerly "Get Help", renamed
-## 2026-08-04) as the "Make an Appointment" section — same CTL-affiliated
-## personnel list, same card layout, so rather than duplicate this widget's
-## code, Request Support places a second content instance of this SAME widget
-## (same dotCMS Widget content type / same Code field) with its own
-## `sectionHeading` field value set to "Make an Appointment". This is why the
-## heading below is NOT hardcoded — see $sectionHeading. Per user decision
-## 2026-08-04: the "Visit My Website" button (websitePromo/buttonLabel) is
-## intentionally NOT gated by which page the widget is placed on — it shows
-## on Request Support too, unlike the page-specific omission the old combined
-## ctl-site_get-help.html had.
-##
-## dotCMS setup required for the Request Support instance: add a Text field
-## `sectionHeading` (variable: sectionHeading) to this widget's content type
-## if not already present, then create a SECOND content record of this widget
-## type (reusing the same Code) with sectionHeading = "Make an Appointment",
-## and place that record in the Request Support page's container. The primary
-## instance — now on the "Meet the CTL Staff" subpage under "About the CTL"
-## (renamed from the flat "CTL Staff" subpage in the Funding/About IA
-## revision, 2026-08-04) — can either leave sectionHeading blank (defaults to
-## "Meet the CTL Staff" below) or set it explicitly.
-##
-## Field map (CtlPersonnel): name, pronouns (RADIO field, NOT Text as first
-## assumed -- confirmed 2026-07-28 via live render showing the raw
-## RadioMap.toString(); access via .selectValue + values/options lookup, same
-## pattern as the modality Checkbox elsewhere in this project). Options:
-## she/her, he/him, they/them, she/they, he/they, they/she, they/he, dont show
-## pronouns -- that last one is a real selectable value, treated same as blank
-## so the parenthetical is hidden. jobTitle + degrees combined onto one line
-## as "Job Title | Deg1, Deg2". headshotPhoto (image), rank (whole number --
-## display sort order; ALREADY a java.lang.Long at the Velocity layer despite
-## the "Text ... whole number" editor label -- see the rank-sort postmortem
-## below), websitePromo (URL) + buttonLabel (text, falls back to "Visit My
-## Website" when empty) -- shown on both instances of this widget (Meet the
-## CTL Staff AND Request Support), not gated by page. affiliations (Checkbox --
-## CheckboxMap, access via .selectedValues.contains(...)) -- option VALUES are
-## "CTL"/"FDC"/"Other" (capitalized, case-sensitive against .contains()).
-##
-## ROOT-CAUSED 2026-07-28 (rank sort): $p.rank was ALREADY a real
-## java.lang.Long the whole time (confirmed via $p.rank.class.name), NOT a
-## String, despite the field being labeled "Text ... whole number" in the
-## dotCMS editor. Earlier attempts forced it into a String first via
-## "$!p.rank" (quoted-string interpolation always stringifies, regardless of
-## underlying type), then tried converting it BACK to a Number ("+0"/"*1" on
-## the STRING) -- that reverse conversion silently failed (String arithmetic
-## throws in this engine's MathUtils, which makes the #set a no-op, leaving
-## the variable completely UNSET rather than null/zero). With every rank key
-## silently unset, the bubble sort's ">" comparison never evaluated true, so
-## nothing ever swapped. FIX: skip the round-trip -- use $p.rank DIRECTLY (already
-## a Long) as the sort key; only the blank-check needs the stringified
-## "$!p.rank" version.
+## Need to know:
+## - pronouns is a RADIO field -> .selectValue, mapped to display label via
+##   parallel .values/.options arrays. "dont show pronouns" is a real option,
+##   treated as blank.
+## - rank is already a java.lang.Long at the Velocity layer (despite the
+##   "Text ... whole number" editor label) — use $p.rank directly as the sort
+##   key, don't round-trip it through a String.
+## - affiliations is a Checkbox -> .selectedValues.contains(...); values are
+##   capitalized ("CTL"/"FDC"/"Other").
 ## ============================================================
 
 #set($allPersonnel = $dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true", 500, "score"))
@@ -98,35 +54,23 @@
     <!-- DEBUG: pulled $allPersonnel.size() CtlPersonnel record(s) total -- ctl=$ctlPersonnel.size() -->
 #end
 
-## per-instance widget field -- see the REUSED AS-IS header note above.
-## Falls back to "Meet the CTL Staff" (the primary instance's page heading,
-## under About the CTL) when unset, so that placement keeps working even
-## before this field is added/populated on its widget record in dotCMS.
+## per-instance field -- see header note above.
 #set($sectionHeading = "$!sectionHeading")
 #if($sectionHeading == "")
     #set($sectionHeading = "Meet the CTL Staff")
 #end
 
-<style>
-    .ctl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; padding: 6px 16px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; color: #730A00; background: transparent; border: 1px solid #730A00; border-radius: 4px; text-decoration: none; }
-    .ctl-btn:hover { background: #730A00; color: #fff; text-decoration: none; }
-
-    .ctl-gh-staff-list { display: flex; flex-direction: column; gap: 16px; }
-    .ctl-gh-staff-item { position: relative; }
-    .ctl-gh-staff-item .card-body { padding-right: 170px; }
-    .ctl-gh-staff-photo { width: 96px; height: 96px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
-    .ctl-gh-staff-card { display: flex; gap: 16px; align-items: flex-start; }
-    .ctl-gh-staff-actions { position: absolute; top: 16px; right: 16px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; text-align: right; }
-    .ctl-gh-staff-actions .ctl-btn { padding: 4px 12px; font-size: 0.72rem; }
-    .ctl-gh-section { }
-</style>
+<!-- .ctl-btn / .ctl-gh-staff-* classes now come from the shared stylesheet
+     (styles/ctl-widgets.css), loaded via the <link> tag added to the sitewide
+     contact-info content block that already renders on every CTL page. No local
+     <style> block needed here anymore. -->
 
 <div class="ctl-gh-section">
     <h2 class="mb-4">$sectionHeading</h2>
 
     #if($ctlPersonnel.size() == 0)
 
-        <div style="padding: 40px; text-align: center; color: #666;">
+        <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
             <p>Staff bios are coming soon &mdash; check back shortly.</p>
         </div>
 
@@ -144,10 +88,6 @@
                 #end
             #end
 
-            ## pronouns is a Radio field (RadioMap) -> .selectValue, mapped to its display
-            ## label via the parallel values/options arrays (same pattern as the modality
-            ## Checkbox elsewhere in this project). "dont show pronouns" is a real
-            ## selectable value, not a blank -- treated the same as blank (hidden).
             #set($pronounsDisplay = "")
             #if($p.pronouns && "$!p.pronouns.selectValue" != "" && "$!p.pronouns.selectValue" != "dont show pronouns")
                 #set($pVal = $p.pronouns.selectValue)
@@ -161,9 +101,6 @@
                 #end
             #end
 
-            ## websitePromo (URL) + buttonLabel (text, falls back to "Visit My Website"
-            ## when empty) -- shown on both instances of this widget (Meet the CTL Staff
-            ## AND Request Support), not gated by page.
             #set($websiteBtnLabel = "$!p.buttonLabel")
             #if($websiteBtnLabel == "")
                 #set($websiteBtnLabel = "Visit My Website")
@@ -176,10 +113,10 @@
                             <a href="mailto:$!p.emailCortlandEdu" class="text-body small">$!p.emailCortlandEdu</a>
                         #end
                         #if("$!p.bookWithMeFullLink" != "")
-                            <a class="ctl-btn" role="button" href="$!p.bookWithMeFullLink" target="_blank" rel="noopener">Meet with Me</a>
+                            <a class="ctl-btn" role="button" href="$!p.bookWithMeFullLink" target="_blank" rel="noopener" aria-label="Schedule a meeting with $!p.name (opens in new tab)">Meet with Me</a>
                         #end
                         #if("$!p.websitePromo" != "")
-                            <a class="ctl-btn" role="button" href="$!p.websitePromo" target="_blank" rel="noopener">$websiteBtnLabel</a>
+                            <a class="ctl-btn" role="button" href="$!p.websitePromo" target="_blank" rel="noopener" aria-label="$websiteBtnLabel: $!p.name (opens in new tab)">$websiteBtnLabel</a>
                         #end
                     </div>
                 #end
