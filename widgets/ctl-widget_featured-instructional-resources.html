@@ -1,21 +1,19 @@
-## ============================================================
 ## Welcome to the CTL — Featured Resources carousel.
 ## Pulls CtlInstructionalResource, filters to featured.selectValue == "yes"
 ## AND non-empty reviewedBy (QC gate), renders in a horizontal-scroll row
-## (.ctl-hscroll) using the same card markup as the For Course Design listing
-## widget. No cap on item count; no auto-play, user scrolls manually.
+## (.ctl-hscroll) using the same card markup as the Instructional Design Resources listing
+## widget. No cap on featured item count; no auto-play, user scrolls manually.
 ## featured is a Radio field — filtered in Velocity via pull-all + .selectValue,
 ## not a Lucene query.
-## Note: .ctl-hscroll CSS/JS is duplicated in
-## ctl-widget_upcoming-activities-carousel_welcome-to-the-ctl.html on purpose
-## (each carousel widget is self-contained); its button-binding script guards
+## If no items are featured+reviewed, falls back to the 3 most recently modified
+## reviewed resources (bubble sort descending by modDate — fixed [0..99] range +
+## #if guards, per CLAUDE.md's Velocity range-operator gotcha).
+## .ctl-hscroll CSS/JS is duplicated in ctl-widget_upcoming-activities-carousel.html
+## (each carousel widget is self-contained); the button-binding script guards
 ## against double-binding since both carousels can appear on the same page.
-## ============================================================
 
-<!-- .ctl-hscroll* / .ctl-res-* classes now come from the shared stylesheet
-     (styles/ctl-widgets.css), loaded via the <link> tag added to the sitewide
-     contact-info content block that already renders on every CTL page. No local
-     <style> block needed here anymore. -->
+<!-- .ctl-hscroll* / .ctl-res-* classes are defined in the shared stylesheet
+     (styles/ctl-widgets.css). -->
 
 <div class="container py-4">
   <h2 class="h3 fw-bold mb-4">Featured Resources</h2>
@@ -28,21 +26,63 @@
     </div>
 #end
 
+#set($reviewedResources = [])
 #set($featResources = [])
 #set($qcHiddenFeaturedCount = 0)
 #foreach($r in $allResources)
-    #if("$!r.featured.selectValue" == "yes")
-        #if("$!r.reviewedBy" != "")
-            #set($dummy = $featResources.add($r))
-        #else
-            #set($qcHiddenFeaturedCount = $qcHiddenFeaturedCount + 1)
+    #if("$!r.reviewedBy" != "")
+        #set($dummy = $reviewedResources.add($r))
+        #if("$!r.featured.selectValue" == "yes")
+            #set($dummy2 = $featResources.add($r))
+        #end
+    #elseif("$!r.featured.selectValue" == "yes")
+        #set($qcHiddenFeaturedCount = $qcHiddenFeaturedCount + 1)
+    #end
+#end
+
+## Fallback: nothing featured (after QC) -- show the 3 most recently modified
+## reviewed resources instead.
+#set($usingRecentFallback = false)
+#if($featResources.size() == 0 && $reviewedResources.size() > 0)
+    #set($usingRecentFallback = true)
+    #set($recentResources = [])
+    #foreach($r in $reviewedResources)
+        #set($dummy3 = $recentResources.add($r))
+    #end
+    #foreach($i in [0..99])
+        #if($i < $recentResources.size())
+            #foreach($j in [0..99])
+                #set($k = $j + 1)
+                #if($k < $recentResources.size())
+                    #set($a = $recentResources.get($j))
+                    #set($b = $recentResources.get($k))
+                    #set($aMs = 0)
+                    #if("$!a.modDate" != "")
+                        #set($aMs = $a.modDate.getTime())
+                    #end
+                    #set($bMs = 0)
+                    #if("$!b.modDate" != "")
+                        #set($bMs = $b.modDate.getTime())
+                    #end
+                    #if($aMs < $bMs)
+                        #set($dummy4 = $recentResources.set($j, $b))
+                        #set($dummy5 = $recentResources.set($k, $a))
+                    #end
+                #end
+            #end
+        #end
+    #end
+    #foreach($n in [0..2])
+        #if($n < $recentResources.size())
+            #set($dummy6 = $featResources.add($recentResources.get($n)))
         #end
     #end
 #end
 
 #if($EDIT_MODE)
     <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
-        &#128027; DEBUG: $featResources.size() featured + reviewed resource(s) will show.
+        &#128027; DEBUG: $featResources.size() resource(s) will show.
+        #if($usingRecentFallback) (no featured+reviewed items -- falling back to most recently modified)#end
         #if($qcHiddenFeaturedCount > 0) ($qcHiddenFeaturedCount featured item(s) hidden — empty reviewedBy)#end
     </div>
 #end
@@ -123,7 +163,7 @@
                         #end
                     </div>
                     <h3 class="h5 card-title">
-                        <a href="/centers/ctl/resources/course-design/$!r.urlTitle" class="stretched-link">$!r.resourceTitle</a>
+                        <a href="/centers/ctl/resources/instructional-design-resources/$!r.urlTitle" class="stretched-link">$!r.resourceTitle</a>
                     </h3>
                     #if($cardDesc != "")
                         <p class="card-text small">$cardDesc</p>

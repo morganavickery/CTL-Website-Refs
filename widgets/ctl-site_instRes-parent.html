@@ -1,5 +1,5 @@
 ## ============================================================
-## Resources > For Course Design — CtlInstructionalResource listing (v8).
+## Resources > Instructional Design Resources — CtlInstructionalResource listing (v8).
 ## dotCMS widget variable: CtlWidgetInstructionalParent
 ## Filters out unreviewed items (reviewedBy empty = QC-gated, edit-mode shows
 ## a count). Cards support radio filters (format/modality), a collapsible
@@ -31,10 +31,8 @@
     </div>
 #end
 
-<!-- .ctl-res-* card/filter-bar/pill/topic-cloud classes now come from the shared
-     stylesheet (styles/ctl-widgets.css), loaded via the <link> tag added to the
-     sitewide contact-info content block that already renders on every CTL page.
-     No local <style> block needed here anymore. -->
+<!-- .ctl-res-* card/filter-bar/pill/topic-cloud classes are defined in the
+     shared stylesheet (styles/ctl-widgets.css). -->
 
 <div class="ctl-res-listing">
 
@@ -139,7 +137,7 @@
                             #end
                         </div>
                         <h3 class="h5 card-title">
-                            <a href="/centers/ctl/resources/course-design/$!r.urlTitle" class="stretched-link">$!r.resourceTitle</a>
+                            <a href="/centers/ctl/resources/instructional-design-resources/$!r.urlTitle" class="stretched-link">$!r.resourceTitle</a>
                         </h3>
                         #if($cardDesc != "")
                             <p class="card-text small">$cardDesc</p>

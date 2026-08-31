@@ -1,19 +1,8 @@
-## ============================================================
-## Welcome to the CTL — homepage widget.
-## Static welcome text + a 6-tile nav grid (full 2x3 on desktop) linking to
-## the other top-level site sections (Request Support, Events, Funding,
-## Instructional Design Resources, Technology Resources, About the CTL).
-## Resources' two subpages get their own tiles instead of one combined
-## "Resources" tile. Tile labels below are hardcoded on purpose, NOT pulled
-## from the target page's own htmlpageasset title — "For Course Design" and
-## "For Technologies" are those pages' actual IA/page titles (see
-## CLAUDE.md's Site Information Architecture), but this widget intentionally
-## overrides that with different display copy ("Instructional Design
-## Resources" / "Technology Resources") for the homepage tile only.
-## No data pulls — just update the tile hrefs/labels here if the IA changes.
-## ============================================================
+## Homepage widget: static welcome text + a 6-tile nav grid linking to the
+## site's top-level sections. Resources' two subpages each get their own
+## tile. Tile labels/hrefs are hardcoded, not pulled from page titles — edit
+## directly if the IA changes.
 
-<h2>Welcome to the CTL!</h2>
 <p>
     The Center for Teaching and Learning (CTL) supports our community through developing and delivering engaging and innovative teaching resources for faculty and staff. We collaborate with offices, departments, and individual faculty members to improve teaching effectiveness and student success.
 
@@ -60,13 +49,13 @@
     </div>
 
     <div class="col">
-      <a href="/centers/ctl/resources/course-design" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+      <a href="/centers/ctl/resources/instructional-design-resources" class="card h-100 text-decoration-none text-body ctl-nav-tile">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-2">
             <i class="bi bi-book fs-3" aria-hidden="true"></i>
             <h3 class="h5 fw-bold mb-0 card-title">Instructional Design Resources</h3>
           </div>
-          <p class="card-text mb-0">Browse our course design database for curriculum planning and design frameworks.</p>
+          <p class="card-text mb-0">Browse our instructional design resources for curriculum planning and design frameworks.</p>
         </div>
       </a>
     </div>

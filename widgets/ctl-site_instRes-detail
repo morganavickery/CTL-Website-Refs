@@ -1,9 +1,9 @@
 ## ============================================================
-## Resources > For Course Design — single CtlInstructionalResource detail page.
+## Resources > Instructional Design Resources — single CtlInstructionalResource detail page.
 ## dotCMS widget variable: CtlWidgetInstDetail
 ## Matches the URL slug (last path segment) against urlTitle via pull-all +
 ## Velocity-side filter (no native urlMapPattern field on this content type).
-## URL Map Pattern: /centers/ctl/resources/course-design/{urlTitle}
+## URL Map Pattern: /centers/ctl/resources/instructional-design-resources/{urlTitle}
 ## ============================================================
 
 #set($forwardUri = $request.getAttribute("javax.servlet.forward.request_uri"))
@@ -19,10 +19,10 @@
 
 #set($matchList = [])
 
-#if($slug == "" || $slug == "course-design" || $slug == "resources" || $slug == "instructional-resource-detail" || $slug == "index" || $slug == "index.dot")
+#if($slug == "" || $slug == "instructional-design-resources" || $slug == "resources" || $slug == "instructional-resource-detail" || $slug == "index" || $slug == "index.dot")
     <div style="background: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 6px;">
         <h4 style="margin-top: 0;">🛠️ Editor System Template View</h4>
-        <p>No resource slug detected. To preview, publish this page and click a card from the For Course Design listing.</p>
+        <p>No resource slug detected. To preview, publish this page and click a card from the Instructional Design Resources listing.</p>
     </div>
 #else
     #set($allResources = $dotcontent.pull("+contentType:CtlInstructionalResource +languageId:1 +live:true", 500, "score"))
@@ -82,22 +82,40 @@
         #end
         #set($modAllSelected = $modCount >= 3)
 
-        ## --- body/citations: downgrade any H1/H2 in WYSIWYG content to H3 so editor-typed
-        ## headings can't clash with the page's own H1/H2 (accessibility/screenreader hazard) ---
+        ## --- body/citations: an H1 in WYSIWYG content would clash with the page's own H1,
+        ## so if content starts at H1, bump every heading down one level (H1->H2 ... H5->H6)
+        ## to preserve its internal hierarchy instead of flattening it. Runs deepest-level-first
+        ## so a freshly-bumped tag can't get caught by a later replacement step. ---
         #set($bodyHtml = "$!item.body")
         #if($bodyHtml != "")
-            #set($bodyHtml = $bodyHtml.replaceAll("(?i)<h1([^>]*)>", "<h3$1>"))
-            #set($bodyHtml = $bodyHtml.replaceAll("(?i)</h1>", "</h3>"))
-            #set($bodyHtml = $bodyHtml.replaceAll("(?i)<h2([^>]*)>", "<h3$1>"))
-            #set($bodyHtml = $bodyHtml.replaceAll("(?i)</h2>", "</h3>"))
+            #if($bodyHtml.toLowerCase().contains("<h1"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)<h5([^>]*)>", "<h6$1>"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)</h5>", "</h6>"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)<h4([^>]*)>", "<h5$1>"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)</h4>", "</h5>"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)<h3([^>]*)>", "<h4$1>"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)</h3>", "</h4>"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)<h2([^>]*)>", "<h3$1>"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)</h2>", "</h3>"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)<h1([^>]*)>", "<h2$1>"))
+                #set($bodyHtml = $bodyHtml.replaceAll("(?i)</h1>", "</h2>"))
+            #end
         #end
 
         #set($citationsHtml = "$!item.citations")
         #if($citationsHtml != "")
-            #set($citationsHtml = $citationsHtml.replaceAll("(?i)<h1([^>]*)>", "<h3$1>"))
-            #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h1>", "</h3>"))
-            #set($citationsHtml = $citationsHtml.replaceAll("(?i)<h2([^>]*)>", "<h3$1>"))
-            #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h2>", "</h3>"))
+            #if($citationsHtml.toLowerCase().contains("<h1"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)<h5([^>]*)>", "<h6$1>"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h5>", "</h6>"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)<h4([^>]*)>", "<h5$1>"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h4>", "</h5>"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)<h3([^>]*)>", "<h4$1>"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h3>", "</h4>"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)<h2([^>]*)>", "<h3$1>"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h2>", "</h3>"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)<h1([^>]*)>", "<h2$1>"))
+                #set($citationsHtml = $citationsHtml.replaceAll("(?i)</h1>", "</h2>"))
+            #end
         #end
 
         ## --- highlights: Textarea, one bullet per line, capped at 4 ---
@@ -143,18 +161,17 @@
             #end
         #end
 
-        <!-- .ctl-ir-* tag/chip/byline/related-card/hscroll classes now come from the
-             shared stylesheet (styles/ctl-widgets.css), loaded via the <link> tag added
-             to the sitewide contact-info content block that already renders on every CTL
-             page. No local <style> block needed here anymore. -->
+        <!-- .ctl-ir-* tag/chip/byline/related-card/hscroll classes, plus the
+             article-body skimmability classes (.ctl-article-toc, .ctl-req-grid,
+             .ctl-collapse-panel, .ctl-option-grid, etc.) used inside the `body`
+             field below, are defined in the shared stylesheet
+             (styles/ctl-widgets.css). -->
 
-        <article style="max-width: 860px;">
+        <article style="max-width: 860px;" data-resource-title="$item.resourceTitle">
 
             #if("$!item.thumbnail.fileName" != "")
                 <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.resourceTitle" style="width: 100%; max-height: 360px; object-fit: cover; border-radius: 8px; margin-bottom: 24px;" />
             #end
-
-            <h2 style="margin-top: 0;">$item.resourceTitle</h2>
 
             #if(!$frameworksList.isEmpty())
                 <div style="margin-bottom: 20px;">
@@ -166,7 +183,7 @@
 
             #if(!$highlightsList.isEmpty())
                 <div class="ctl-ir-highlights">
-                    <h3>Need to Know</h3>
+                    <h3>Highlights</h3>
                     <ul>
                         #foreach($h in $highlightsList)
                             <li>$h</li>
@@ -195,17 +212,12 @@
                     <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Downloads</h3>
                     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 500px;">
                         #foreach($file in $item.downloadableAttachments)
-                            #if("$!file.ctlAttachmentfile.rawUri" != "")
-                                <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="btn btn-default" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
+                            #if("$!file.ctlAttachmentfile.fileName" != "")
+                                <a href="$file.ctlAttachmentfile.path$file.ctlAttachmentfile.fileName" target="_blank" rel="noopener" class="btn btn-default" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
                                     <div style="width: 54px; height: 54px; flex-shrink: 0; background-color: #ffffff !important; color: var(--ctl-maroon) !important; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor;">
-                                        #if("$!file.ctlAttachmentfile.thumbnailUri" != "")
-                                            <img src="$file.ctlAttachmentfile.thumbnailUri" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: top; display: block;" />
-                                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(138, 42, 43, 0.2); z-index: 2; pointer-events: none;"></div>
-                                        #else
-                                            <div style="width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center;">
-                                                <i class="bi bi-file-earmark-pdf" style="font-size: 1.25rem; opacity: 0.5;"></i>
-                                            </div>
-                                        #end
+                                        <div style="width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-file-earmark-pdf" style="font-size: 1.25rem; opacity: 0.5;"></i>
+                                        </div>
                                     </div>
                                     <div style="display: flex; align-items: center; justify-content: space-between; flex: 1; padding: 0 16px; gap: 12px;">
                                         <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; line-height: 1.2;">$file.ctlAttachmentlabel</span>
@@ -215,6 +227,13 @@
                             #end
                         #end
                     </div>
+                </div>
+            #end
+
+            #if($citationsHtml != "")
+                <div style="margin-bottom: 28px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">Citations &amp; Further Reading</h3>
+                    <div style="font-size: 0.9rem; color: #444; line-height: 1.6;">$citationsHtml</div>
                 </div>
             #end
 
@@ -258,7 +277,7 @@
                                 <div class="card h-100 ctl-ir-related-card ctl-hover-lift">
                                     <div class="card-body">
                                         <h4 class="h6 card-title">
-                                            <a href="/centers/ctl/resources/course-design/$!rel.urlTitle" class="stretched-link">$!rel.resourceTitle</a>
+                                            <a href="/centers/ctl/resources/instructional-design-resources/$!rel.urlTitle" class="stretched-link">$!rel.resourceTitle</a>
                                         </h4>
                                         #if("$!rel.shortDescription" != "")
                                             <p class="card-text small">$rel.shortDescription</p>
@@ -282,15 +301,8 @@
                 </div>
             #end
 
-            #if($citationsHtml != "")
-                <div style="margin-bottom: 28px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">Citations &amp; Further Reading</h3>
-                    <div style="font-size: 0.9rem; color: #444; line-height: 1.6;">$citationsHtml</div>
-                </div>
-            #end
-
             <p style="margin-top: 40px;">
-                <a href="/centers/ctl/resources/course-design" style="color: inherit;">&larr; Back to For Course Design</a>
+                <a href="/centers/ctl/resources/instructional-design-resources" style="color: inherit;">&larr; Back to Instructional Design Resources</a>
             </p>
 
         </article>
@@ -299,7 +311,7 @@
         <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
             <h2>Not Found</h2>
             <p>Sorry, this resource could not be found or may have been removed.</p>
-            <a href="/centers/ctl/resources/course-design" style="color: inherit;">Return to For Course Design</a>
+            <a href="/centers/ctl/resources/instructional-design-resources" style="color: inherit;">Return to Instructional Design Resources</a>
         </div>
     #end
 #end
@@ -307,11 +319,19 @@
 #if($matchList.size() > 0)
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    ## Read the title from a data attribute on <article> rather than embedding it
+    ## in a JS string literal -- an apostrophe in the title would otherwise break
+    ## out of the string and throw, silently killing this whole script block.
+    var resourceTitle = document.querySelector('article[data-resource-title]');
+    resourceTitle = resourceTitle ? resourceTitle.getAttribute('data-resource-title') : '';
+
     var titleBanner = document.querySelector('.page-title h1');
-    if (titleBanner) {
-        titleBanner.textContent = '$item.resourceTitle';
+    if (titleBanner && resourceTitle) {
+        titleBanner.textContent = resourceTitle;
     }
-    document.title = '$item.resourceTitle';
+    if (resourceTitle) {
+        document.title = resourceTitle;
+    }
 
     var crumbs = document.querySelectorAll('ol.breadcrumb li.breadcrumb-item');
     if (crumbs.length >= 2) {
@@ -320,13 +340,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var parentLink = parentCrumb.querySelector('a');
         if (parentLink) {
-            parentLink.setAttribute('href', '/centers/ctl/resources/course-design');
-            parentLink.textContent = 'For Course Design';
+            parentLink.setAttribute('href', '/centers/ctl/resources/instructional-design-resources');
+            parentLink.textContent = 'Instructional Design Resources';
         } else {
-            parentCrumb.textContent = 'For Course Design';
+            parentCrumb.textContent = 'Instructional Design Resources';
         }
 
-        activeCrumb.textContent = '$item.resourceTitle';
+        // Resource titles can run long, so the trail stops at "Instructional
+        // Design Resources" instead of showing the article's own name.
+        activeCrumb.remove();
     }
 });
 </script>
