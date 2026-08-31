@@ -1,4 +1,3 @@
-## ============================================================
 ## Shared CtlActivity detail page — used for both Events and Funding
 ## (Current Opportunities / Past Recipients), since CtlActivity is one
 ## unified content type (isEvent/isOpportunity). Matches the URL slug
@@ -6,49 +5,30 @@
 ## listing prefixes; parentLabel/parentUrl below (used for the "Back to X"
 ## link and breadcrumb) are set based on which prefix the request came in on.
 ##
-## Concurrent Sessions (added 2026-08-20): conference activities
-## (isConference checked) relate to CtlActivitySession sub-records via
-## activitySessions. Grouped by sessionTimeBlock (Text field, 1-6) under
-## headings pulled from the parent's sessiontimeblockdefinitions Key-Value
-## field, sorted within each block by sessionrowsortorder, rendered as an
-## accordion (collapsed bar / expand-to-show-abstract, same toggle pattern
-## as Our Services' "Learn More"). This is the first code in this project
-## to touch a Key-Value field — no confirmed Velocity access pattern yet,
-## so the section still carries an EDIT_MODE debug panel dumping raw
-## values/class names, in case .containsKey()/.get() isn't the right call
-## for it either.
+## Page order: title/heading -> date/time/location -> registration box
+## (Add to Calendar + Register/Apply) -> activity description -> concurrent
+## sessions -> contact. Compensation info and the optional submission-track
+## box sit adjacent to the registration box; Downloads sits adjacent to the
+## description.
 ##
-## Confirmed via a live REST pull of both content types 2026-08-20, two
-## bugs found and fixed on the first pass (both the same "quiet empty
-## looks identical to wrong accessor" trap as the format/category and
-## rank bugs elsewhere in this project — this is why the isConference
-## checkbox originally never gated the section at all):
-##   - isConference's checkbox VALUE is capitalized "True", not lowercase
-##     "true" like every other checkbox on CtlActivity ("values":
-##     "yes|True" vs. isEvent's "values": "Yes|true") — .contains("true")
-##     silently never matched.
-##   - CtlActivitySession's Row Sort Order and Abstract fields are
-##     all-lowercase at the schema layer — sessionrowsortorder and
-##     sessionabstract, NOT camelCase sessionRowSortOrder/sessionAbstract
-##     — same lowercase-schema-variable trap as the parent's
-##     sessiontimeblockdefinitions. sessionTimeBlock itself IS camelCase
-##     and IS a plain Text field (not Select/Dropdown as first assumed),
-##     so the direct-string-comparison accessor for it was already right.
+## Concurrent Sessions: conference activities (isConference checked) relate
+## to CtlActivitySession sub-records via activitySessions. Grouped by
+## sessionTimeBlock (Text field, 1-6) under headings pulled from the parent's
+## sessiontimeblockdefinitions Key-Value field, sorted within each block by
+## sessionrowsortorder, rendered as an accordion. Each session's collapsible
+## body shows (in order): abstract, Session Materials downloads (if any), then
+## an auto-generated APA7 citation (see that section for date/author details).
 ##
-## Third bug, root-caused 2026-08-20 with real published session content
-## (title/room/speaker/abstract all confirmed filled in) still rendering
-## blank: the render loop's variable was named $session, which collides
-## with a dotCMS/Velocity built-in context variable (the HTTP session
-## object — this project already reserves $request/$response/$user as
-## globals elsewhere). #foreach still iterated the correct number of
-## times, but every $session.xxx field reference inside the loop body
-## silently resolved against the wrong object and quiet-printed empty —
-## proven by a parallel debug loop using a differently-named variable
-## ($dbgS) over the identical list, which printed every field correctly.
-## Renamed the loop variable to $sessItem throughout. New standing rule
-## for this file (and worth checking in any future Velocity loop in this
-## project): never name a #foreach variable $session, $request,
-## $response, or $user.
+## Need to know:
+## - isConference's checkbox VALUE is capitalized "True", unlike every other
+##   checkbox on CtlActivity (which use lowercase "true").
+## - CtlActivitySession's Row Sort Order and Abstract fields are all-lowercase
+##   at the schema layer: sessionrowsortorder, sessionabstract (not camelCase).
+##   sessionTimeBlock itself is camelCase and a plain Text field.
+## - Never name a #foreach loop variable $session — it collides with
+##   dotCMS/Velocity's built-in HTTP session object and every field reference
+##   inside the loop silently resolves against the wrong object. Use
+##   $sessItem (or similar) instead. Same applies to $request/$response/$user.
 ## ============================================================
 
 #set($now = $date.getDate())
@@ -103,22 +83,12 @@
 
         #set($isEventItem = $item.isEvent.selectedValues.contains("true"))
         #set($isOppItem = $item.isOpportunity.selectedValues.contains("true"))
-        ## isConference's checkbox VALUE is capitalized "True" (not lowercase "true"
-        ## like every other checkbox on this content type) — confirmed via REST pull
-        ## 2026-08-20: "values": "yes|True" vs. isEvent's "values": "Yes|true". Same
-        ## case-sensitive-.contains() trap as CtlPersonnel's affiliations field.
+        ## isConference's checkbox value is capitalized "True", unlike other checkboxes here.
         #set($isConferenceItem = $item.isConference.selectedValues.contains("True"))
 
-        ## ============================================================
-        ## Unconditional (EDIT_MODE-only, NOT gated on isConferenceItem)
-        ## Concurrent Sessions diagnostic — added 2026-08-20 to pinpoint
-        ## why the section wasn't appearing after live population. This
-        ## fires regardless of whether isConference/activitySessions check
-        ## out, so it tells us WHICH check is failing instead of just
-        ## "the section didn't render." The section's own debug panel
-        ## further down only fires once this gate already passes, so it
-        ## can't diagnose a gate failure by itself.
-        ## ============================================================
+        ## Concurrent Sessions diagnostic — fires regardless of whether the
+        ## isConference/activitySessions gate passes, so it shows which check
+        ## is failing rather than just "the section didn't render."
         #if($EDIT_MODE)
             #set($dbgIsConfRaw = "$!item.isConference.selectedValues")
             #set($dbgIsConfClass = "unknown")
@@ -182,12 +152,11 @@
         #end
 
         <!-- .ctl-tag / .ctl-badge-closed / .ctl-btn / .ctl-info-row / .ctl-deadline-box*
-             now come from the shared stylesheet (styles/ctl-widgets.css), loaded via the
-             <link> tag added to the sitewide contact-info content block that already
-             renders on every CTL page. No local <style> block needed here anymore. -->
+             are defined in the shared stylesheet (styles/ctl-widgets.css). -->
 
         <article style="max-width: 860px;">
 
+            ## ---- 1. Activity title / heading ----
             #if("$!item.thumbnail.fileName" != "")
                 <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" style="width: 100%; max-height: 360px; object-fit: cover; border-radius: 8px; margin-bottom: 24px;" />
             #end
@@ -204,7 +173,7 @@
 
             <h2 style="margin-top: 0;">$item.title</h2>
 
-            ## Event logistics: date/time/location/past-status/calendar action
+            ## ---- 2. Date, time, location ----
             <div class="ctl-info-row" style="margin-bottom: 12px;">
                 #if($isEventItem && "$!item.eventStartDate" != "")
                     <span><i class="bi bi-calendar-event"></i> $date.format('MMM d', $item.eventStartDate)#if("$!item.eventEndDate" != "" && $item.eventStartDate != $item.eventEndDate) &ndash; $date.format('MMM d, yyyy', $item.eventEndDate)#else, $date.format('yyyy', $item.eventStartDate)#end</span>
@@ -218,34 +187,40 @@
                 #if($isEventItem && $isPastEvent)
                     <span class="ctl-badge-closed">Past Event</span>
                 #end
-                #if($isEventItem && !$isPastEvent && "$!item.eventStartDate" != "")
-                    #set($calDatePart = $date.format('yyyyMMdd', $item.eventStartDate))
-                    #set($calEndDatePart = $calDatePart)
-                    #if("$!item.eventEndDate" != "")
-                        #set($calEndDatePart = $date.format('yyyyMMdd', $item.eventEndDate))
+            </div>
+
+            ## Add to Calendar renders inside the registration box below (next to
+            ## Register/Apply); only the ICS data is computed here.
+            #set($showAddToCalendar = false)
+            #if($isEventItem && !$isPastEvent && "$!item.eventStartDate" != "")
+                #set($showAddToCalendar = true)
+                #set($calDatePart = $date.format('yyyyMMdd', $item.eventStartDate))
+                #set($calEndDatePart = $calDatePart)
+                #if("$!item.eventEndDate" != "")
+                    #set($calEndDatePart = $date.format('yyyyMMdd', $item.eventEndDate))
+                #end
+                #set($icsDtStart = "")
+                #set($icsDtEnd = "")
+                #if("$!item.eventStartTime" != "")
+                    #set($calStartTimePart = $date.format('HHmmss', $item.eventStartTime))
+                    #set($calEndTimePart = $calStartTimePart)
+                    #if("$!item.eventEndTime" != "")
+                        #set($calEndTimePart = $date.format('HHmmss', $item.eventEndTime))
                     #end
-                    #set($icsDtStart = "")
-                    #set($icsDtEnd = "")
-                    #if("$!item.eventStartTime" != "")
-                        #set($calStartTimePart = $date.format('HHmmss', $item.eventStartTime))
-                        #set($calEndTimePart = $calStartTimePart)
-                        #if("$!item.eventEndTime" != "")
-                            #set($calEndTimePart = $date.format('HHmmss', $item.eventEndTime))
-                        #end
-                        #set($icsDtStart = "DTSTART:${calDatePart}T${calStartTimePart}")
-                        #set($icsDtEnd = "DTEND:${calEndDatePart}T${calEndTimePart}")
-                    #else
-                        #set($icsDtStart = "DTSTART;VALUE=DATE:${calDatePart}")
-                        #set($icsDtEnd = "DTEND;VALUE=DATE:${calEndDatePart}")
-                    #end
-                    #set($icsTitle = $item.title.replace(",", " "))
-                    #set($icsLocation = "")
-                    #if("$!item.eventLocation" != "")
-                        #set($icsLocation = $item.eventLocation.replace(",", " "))
-                    #end
-                    #set($icsUid = "${item.identifier}@ctl.cortland.edu")
-                    #set($icsStamp = "${calDatePart}T000000Z")
-                    #set($icsContent = "BEGIN:VCALENDAR
+                    #set($icsDtStart = "DTSTART:${calDatePart}T${calStartTimePart}")
+                    #set($icsDtEnd = "DTEND:${calEndDatePart}T${calEndTimePart}")
+                #else
+                    #set($icsDtStart = "DTSTART;VALUE=DATE:${calDatePart}")
+                    #set($icsDtEnd = "DTEND;VALUE=DATE:${calEndDatePart}")
+                #end
+                #set($icsTitle = $item.title.replace(",", " "))
+                #set($icsLocation = "")
+                #if("$!item.eventLocation" != "")
+                    #set($icsLocation = $item.eventLocation.replace(",", " "))
+                #end
+                #set($icsUid = "${item.identifier}@ctl.cortland.edu")
+                #set($icsStamp = "${calDatePart}T000000Z")
+                #set($icsContent = "BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//SUNY Cortland CTL//Activity//EN
 CALSCALE:GREGORIAN
@@ -258,41 +233,11 @@ SUMMARY:${icsTitle}
 LOCATION:${icsLocation}
 END:VEVENT
 END:VCALENDAR")
-                    #set($icsEncoded = $icsContent.replace(" ", "%20").replace("
+                #set($icsEncoded = $icsContent.replace(" ", "%20").replace("
 ", "%0A"))
-                    <a href="data:text/calendar;charset=utf8,${icsEncoded}" download="${slug}.ics" class="ctl-btn" aria-label="Add $item.title to your calendar">
-                        <i class="bi bi-calendar-plus"></i> Add to Calendar
-                    </a>
-                #end
-            </div>
-
-            ## Compensation info: visually separated from logistics since it's a different
-            ## kind of detail (compensation, not date/time/location)
-            #if("$!item.oppAmountPaid" != "" || "$!item.oppLaborExpectation" != "")
-                <div class="ctl-info-row" style="background: var(--ctl-gray-bg); border-radius: 6px; padding: 10px 14px; margin-bottom: 24px;">
-                    #if("$!item.oppAmountPaid" != "")
-                        <span><i class="bi bi-cash-stack"></i> <strong>#if(!$item.oppAmountPaid.startsWith("$"))$#end$item.oppAmountPaid</strong></span>
-                    #end
-                    #if("$!item.oppLaborExpectation" != "")
-                        <span><i class="bi bi-info-circle"></i> $item.oppLaborExpectation</span>
-                    #end
-                </div>
             #end
 
-            
-
-            #if("$!item.longDescription" != "")
-                <div style="line-height: 1.7; font-size: 1rem; color: #333; margin-bottom: 28px;">$item.longDescription</div>
-            #end
-
-            #if("$!item.primaryContact" != "")
-                <dl style="font-size: 0.95rem; border-top: 1px solid var(--ctl-border); padding-top: 20px; margin-bottom: 28px;">
-                    <dt style="font-weight: 700;">Contact</dt>
-                    <dd style="margin: 2px 0 0 0;">$item.primaryContact</dd>
-                </dl>
-            #end
-
-            ## Primary signup box: registration or application only
+            ## ---- 3. Registration box (Register/Apply + Add to Calendar together) ----
             #if($showSignupRow)
                 #set($badgeText = "Registration Required")
                 #set($badgeBg = "var(--ctl-maroon-tint)")
@@ -317,7 +262,36 @@ END:VCALENDAR")
                         #elseif("$!item.registerApplyLink" != "" && "$!item.registerApplyLink" != "http://")
                             <a href="$item.registerApplyLink" target="_blank" class="ctl-btn" aria-label="$ctaLabel for $item.title (opens in new tab)">$ctaLabel</a>
                         #end
+                        #if($showAddToCalendar)
+                            <a href="data:text/calendar;charset=utf8,${icsEncoded}" download="${slug}.ics" class="ctl-btn" aria-label="Add $item.title to your calendar">
+                                <i class="bi bi-calendar-plus"></i> Add to Calendar
+                            </a>
+                        #end
                     </div>
+                </div>
+            #elseif($showAddToCalendar)
+                ## No formal registration/application on this activity, but it's
+                ## still an upcoming dated event -- keep Add to Calendar available
+                ## on its own in a lighter version of the same box.
+                <div class="ctl-deadline-box">
+                    <div class="ctl-info-row">
+                        <a href="data:text/calendar;charset=utf8,${icsEncoded}" download="${slug}.ics" class="ctl-btn" aria-label="Add $item.title to your calendar">
+                            <i class="bi bi-calendar-plus"></i> Add to Calendar
+                        </a>
+                    </div>
+                </div>
+            #end
+
+            ## Compensation info: kept adjacent to the registration box since it's
+            ## the same kind of "signup-adjacent fact" as the deadline/badge above.
+            #if("$!item.oppAmountPaid" != "" || "$!item.oppLaborExpectation" != "")
+                <div class="ctl-info-row" style="background: var(--ctl-gray-bg); border-radius: 6px; padding: 10px 14px; margin-bottom: 24px;">
+                    #if("$!item.oppAmountPaid" != "")
+                        <span><i class="bi bi-cash-stack"></i> <strong>#if(!$item.oppAmountPaid.startsWith("$"))$#end$item.oppAmountPaid</strong></span>
+                    #end
+                    #if("$!item.oppLaborExpectation" != "")
+                        <span><i class="bi bi-info-circle"></i> $item.oppLaborExpectation</span>
+                    #end
                 </div>
             #end
 
@@ -345,22 +319,22 @@ END:VCALENDAR")
                 </div>
             #end
 
+            ## ---- 4. Activity description ----
+            #if("$!item.longDescription" != "")
+                <div style="line-height: 1.7; font-size: 1rem; color: #333; margin-bottom: 28px;">$item.longDescription</div>
+            #end
+
             #if($item.attachments && $item.attachments.size() > 0)
                 <div style="margin-bottom: 32px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Downloads</h3>
                     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 500px;">
                         #foreach($file in $item.attachments)
-                            #if("$!file.ctlAttachmentfile.rawUri" != "")
-                                <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="btn btn-default" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
+                            #if("$!file.ctlAttachmentfile.fileName" != "")
+                                <a href="$file.ctlAttachmentfile.path$file.ctlAttachmentfile.fileName" target="_blank" rel="noopener" class="btn btn-default" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
                                     <div style="width: 54px; height: 54px; flex-shrink: 0; background-color: #ffffff !important; color: var(--ctl-maroon) !important; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor;">
-                                        #if("$!file.ctlAttachmentfile.thumbnailUri" != "")
-                                            <img src="$file.ctlAttachmentfile.thumbnailUri" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: top; display: block;" />
-                                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(138, 42, 43, 0.2); z-index: 2; pointer-events: none;"></div>
-                                        #else
-                                            <div style="width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center;">
-                                                <i class="bi bi-file-earmark-pdf" style="font-size: 1.25rem; opacity: 0.5;"></i>
-                                            </div>
-                                        #end
+                                        <div style="width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-file-earmark-pdf" style="font-size: 1.25rem; opacity: 0.5;"></i>
+                                        </div>
                                     </div>
                                     <div style="display: flex; align-items: center; justify-content: space-between; flex: 1; padding: 0 16px; gap: 12px;">
                                         <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; line-height: 1.2;">$file.ctlAttachmentlabel</span>
@@ -373,7 +347,7 @@ END:VCALENDAR")
                 </div>
             #end
 
-            ## Concurrent Sessions — see file header for the 2026-08-20 writeup.
+            ## ---- 5. Concurrent Sessions (if applicable) ----
             ## Gated on isConference (not just activitySessions.size() > 0) so a
             ## non-conference activity never shows this UI even if a session got
             ## related to it by mistake.
@@ -381,6 +355,27 @@ END:VCALENDAR")
                 #set($allSessions = [])
                 #foreach($s in $item.activitySessions)
                     #set($dummy = $allSessions.add($s))
+                #end
+
+                ## Acronym -> Bootstrap Icon lookup for session tags (parallel arrays —
+                ## this Velocity engine has no map-literal support). Acronyms:
+                ## DP, PPR, TBC, CC, WSC, ISW, M.
+                #set($ctlTagKeys = ["DP", "PPR", "TBC", "CC", "WSC", "ISW", "M"])
+                #set($ctlTagIcons = ["bi-laptop", "bi-journal-bookmark", "bi-people-fill", "bi-briefcase", "bi-heart", "bi-mortarboard", "bi-compass"])
+
+                ## APA7 citation date, shared by every session — CtlActivitySession has
+                ## no date field of its own, so the parent's eventStartDate/eventEndDate
+                ## stands in.
+                #set($citeDateStr = "")
+                #if("$!item.eventStartDate" != "")
+                    #set($citeYear = $date.format('yyyy', $item.eventStartDate))
+                    #set($citeMonthDay = $date.format('MMMM d', $item.eventStartDate))
+                    #if("$!item.eventEndDate" != "" && $item.eventStartDate != $item.eventEndDate)
+                        #set($citeMonthDayEnd = $date.format('MMMM d', $item.eventEndDate))
+                        #set($citeDateStr = "$citeYear, $citeMonthDay&ndash;$citeMonthDayEnd")
+                    #else
+                        #set($citeDateStr = "$citeYear, $citeMonthDay")
+                    #end
                 #end
 
                 #if($EDIT_MODE)
@@ -394,16 +389,10 @@ END:VCALENDAR")
                         sessiontimeblockdefinitions class: $item.sessiontimeblockdefinitions.class.name,
                         keys: $item.sessiontimeblockdefinitions.keySet()
                     </div>
-                    ## Per-session field dump, added 2026-08-20 after sessionTimeBlock
-                    ## kept resolving fine while sessionTitle/sessionRoom/sessionSpeakers/
-                    ## sessionabstract rendered empty even on a record the user manually
-                    ## confirmed has real published data. Prints identifier/inode/live/
-                    ## working/modDate alongside each field's raw value + class, so a
-                    ## genuinely-blank field (renders "" but class still resolves, e.g.
-                    ## java.lang.String) can be told apart from a stale/wrong-version
-                    ## object (identifier/modDate won't match what's in the content
-                    ## editor) or an unresolved reference (the WHOLE line fails to print
-                    ## and further lines after it vanish too, same tell as the rank bug).
+                    ## Per-session field dump: prints identifier/inode/live/working/modDate
+                    ## alongside each field's raw value + class, to tell a genuinely-blank
+                    ## field apart from a stale/wrong-version object or an unresolved
+                    ## reference (which silently drops the rest of the line too).
                     <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.75rem; font-family: monospace;">
                         &#128027; DEBUG (per-session field dump):<br/>
                         #foreach($dbgS in $allSessions)
@@ -417,144 +406,20 @@ END:VCALENDAR")
                     </div>
                 #end
 
-                <!-- TEMPORARY local <style> block, added 2026-08-20. The
-                     shared stylesheet (styles/ctl-widgets.css, loaded via
-                     <link> on every CTL page) contains these exact rules
-                     already, but the live copy at
-                     /centers/ctl/ctl-widgets.css is stuck serving a stale
-                     version (confirmed via direct fetch: it's missing
-                     everything added after early August, including these
-                     .ctl-session-* rules) — this looks like a dotCMS
-                     caching/publish issue independent of this project's
-                     code, still being tracked down. Embedding the rules
-                     locally here matches how every widget worked before
-                     the 2026-08-05 stylesheet consolidation, so this page
-                     renders correctly regardless of the stale shared file.
-                     REMOVE this block once the live shared stylesheet is
-                     confirmed serving current content again — leaving both
-                     copies in place long-term risks them drifting apart. -->
-                <style>
-                    .ctl-session-block { margin-bottom: 24px; }
-                    .ctl-session-block:last-child { margin-bottom: 0; }
-                    .ctl-session-block-heading {
-                        font-size: 0.95rem;
-                        font-weight: 700;
-                        color: var(--ctl-maroon);
-                        margin-bottom: 10px;
-                    }
-                    .ctl-session-item {
-                        border: 1px solid var(--ctl-border);
-                        border-radius: 6px;
-                        margin-bottom: 8px;
-                        overflow: hidden;
-                    }
-                    .ctl-session-item:last-child { margin-bottom: 0; }
-                    .ctl-session-toggle {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        gap: 12px;
-                        width: 100%;
-                        padding: 12px 14px;
-                        border: none;
-                        background: var(--ctl-gray-bg);
-                        text-align: left;
-                        cursor: pointer;
-                    }
-                    .ctl-session-toggle:hover,
-                    .ctl-session-toggle:focus-visible {
-                        background: var(--ctl-navy-tint);
-                    }
-                    .ctl-session-toggle-main {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 2px;
-                        min-width: 0;
-                    }
-                    .ctl-session-title {
-                        font-weight: 700;
-                        font-size: 0.95rem;
-                    }
-                    .ctl-session-meta {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 2px 12px;
-                        font-size: 0.82rem;
-                        color: var(--ctl-gray-text);
-                    }
-                    .ctl-session-meta-item {
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 4px;
-                    }
-                    .ctl-session-summary {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 6px;
-                        padding: 0 14px 12px;
-                        background: var(--ctl-gray-bg);
-                    }
-                    .ctl-session-toggle-icon {
-                        flex-shrink: 0;
-                        font-size: 0.75rem;
-                        color: var(--ctl-maroon);
-                        transition: transform 0.15s ease;
-                    }
-                    .ctl-session-toggle[aria-expanded="true"] .ctl-session-toggle-icon {
-                        transform: rotate(180deg);
-                    }
-                    .ctl-session-body {
-                        padding: 14px;
-                        border-top: 1px solid var(--ctl-border);
-                        font-size: 0.9rem;
-                    }
-                    .ctl-session-abstract { line-height: 1.65; }
-                    .ctl-session-abstract p,
-                    .ctl-session-abstract ul,
-                    .ctl-session-abstract ol {
-                        margin-bottom: 0.85em;
-                    }
-                    .ctl-session-abstract p:last-child { margin-bottom: 0; }
-                    .ctl-session-materials {
-                        margin-top: 14px;
-                        padding-top: 12px;
-                        border-top: 1px dashed var(--ctl-border);
-                    }
-                    .ctl-session-materials-label {
-                        display: block;
-                        font-size: 0.68rem;
-                        font-weight: 700;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                        color: var(--ctl-gray-text);
-                        margin-bottom: 8px;
-                    }
-                    .ctl-session-material-link {
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 6px;
-                        font-size: 0.85rem;
-                        color: var(--ctl-maroon);
-                        margin-right: 16px;
-                        margin-bottom: 6px;
-                    }
-                    .ctl-session-material-link:hover,
-                    .ctl-session-material-link:focus-visible {
-                        text-decoration: underline;
-                    }
-                </style>
+                <!-- .ctl-session-* classes are defined in the shared stylesheet
+                     (styles/ctl-widgets.css). -->
 
                 <div class="ctl-sessions-section" style="margin-bottom: 32px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Concurrent Sessions</h3>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Sessions</h3>
 
-                    ## Fixed range [1..20], NOT [1..6] — live-tested 2026-08-20 on
-                    ## Adjunct Development Day found a real session using time block 7,
-                    ## contradicting the Variable Map's documented "Values 1–6". 20 is a
-                    ## generous fixed ceiling (cheap to over-iterate; each pass is just an
-                    ## #if membership check) rather than trusting that documented cap.
+                    ## Fixed ORDER list, not a numeric [1..20] range — sessionTimeBlock can
+                    ## hold a non-numeric key (e.g. "Lunch") that needs to render between
+                    ## numeric blocks, which a pure ascending-integer loop can't place, and
+                    ## Key-Value field iteration order isn't guaranteed. Add any future
+                    ## non-numeric block key here in its intended position.
                     #set($sessionIdCounter = 0)
-                    #foreach($blockNum in [1..20])
-                        #set($blockNumStr = "$blockNum")
+                    #set($blockOrder = ["1", "2", "3", "Lunch", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
+                    #foreach($blockNumStr in $blockOrder)
                         #set($blockSessions = [])
                         #foreach($s in $allSessions)
                             #if("$!s.sessionTimeBlock" == $blockNumStr)
@@ -569,16 +434,11 @@ END:VCALENDAR")
                         #end
 
                         #if($blockSessions.size() > 0)
-                            ## Bubble sort ascending by sessionrowsortorder (confirmed
-                            ## all-lowercase live schema variable via REST pull
-                            ## 2026-08-20 — same lowercase-schema trap as the parent's
-                            ## sessiontimeblockdefinitions). Fixed [0..99] bounds +
-                            ## explicit #if guards (not a range derived from
-                            ## blockSessions.size()) per the Velocity descending-range
-                            ## gotcha. Read directly as numeric, no String round-trip —
-                            ## same fix as the rank/reportYearStart bugs, since a
-                            ## "Text... number" editor label doesn't mean the
-                            ## Velocity-layer type is actually a String.
+                            ## Bubble sort ascending by sessionrowsortorder (all-lowercase
+                            ## schema variable). Fixed [0..99] bounds + #if guards, not a
+                            ## range derived from blockSessions.size() — see CLAUDE.md's
+                            ## Velocity range-operator gotcha. Read directly as numeric,
+                            ## no String round-trip needed.
                             #foreach($i in [0..99])
                                 #if($i < $blockSessions.size())
                                     #foreach($j in [0..99])
@@ -608,26 +468,16 @@ END:VCALENDAR")
                                 #set($blockLabel = $item.sessiontimeblockdefinitions.get($blockNumStr))
                             #end
                             #if("$!blockLabel" == "")
-                                #set($blockLabel = "Concurrent Sessions $blockNumStr")
+                                #set($blockLabel = "Sessions $blockNumStr")
                             #end
 
                             <div class="ctl-session-block">
                                 <h4 class="ctl-session-block-heading">$blockLabel</h4>
 
-                                ## Loop variable is $sessItem, NOT $session — root-caused
-                                ## 2026-08-20: $session collides with a dotCMS/Velocity
-                                ## built-in context variable (the HTTP session object,
-                                ## alongside $request/$response/$user already used
-                                ## elsewhere in this project). Using it as a #foreach
-                                ## variable name doesn't error and doesn't break iteration
-                                ## count, but every $session.xxx field reference inside the
-                                ## loop silently resolves against the wrong object and
-                                ## quiet-prints empty — while a debug loop using a
-                                ## differently-named variable ($dbgS) over the exact same
-                                ## list printed every field correctly. Same "quiet empty
-                                ## looks identical to a real bug" trap as the rest of this
-                                ## project's gotchas, just at the variable-naming layer
-                                ## instead of the field-naming layer.
+                                ## Loop variable is $sessItem, NOT $session — $session collides
+                                ## with dotCMS/Velocity's built-in HTTP session object, and every
+                                ## $session.xxx reference inside the loop would silently resolve
+                                ## against the wrong object instead of erroring.
                                 #foreach($sessItem in $blockSessions)
                                     #set($sessionIdCounter = $sessionIdCounter + 1)
                                     #set($sessionAnchorId = "ctlSession$sessionIdCounter")
@@ -651,19 +501,25 @@ END:VCALENDAR")
                                                     #if("$!sessItem.sessionSpeakers" != "")<span class="ctl-session-meta-item"><i class="bi bi-people"></i> $sessItem.sessionSpeakers</span>#end
                                                 </span>
                                             </span>
-                                            <span class="ctl-session-toggle-icon" aria-hidden="true">&#9662;</span>
-                                        </button>
-                                        ## Always-visible summary row (tags) — sits outside the
-                                        ## collapsible body per 2026-08-20 request: title/room/
-                                        ## speakers/tags should show even when collapsed, only
-                                        ## abstract/materials should require expanding.
-                                        #if($tagList.size() > 0)
-                                            <div class="ctl-session-summary">
-                                                #foreach($tag in $tagList)
-                                                    <span class="ctl-tag">$tag</span>
+                                            ## Tags now sit top-right of the tile, next to the chevron,
+                                            ## always visible whether the tile is collapsed or expanded.
+                                            <span class="ctl-session-toggle-right">
+                                                #if($tagList.size() > 0)
+                                                    <span class="ctl-session-tags">
+                                                        #foreach($tag in $tagList)
+                                                            #set($tagIconClass = "bi-tag")
+                                                            #foreach($tk in [0..6])
+                                                                #if($tk < $ctlTagKeys.size() && $ctlTagKeys.get($tk) == $tag)
+                                                                    #set($tagIconClass = $ctlTagIcons.get($tk))
+                                                                #end
+                                                            #end
+                                                            <span class="ctl-session-tag"><i class="bi $tagIconClass"></i>$tag</span>
+                                                        #end
+                                                    </span>
                                                 #end
-                                            </div>
-                                        #end
+                                                <span class="ctl-session-toggle-icon" aria-hidden="true">&#9662;</span>
+                                            </span>
+                                        </button>
                                         <div class="ctl-session-body" id="$sessionAnchorId" hidden>
                                             #if("$!sessItem.sessionabstract" != "")
                                                 <div class="ctl-session-abstract">$sessItem.sessionabstract</div>
@@ -672,14 +528,24 @@ END:VCALENDAR")
                                                 <div class="ctl-session-materials">
                                                     <span class="ctl-session-materials-label">Session Materials</span>
                                                     #foreach($file in $sessItem.sessionAttachments)
-                                                        #if("$!file.ctlAttachmentfile.rawUri" != "")
-                                                            <a href="$file.ctlAttachmentfile.rawUri" target="_blank" rel="noopener" class="ctl-session-material-link" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)">
+                                                        #if("$!file.ctlAttachmentfile.fileName" != "")
+                                                            <a href="$file.ctlAttachmentfile.path$file.ctlAttachmentfile.fileName" target="_blank" rel="noopener" class="ctl-session-material-link" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)">
                                                                 <i class="bi bi-download"></i> $file.ctlAttachmentlabel
                                                             </a>
                                                         #end
                                                     #end
                                                 </div>
                                             #end
+
+                                            ## APA7 citation: title rendered as entered, not forced to
+                                            ## sentence case (risks mangling acronyms/proper nouns).
+                                            ## sessionSpeakers is plain "First Last, First Last" free
+                                            ## text, so authors render as entered, not inverted to
+                                            ## APA's "Last, F. M." form.
+                                            <div class="ctl-session-citation">
+                                                <span class="ctl-session-citation-label">Suggested Citation (APA 7)</span>
+                                                <p class="ctl-session-citation-text">$!sessItem.sessionSpeakers. #if("$!citeDateStr" != "")($citeDateStr).#else(n.d.).#end <em>$!sessItem.sessionTitle</em> [Conference session]. $item.title#if("$!item.eventLocation" != ""), $item.eventLocation#end.</p>
+                                            </div>
                                         </div>
                                     </div>
                                 #end
@@ -687,6 +553,14 @@ END:VCALENDAR")
                         #end
                     #end
                 </div>
+            #end
+
+            ## ---- 6. Contact ----
+            #if("$!item.primaryContact" != "")
+                <dl style="font-size: 0.95rem; border-top: 1px solid var(--ctl-border); padding-top: 20px; margin-bottom: 28px;">
+                    <dt style="font-weight: 700;">Contact</dt>
+                    <dd style="margin: 2px 0 0 0;">$item.primaryContact</dd>
+                </dl>
             #end
 
             <p style="margin-top: 40px;">
