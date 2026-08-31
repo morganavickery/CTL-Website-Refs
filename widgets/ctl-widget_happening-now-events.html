@@ -1,0 +1,146 @@
+## Events — "Happening Now" listing.
+## Pulls CtlActivity, filters to isEvent + start date <= today <= end date
+## (day granularity). One of three partitioned event sections — Upcoming
+## (start strictly after today) and Past (end strictly before today) exclude
+## anything that lands here, so an event never appears in more than one
+## section. Sorted by start date ascending. Same card layout as Upcoming
+## Events plus a maroon "Happening Now" badge and left accent bar.
+## Whole tile links to the detail page (.stretched-link on the title); the
+## Register button still works independently on top of it (z-index rule in
+## the shared stylesheet). Renders nothing when no event is currently underway.
+##
+## Dates compared as 'yyyyMMdd' strings via String.compareTo() (returns a
+## primitive int, sidestepping this engine's broken String < / > operators)
+## rather than raw epoch ms. Manual bubble sort, fixed ranges + #if guards —
+## see the range-operator gotcha in CLAUDE.md.
+
+#set($now = $date.getDate())
+#set($todayKey = $date.format('yyyyMMdd', $now))
+#set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1 +live:true +deleted:false", 100, "score"))
+#set($allEvents = [])
+#foreach($item in $allActivities)
+    #if($item.isEvent.selectedValues.contains("true"))
+        #set($dummy = $allEvents.add($item))
+    #end
+#end
+#set($nowItems = [])
+#set($nowKeys = [])
+#foreach($item in $allEvents)
+    #set($hasStart = ("$!item.eventStartDate" != ""))
+    #set($hasEnd = ("$!item.eventEndDate" != ""))
+    #if($hasStart)
+        #set($startKey = $date.format('yyyyMMdd', $item.eventStartDate))
+    #elseif($hasEnd)
+        #set($startKey = $date.format('yyyyMMdd', $item.eventEndDate))
+    #else
+        #set($startKey = "")
+    #end
+    #if($hasEnd)
+        #set($endKey = $date.format('yyyyMMdd', $item.eventEndDate))
+    #elseif($hasStart)
+        #set($endKey = $startKey)
+    #else
+        #set($endKey = "")
+    #end
+    #if($startKey != "" && $endKey != "" && $startKey.compareTo($todayKey) <= 0 && $endKey.compareTo($todayKey) >= 0)
+        #set($dummy = $nowItems.add($item))
+        #set($dummy = $nowKeys.add($startKey))
+    #end
+#end
+
+## ---- manual bubble sort ascending by startKey ----
+#set($n = $nowItems.size())
+#foreach($i in [0..99])
+  #if($i < $n)
+    #set($limit = $n - $i - 1)
+    #foreach($j in [0..99])
+      #if($j < $limit)
+        #set($jPlus1 = $j + 1)
+        #set($keyA = $nowKeys.get($j))
+        #set($keyB = $nowKeys.get($jPlus1))
+        #if($keyA.compareTo($keyB) > 0)
+          #set($itemTmp = $nowItems.get($j))
+          #set($keyTmp = $nowKeys.get($j))
+          #set($nowItems[$j] = $nowItems.get($jPlus1))
+          #set($nowKeys[$j] = $nowKeys.get($jPlus1))
+          #set($nowItems[$jPlus1] = $itemTmp)
+          #set($nowKeys[$jPlus1] = $keyTmp)
+        #end
+      #end
+    #end
+  #end
+#end
+#set($happeningNowList = $nowItems)
+
+#if($EDIT_MODE)
+    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+        &#128027; DEBUG: $allEvents.size() event record(s), $happeningNowList.size() happening now.
+    </div>
+#end
+
+#if($happeningNowList.size() > 0)
+<h2 class="section-title">Happening Now</h2>
+<div class="event-listing-group" style="display: flex; flex-direction: column; gap: 20px; margin-left: 10px; margin-bottom: 30px;">
+    #foreach($item in $happeningNowList)
+        <div class="ctl-listing-card ctl-hover-lift" style="border-left: 4px solid var(--ctl-maroon); background: var(--ctl-maroon-tint);">
+            #if("$!item.thumbnail.fileName" != "")
+                <div style="flex: 0 0 200px;">
+                    <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" style="width: 200px; height: 150px; object-fit: cover; border-radius: 6px;" />
+                </div>
+            #end
+            <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; flex-direction: column; margin-bottom: 14px;">
+                    <div style="order: 1; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                        <span class="ctl-badge" style="background-color: var(--ctl-maroon); color: #fff;">Happening Now</span>
+                        #if($item.categories && $item.categories.size() > 0)
+                            #foreach($cat in $item.categories)
+                                #if("$!cat.categoryName" != "")
+                                    <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; background-color: var(--ctl-gray-bg); color: #444; border: 1px solid var(--ctl-border); border-radius: 4px; display: inline-block; line-height: 1;">$cat.categoryName</span>
+                                #end
+                            #end
+                        #end
+                    </div>
+                    <h3 style="order: 2; margin: 0; font-size: 1.35rem; font-weight: 700; line-height: 1.3;">
+                        <a href="/centers/ctl/activities/$item.urlMapPattern" class="ctl-listing-title-link stretched-link">$item.title</a>
+                    </h3>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.9rem; color: var(--ctl-gray-text);">
+                    #if("$!item.eventStartDate" != "")
+                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-calendar-event" style="font-size: 0.95rem;"></i>
+                            <span>$date.format('MMM d', $item.eventStartDate)#if("$!item.eventEndDate" != "" && $item.eventStartDate != $item.eventEndDate) &ndash; $date.format('MMM d, yyyy', $item.eventEndDate)#else, $date.format('yyyy', $item.eventStartDate)#end</span>
+                        </span>
+                    #end
+                    #if("$!item.eventStartDate" != "")
+                        <span style="color: var(--ctl-border);">|</span>
+                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-clock" style="font-size: 0.95rem;"></i>
+                            <span>$date.format('h:mma', $item.eventStartDate).toLowerCase()#if("$!item.eventEndDate" != "") &ndash; $date.format('h:mma', $item.eventEndDate).toLowerCase()#end</span>
+                        </span>
+                    #end
+                    #if("$!item.eventLocation" != "")
+                        <span style="color: var(--ctl-border);">|</span>
+                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-geo-alt" style="font-size: 0.95rem;"></i>
+                            <span>$item.eventLocation</span>
+                        </span>
+                    #end
+                </div>
+                <div style="border-top: 1px solid var(--ctl-border); margin-top: 14px; margin-bottom: 14px;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+                    #if("$!item.shortDescription" != "")
+                        <div style="margin: 0; color: #444; font-size: 0.95rem; flex: 1; line-height: 1.4;">$item.shortDescription</div>
+                    #end
+                    <div style="flex-shrink: 0;">
+                        #if("$!item.registerApplyLink" != "" && "$!item.registerApplyLink" != "http://")
+                            <a href="$item.registerApplyLink" target="_blank" class="btn btn-default btn-sm" aria-label="Register for $item.title (opens in new tab)">Register</a>
+                        #else
+                            <a href="/centers/ctl/activities/$item.urlMapPattern" class="btn btn-default btn-sm" aria-label="View details for $item.title">Details</a>
+                        #end
+                    </div>
+                </div>
+            </div>
+        </div>
+    #end
+</div>
+#end

@@ -1,21 +1,22 @@
-## ============================================================
 ## Events — upcoming events listing.
-## Pulls CtlActivity, filters to isEvent + end/start date >= today (or blank
-## = ongoing). Single-column cards: thumbnail, categories, date, time,
-## location, description, Register/Details button. Links to the shared
-## activity-detail page. Past events live separately in
-## ctl-widget_past-events_events.html.
-## Card structure (tags-above-title, categories) matches
-## ctl-widget_active-opportunities.html for listing-page consistency. Cards
-## use .ctl-listing-card + .ctl-hover-lift (styles/ctl-widgets.css) for the
-## same lift-on-hover animation as the home nav tiles / resource cards
-## (added 2026-08-07). Whole tile is clickable to the detail page (title link
-## carries .stretched-link, same day) — the Register button still works
-## independently on top of it via a z-index rule in the shared stylesheet.
-## ============================================================
+## Pulls CtlActivity, filters to isEvent + start date strictly after today
+## (day granularity), or blank dates (ongoing/TBD, sorted last). Single-column
+## cards: thumbnail, categories, date, time, location, description,
+## Register/Details button. Links to the shared activity-detail page.
+## "Happening now" and past events live in their own widgets
+## (ctl-widget_happening-now-events.html, ctl-widget_past-events_events.html)
+## so the three sections never overlap. Sorted soonest-first.
+## Whole tile links to the detail page (.stretched-link on the title); the
+## Register button still works independently on top of it (z-index rule in
+## the shared stylesheet).
+##
+## Dates compared as 'yyyyMMdd' strings via String.compareTo() (returns a
+## primitive int, sidestepping this engine's broken String < / > operators)
+## rather than raw epoch ms. Manual bubble sort, fixed ranges + #if guards —
+## see the range-operator gotcha in CLAUDE.md.
 
 #set($now = $date.getDate())
-#set($nowMs = $now.getTime())
+#set($todayKey = $date.format('yyyyMMdd', $now))
 #set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1 +live:true +deleted:false", 100, "score"))
 #set($allEvents = [])
 #foreach($item in $allActivities)
@@ -23,19 +24,50 @@
         #set($dummy = $allEvents.add($item))
     #end
 #end
-#set($upcomingList = [])
+#set($upcomingItems = [])
+#set($upcomingKeys = [])
 #foreach($item in $allEvents)
-    #if("$!item.eventEndDate" != "")
-        #set($compareMs = $item.eventEndDate.getTime())
-    #elseif("$!item.eventStartDate" != "")
-        #set($compareMs = $item.eventStartDate.getTime())
+    #set($hasStart = ("$!item.eventStartDate" != ""))
+    #set($hasEnd = ("$!item.eventEndDate" != ""))
+    #if($hasStart)
+        #set($startKey = $date.format('yyyyMMdd', $item.eventStartDate))
+    #elseif($hasEnd)
+        #set($startKey = $date.format('yyyyMMdd', $item.eventEndDate))
     #else
-        #set($compareMs = false)
+        #set($startKey = "")
     #end
-    #if(!$compareMs || $compareMs >= $nowMs)
-        #set($dummy = $upcomingList.add($item))
+    #if($startKey != "" && $startKey.compareTo($todayKey) > 0)
+        #set($dummy = $upcomingItems.add($item))
+        #set($dummy = $upcomingKeys.add($startKey))
+    #elseif($startKey == "")
+        #set($dummy = $upcomingItems.add($item))
+        #set($dummy = $upcomingKeys.add("99999999"))
     #end
 #end
+
+## ---- manual bubble sort ascending by startKey (soonest first) ----
+#set($n = $upcomingItems.size())
+#foreach($i in [0..99])
+  #if($i < $n)
+    #set($limit = $n - $i - 1)
+    #foreach($j in [0..99])
+      #if($j < $limit)
+        #set($jPlus1 = $j + 1)
+        #set($keyA = $upcomingKeys.get($j))
+        #set($keyB = $upcomingKeys.get($jPlus1))
+        #if($keyA.compareTo($keyB) > 0)
+          #set($itemTmp = $upcomingItems.get($j))
+          #set($keyTmp = $upcomingKeys.get($j))
+          #set($upcomingItems[$j] = $upcomingItems.get($jPlus1))
+          #set($upcomingKeys[$j] = $upcomingKeys.get($jPlus1))
+          #set($upcomingItems[$jPlus1] = $itemTmp)
+          #set($upcomingKeys[$jPlus1] = $keyTmp)
+        #end
+      #end
+    #end
+  #end
+#end
+#set($upcomingList = $upcomingItems)
 
 #if($EDIT_MODE)
     <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">

@@ -1,20 +1,18 @@
-## ============================================================
 ## Events — past events listing.
-## Pulls CtlActivity, filters to isEvent + end/start date < today.
-## 2-column grid (1-column under 768px), pared-down tiles: name, categories,
-## short description, date, Details button only — no thumbnail/time/location.
-## Categories kept despite the pared-down layout, matching
-## ctl-widget_missed-opportunities.html's same tradeoff.
-## Cards use .ctl-listing-card-compact + .ctl-hover-lift
-## (styles/ctl-widgets.css) for the same lift-on-hover animation as the home
-## nav tiles / resource cards (added 2026-08-07). Whole tile is clickable to
-## the detail page (title link carries .stretched-link, same day) — title
-## and Details button already pointed at the same URL here, so this just
-## widens the click target.
-## ============================================================
+## Pulls CtlActivity, filters to isEvent + end date strictly before today
+## (day granularity). One of three partitioned event sections — see
+## ctl-widget_happening-now-events.html and ctl-widget_upcoming-events.html.
+## Sorted most-recent-first (descending by end date). 2-column grid
+## (1-column under 768px); pared-down tiles (no thumbnail/time/location).
+## Whole tile links to the detail page (.stretched-link on the title).
+##
+## Dates compared as 'yyyyMMdd' strings via String.compareTo() (returns a
+## primitive int, sidestepping this engine's broken String < / > operators)
+## rather than raw epoch ms. Manual bubble sort, fixed ranges + #if guards —
+## see the range-operator gotcha in CLAUDE.md.
 
 #set($now = $date.getDate())
-#set($nowMs = $now.getTime())
+#set($todayKey = $date.format('yyyyMMdd', $now))
 #set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1 +live:true +deleted:false", 100, "score"))
 #set($allEvents = [])
 #foreach($item in $allActivities)
@@ -22,19 +20,47 @@
         #set($dummy = $allEvents.add($item))
     #end
 #end
-#set($pastList = [])
+#set($pastItems = [])
+#set($pastKeys = [])
 #foreach($item in $allEvents)
-    #if("$!item.eventEndDate" != "")
-        #set($compareMs = $item.eventEndDate.getTime())
-    #elseif("$!item.eventStartDate" != "")
-        #set($compareMs = $item.eventStartDate.getTime())
+    #set($hasEnd = ("$!item.eventEndDate" != ""))
+    #set($hasStart = ("$!item.eventStartDate" != ""))
+    #if($hasEnd)
+        #set($endKey = $date.format('yyyyMMdd', $item.eventEndDate))
+    #elseif($hasStart)
+        #set($endKey = $date.format('yyyyMMdd', $item.eventStartDate))
     #else
-        #set($compareMs = false)
+        #set($endKey = "")
     #end
-    #if($compareMs && $compareMs < $nowMs)
-        #set($dummy = $pastList.add($item))
+    #if($endKey != "" && $endKey.compareTo($todayKey) < 0)
+        #set($dummy = $pastItems.add($item))
+        #set($dummy = $pastKeys.add($endKey))
     #end
 #end
+
+## ---- manual bubble sort descending by endKey (most recent first) ----
+#set($n = $pastItems.size())
+#foreach($i in [0..99])
+  #if($i < $n)
+    #set($limit = $n - $i - 1)
+    #foreach($j in [0..99])
+      #if($j < $limit)
+        #set($jPlus1 = $j + 1)
+        #set($keyA = $pastKeys.get($j))
+        #set($keyB = $pastKeys.get($jPlus1))
+        #if($keyA.compareTo($keyB) < 0)
+          #set($itemTmp = $pastItems.get($j))
+          #set($keyTmp = $pastKeys.get($j))
+          #set($pastItems[$j] = $pastItems.get($jPlus1))
+          #set($pastKeys[$j] = $pastKeys.get($jPlus1))
+          #set($pastItems[$jPlus1] = $itemTmp)
+          #set($pastKeys[$jPlus1] = $keyTmp)
+        #end
+      #end
+    #end
+  #end
+#end
+#set($pastList = $pastItems)
 
 #if($EDIT_MODE)
     <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
@@ -42,10 +68,7 @@
     </div>
 #end
 
-<!-- .ctl-past-events-grid now comes from the shared stylesheet
-     (styles/ctl-widgets.css), loaded via the <link> tag added to the sitewide
-     contact-info content block that already renders on every CTL page. No local
-     <style> block needed here anymore. -->
+<!-- .ctl-past-events-grid is defined in the shared stylesheet (styles/ctl-widgets.css). -->
 
 <h2 class="section-title" style="margin-top: 50px;">Past Events</h2>
 <div class="ctl-past-events-grid" style="margin-left: 10px;">
