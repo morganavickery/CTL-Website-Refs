@@ -13,6 +13,13 @@
 ##   key, don't round-trip it through a String.
 ## - affiliations is a Checkbox -> .selectedValues.contains(...); values are
 ##   capitalized ("CTL"/"FDC"/"Other").
+## - degrees is freeform Text; a case-insensitive "phd" substring appends
+##   ", PhD" to the displayed name. Other degree values are not otherwise
+##   displayed.
+## - serviceYearStart / serviceYearEnd are FDC term-of-service years, shown
+##   as "2022-2024"; falls back to just the start year if only one is set.
+## Card info stack, top to bottom: name (+ ", PhD" if applicable), pronouns,
+## jobTitle, service years, then email/meet/website actions.
 ## ============================================================
 
 #set($allPersonnel = $dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true", 500, "score"))
@@ -52,12 +59,8 @@
     <!-- DEBUG: pulled $allPersonnel.size() CtlPersonnel record(s) total -- fdc=$fdcPersonnel.size() -->
 #end
 
-<!-- .ctl-btn / .ctl-gh-grid-* classes (compact FDC grid card treatment -- this
-     group doesn't carry areasOfExpertise/howICanHelp, so it doesn't need the
-     wide single-column layout CTL Staff uses) now come from the shared
-     stylesheet (styles/ctl-widgets.css), loaded via the <link> tag added to the
-     sitewide contact-info content block that already renders on every CTL page.
-     No local <style> block needed here anymore. -->
+<!-- .ctl-btn / .ctl-gh-grid-* classes are defined in the shared stylesheet
+     (styles/ctl-widgets.css). -->
 
 <div class="ctl-gh-section">
     <h2 class="mb-4">Faculty Development Committee</h2>
@@ -73,13 +76,23 @@
         <div class="ctl-gh-staff-grid">
         #foreach($p in $fdcPersonnel)
 
-            #set($titleLine = "$!p.jobTitle")
+            #set($hasPhD = false)
             #if("$!p.degrees" != "")
-                #if($titleLine != "")
-                    #set($titleLine = "$titleLine | $!p.degrees")
-                #else
-                    #set($titleLine = "$!p.degrees")
+                #set($degreesLower = $p.degrees.toLowerCase())
+                #if($degreesLower.contains("phd"))
+                    #set($hasPhD = true)
                 #end
+            #end
+            #set($displayName = "$!p.name")
+            #if($hasPhD)
+                #set($displayName = "$!p.name, PhD")
+            #end
+
+            #set($yearsDisplay = "")
+            #if("$!p.serviceYearStart" != "" && "$!p.serviceYearEnd" != "")
+                #set($yearsDisplay = "$!p.serviceYearStart-$!p.serviceYearEnd")
+            #elseif("$!p.serviceYearStart" != "")
+                #set($yearsDisplay = "$!p.serviceYearStart")
             #end
 
             #set($pronounsDisplay = "")
@@ -107,10 +120,18 @@
                     #end
 
                     <div class="ctl-gh-grid-info">
-                        <h3 class="h6 fw-bold mb-0">$!p.name#if($pronounsDisplay != "") <span class="fw-normal small text-muted d-block">($pronounsDisplay)</span>#end</h3>
+                        <h3 class="h6 fw-bold mb-0 lh-sm">$displayName</h3>
 
-                        #if($titleLine != "")
-                            <p class="fst-italic text-muted small mb-0">$titleLine</p>
+                        #if($pronounsDisplay != "")
+                            <p class="small text-muted mb-0 lh-sm">$pronounsDisplay</p>
+                        #end
+
+                        #if("$!p.jobTitle" != "")
+                            <p class="fst-italic text-muted small mb-0 mt-1 lh-sm">$!p.jobTitle</p>
+                        #end
+
+                        #if($yearsDisplay != "")
+                            <p class="small text-muted mb-0 mt-1 lh-sm">$yearsDisplay</p>
                         #end
 
                         #if("$!p.emailCortlandEdu" != "" || "$!p.bookWithMeFullLink" != "" || "$!p.websitePromo" != "")
