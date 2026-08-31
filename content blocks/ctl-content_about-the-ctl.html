@@ -1,30 +1,6 @@
 
-<!-- TEMPORARY local <style> block, added 2026-08-20. The shared
-     stylesheet (styles/ctl-widgets.css, loaded via <link> on every CTL
-     page) already contains .ctl-mission-toggle's rules, but the live copy
-     at /centers/ctl/ctl-widgets.css is stuck serving a stale version
-     (confirmed via direct fetch: missing everything added after early
-     August) — a dotCMS caching/publish issue independent of this content,
-     still being tracked down. Embedding the rules locally here matches how
-     every widget worked before the 2026-08-05 stylesheet consolidation, so
-     these collapsible pillars render correctly regardless of the stale
-     shared file. REMOVE this block once the live shared stylesheet is
-     confirmed serving current content again. -->
-<style>
-    .ctl-mission-toggle {
-        background: none;
-        border: none;
-        padding: 0;
-        font: inherit;
-        color: inherit;
-    }
-    .ctl-mission-toggle .bi-chevron-down {
-        transition: transform 0.2s ease;
-    }
-    .ctl-mission-toggle[aria-expanded="true"] .bi-chevron-down {
-        transform: rotate(180deg);
-    }
-</style>
+<!-- .ctl-mission-toggle is defined in the shared stylesheet
+     (styles/ctl-widgets.css). -->
 
 <h2 data-pm-slice="1 1 []">Mission</h2>
 <p data-pm-slice="1 1 []">The Center for Teaching and Learning (CTL) supports our community through developing and delivering engaging and innovative teaching resources for faculty and staff. We collaborate with offices, departments, and individual faculty members to improve teaching effectiveness and student success. We support faculty and staff in every unit to ensure that Cortland provides equitable, accessible learning environments, advancing the university&rsquo;s principles through well-researched, data-driven design</p>
