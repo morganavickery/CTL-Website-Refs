@@ -1,0 +1,709 @@
+<!-- Static markup, not a $dotcontent.pull() loop. Uses Bootstrap 5.3's native
+     accordion component (data-bs-toggle="collapse") -- no custom CSS/JS
+     required beyond what the theme already loads sitewide. Each panel:
+     description, then Affordances/Caveats side by side (.row/.col-md-6),
+     then Concrete Use Cases. -->
+
+<div class="ctl-gh-section">
+    <p>Microsoft Teams offers a range of built-in and add-on tools for making live class sessions more interactive &mdash; from polls and Q&amp;A to breakout rooms and collaborative whiteboards. This guide covers what's already available in every Teams meeting, plus third-party apps that can be added to extend those capabilities further.</p>
+    <p><em>Working draft for faculty recommendation.</em></p>
+</div>
+
+<div class="ctl-gh-section">
+    <h2>Native Teams Meeting Features</h2>
+    <div class="accordion" id="accordionTeamsNative">
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingNative1">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNative1" aria-expanded="false" aria-controls="collapseNative1">
+                    Q&amp;A in Teams Meetings
+                </button>
+            </h3>
+            <div id="collapseNative1" class="accordion-collapse collapse" aria-labelledby="headingNative1" data-bs-parent="#accordionTeamsNative">
+                <div class="accordion-body">
+                    <p>Moderated question queue layered on meeting chat; students submit/upvote questions, presenter marks answered, exportable list.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Reduces chat clutter in large sessions; upvoting surfaces most-wanted questions; anonymous option; keeps a record for follow-up.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Only live/synchronous, no persistence as a discussion board; moderation queue can lag in very large classes; less robust than dedicated backchannel tools.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students type questions during a large lecture instead of interrupting; the instructor answers the top-voted ones at the end.</li>
+                        <li>During a guest lecture, students submit questions throughout the talk so the guest can address common ones together.</li>
+                        <li>At a PhD qualifying exam, the committee chair queues questions so only one person speaks at a time.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingNative2">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNative2" aria-expanded="false" aria-controls="collapseNative2">
+                    Polls in Teams Meetings
+                </button>
+            </h3>
+            <div id="collapseNative2" class="accordion-collapse collapse" aria-labelledby="headingNative2" data-bs-parent="#accordionTeamsNative">
+                <div class="accordion-body">
+                    <p>Live multiple-choice, word cloud, ranking, and quiz-style polls launched mid-meeting with instant results.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Deep customization of question types; built into the meeting UI with no extra login; live results build momentum for discussion.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Anonymity/reporting weaker than dedicated tools; hard to reuse across sections without recreation; limited longitudinal analytics.</p>
+                        </div>
+                    </div>
+                    <p><strong>Use Cases:</strong></p>
+                    <ul>
+                        <li>Mid-lecture, students vote on a sample problem so the instructor can see who understood it before moving on.</li>
+                        <li>Before a debate, students vote anonymously on their initial position so the class can see how opinions are split.</li>
+                        <li>A quick quiz poll at the start of a review session flags who is behind on the reading.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingNative3">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNative3" aria-expanded="false" aria-controls="collapseNative3">
+                    PowerPoint Live
+                </button>
+            </h3>
+            <div id="collapseNative3" class="accordion-collapse collapse" aria-labelledby="headingNative3" data-bs-parent="#accordionTeamsNative">
+                <div class="accordion-body">
+                    <p>Presenter mode where attendees can view slides at their own pace with live captions and accessible, high-contrast viewing.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Meaningful accessibility gains (live/translated captions, screen-reader-friendly view); low friction since it is just "presenting" a normal deck.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Only helps if already lecturing from slides; adds no interactivity on its own; self-paced viewing can fragment shared attention.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>A deaf student reads live, auto-generated captions during lecture instead of needing a separate captioning service.</li>
+                        <li>International students follow along using live translated captions in a language they're more comfortable with.</li>
+                        <li>A student who got lost mid-lecture scrolls back through the exact slides at their own pace after class.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingNative4">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNative4" aria-expanded="false" aria-controls="collapseNative4">
+                    Microsoft Forms
+                </button>
+            </h3>
+            <div id="collapseNative4" class="accordion-collapse collapse" aria-labelledby="headingNative4" data-bs-parent="#accordionTeamsNative">
+                <div class="accordion-body">
+                    <p>Surveys/quizzes built in Forms, can be "shared live" to the meeting screen for real-time response.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Auto-grading for quizzes; fallback when Polls' UI does not fit; exports cleanly to Excel for gradebook or analysis.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Less flashy real-time UI than Mentimeter/Kahoot; slower to set up mid-session than native Polls.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students submit a 2-question form before leaving class so the instructor knows what to revisit next time.</li>
+                        <li>A short survey before a new unit shows what students already know, so class time skips what they've covered.</li>
+                        <li>End-of-semester feedback is collected anonymously and exported to a spreadsheet to spot patterns.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingNative6">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNative6" aria-expanded="false" aria-controls="collapseNative6">
+                    Breakout Rooms
+                </button>
+            </h3>
+            <div id="collapseNative6" class="accordion-collapse collapse" aria-labelledby="headingNative6" data-bs-parent="#accordionTeamsNative">
+                <div class="accordion-body">
+                    <p>Splits a meeting into smaller simultaneous rooms; instructor can pre-assign or randomize and drop into any room.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Core infrastructure for active-learning/peer-instruction pedagogy; instructor can visit rooms like a physical classroom.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> No persistent state between sessions; limited instructor visibility across many rooms at once; setup/teardown eats meeting time.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Groups of 4 discuss a patient case study for 10 minutes, then compare recommendations as a class.</li>
+                        <li>Students pair up to practice a scripted conversation aloud before speaking in front of the whole class.</li>
+                        <li>Each project team gets its own room for the full period while the instructor checks in on progress.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingNative7">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNative7" aria-expanded="false" aria-controls="collapseNative7">
+                    Presenter Modes (Standout, Reporter, Side-by-side)
+                </button>
+            </h3>
+            <div id="collapseNative7" class="accordion-collapse collapse" aria-labelledby="headingNative7" data-bs-parent="#accordionTeamsNative">
+                <div class="accordion-body">
+                    <p>Video layouts compositing the presenter's camera feed with content.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Increases visual presence/engagement cues relative to a static screen-share; can help sustain attention in long sessions.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Bandwidth/hardware dependent; some faculty and students find it gimmicky; no direct evidence it improves learning outcomes.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>The instructor's video layers over the slides during a dramatic story, keeping focus on their expressions.</li>
+                        <li>In a studio art demo, the instructor's hands and materials are shown next to the shared screen.</li>
+                        <li>A guest speaker's video and slides appear side-by-side, making the session feel like a conversation.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingNative8">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNative8" aria-expanded="false" aria-controls="collapseNative8">
+                    Microsoft Reflect
+                </button>
+            </h3>
+            <div id="collapseNative8" class="accordion-collapse collapse" aria-labelledby="headingNative8" data-bs-parent="#accordionTeamsNative">
+                <div class="accordion-body">
+                    <p>Emotion check-ins (Class Teams "how are you feeling?" prompts), journaling prompts, aggregated wellbeing analytics for the instructor.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Low-friction way to gauge classroom climate; built natively into Class Teams; free.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Not appropriate for this audience: designed primarily around K-12 SEL frameworks; adoption and validated pedagogical evidence at the undergrad/grad level is thin; requires Class Team structure most higher-ed courses do not use.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>A weekly emoji check-in in a large intro course flags when many students are struggling before it shows up in grades.</li>
+                        <li>After a stressful exam period, a private reflection prompt surfaces concerns students might not raise directly.</li>
+                        <li>Weekly check-ins in a first-year seminar track whether students feel more confident as the term goes on.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="ctl-gh-section">
+    <h2>Third-Party Teams Apps</h2>
+    <div class="accordion" id="accordionTeamsThirdParty">
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird1">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird1" aria-expanded="false" aria-controls="collapseThird1">
+                    Poll Everywhere
+                </button>
+            </h3>
+            <div id="collapseThird1" class="accordion-collapse collapse" aria-labelledby="headingThird1" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Live polling, word clouds, Q&amp;A; competitor to clickers. Free tier caps at roughly 25 responses.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Long track record in higher ed as a "clicker replacement"; strong peer-instruction research base; works via web link, no app install for students.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Free tier caps at roughly 25 responses per poll &mdash; workable for a small seminar, but a paid plan is needed for a real lecture-hall-sized class.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students vote on a conceptual question; if fewer than 70% answer correctly, the instructor re-explains before moving on.</li>
+                        <li>Before a debate, students anonymously vote on their position so quieter students can weigh in honestly.</li>
+                        <li>A live word cloud of one-word answers becomes the discussion starter for the day.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/saas/wa200005101" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird2">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird2" aria-expanded="false" aria-controls="collapseThird2">
+                    123 Timer and Clock (BlueSky)
+                </button>
+            </h3>
+            <div id="collapseThird2" class="accordion-collapse collapse" aria-labelledby="headingThird2" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Simple Teams tab showing a countdown timer/clock.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Zero learning curve; useful pacing aid.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Pure utility, not a pedagogical tool in itself; negligible visibility/adoption among faculty; no evidence base.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>A shared countdown timer keeps a timed in-class essay exam on track without students asking how much time is left.</li>
+                        <li>A strict 3-minute timer keeps student practice presentations on pace.</li>
+                        <li>Each side of a debate gets exactly 2 minutes for opening statements, kept fair by the timer.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/office/WA200006827" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird4">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird4" aria-expanded="false" aria-controls="collapseThird4">
+                    Vocabulary Builder (Aspiro Consulting Ltd)
+                </button>
+            </h3>
+            <div id="collapseThird4" class="accordion-collapse collapse" aria-labelledby="headingThird4" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Public documentation is minimal beyond a certification listing; appears to be a basic vocabulary-drill/flashcard tab.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Presumably low-friction drill practice if functional.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Very low visibility &mdash; no verifiable classroom use, reviews, or active user base; unvetted until trialed directly.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students could preview next week's vocabulary list before class, freeing up discussion time (unverified fit).</li>
+                        <li>Students could complete short daily vocabulary drills for test prep as homework (unverified fit).</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/product/office/WA200009591" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird5">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird5" aria-expanded="false" aria-controls="collapseThird5">
+                    Edusign
+                </button>
+            </h3>
+            <div id="collapseThird5" class="accordion-collapse collapse" aria-labelledby="headingThird5" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Digital attendance/e-signature tool; instructor triggers attendance check, participants sign via popup, tracked directly in Teams.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Automates attendance data flow via API, reducing administrative time; strong for compliance-driven attendance (funding-linked programs).</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Administrative/compliance tool, not a teaching tool; strongest track record is in France/Europe vocational and continuing-ed contexts, less so US R1 lecture courses.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students sign in electronically each session, generating an official attendance record for a funding-linked program.</li>
+                        <li>Students scan a QR code to check in, and the instructor pulls an attendance report for grading at semester's end.</li>
+                        <li>In a hybrid course, the instructor confirms which remote students were actually present, not just logged in.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/office/WA200003419" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird6">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird6" aria-expanded="false" aria-controls="collapseThird6">
+                    Kahoot!
+                </button>
+            </h3>
+            <div id="collapseThird6" class="accordion-collapse collapse" aria-labelledby="headingThird6" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Game-based live quizzes with leaderboard. Free "Basic" plan caps live games at 10 participants.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Very strong engagement effect and evidence base on short-term recall/motivation; near-universal name recognition, minimal training needed.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Free "Basic" plan caps live games at only 10 players &mdash; fine for a small breakout group, but a paid plan (Kahoot+) is required to run it with a full-size class.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>A 10-question review game before the midterm shows students which topics they still need to study.</li>
+                        <li>A quick, easy quiz on day one gets students comfortable answering out loud before harder questions later.</li>
+                        <li>A weekly quiz on the periodic table reinforces memorization through repeated low-stakes testing.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/saas/wa200001538" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird7">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird7" aria-expanded="false" aria-controls="collapseThird7">
+                    Mindomo (Expert Software Applications)
+                </button>
+            </h3>
+            <div id="collapseThird7" class="accordion-collapse collapse" aria-labelledby="headingThird7" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Collaborative mind-mapping/outlining tool.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Decent for visualizing hierarchical relationships; presentation mode turns maps into slideshows.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Smaller community/feature set than Lucidchart/MindMeister; free tier fairly limited on map count/collaborators.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students map symptoms, causes, and treatments for a disease to see how the pieces connect, not just memorize them.</li>
+                        <li>A grad student maps major themes and authors in their field to spot gaps before choosing a thesis topic.</li>
+                        <li>Students diagram an argument's claims and support to check its logic before writing a response paper.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-gb/product/office/WA104381995" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird8">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird8" aria-expanded="false" aria-controls="collapseThird8">
+                    ClassCred (Classy Apps LLC)
+                </button>
+            </h3>
+            <div id="collapseThird8" class="accordion-collapse collapse" aria-labelledby="headingThird8" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Gamification layer &mdash; rewards, badges, polls, debates &mdash; aimed at engagement and streamlined educator workflow in Slack/Teams.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Bundles several light engagement mechanics (polls, debates, peer recognition) in one place.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Startup-scale product, little independent/peer-reviewed evidence; gamified point/store systems raise usual concerns about extrinsic motivation crowding out intrinsic interest.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students automatically earn points for posting and replying on a discussion board, showing ongoing participation.</li>
+                        <li>Students publicly recognize a teammate who went above and beyond on a project milestone.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/office/wa200003897" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird9">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird9" aria-expanded="false" aria-controls="collapseThird9">
+                    Lucidchart
+                </button>
+            </h3>
+            <div id="collapseThird9" class="accordion-collapse collapse" aria-labelledby="headingThird9" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Flowcharting/diagramming (ERDs, org charts, process maps, UML).</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Widely trusted in CS, engineering, and business programs; strong template library; real collaborative editing.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Free tier caps document/shape count; steeper learning curve than a plain whiteboard for non-technical use.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students diagram how tables in a hospital records system relate, graded for logic before writing any code.</li>
+                        <li>Teams map the real steps in a coffee shop's ordering process to find bottlenecks for their final project.</li>
+                        <li>The instructor diagrams how a piece of code executes step by step before students trace the logic themselves.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/office/WA104381935" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird10">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird10" aria-expanded="false" aria-controls="collapseThird10">
+                    Mentimeter
+                </button>
+            </h3>
+            <div id="collapseThird10" class="accordion-collapse collapse" aria-labelledby="headingThird10" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Live polls, word clouds, quizzes, Q&amp;A, open-ended text walls.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> One of the most widely adopted and trusted live-engagement tools in higher ed; clean presentation-embedded UI; strong engagement evidence in large classes.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Free tier limits number of questions/slides per presentation; advanced quiz types and branding are paywalled.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students type one-word impressions of a topic; the resulting word cloud kicks off the day's discussion.</li>
+                        <li>Before a debate, students anonymously vote on their position to compare against how discussion changes minds.</li>
+                        <li>A multiple-choice question embedded in the slides tells the instructor whether to slow down or move on.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/product/office/WA200002972" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird12">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird12" aria-expanded="false" aria-controls="collapseThird12">
+                    Lucidspark
+                </button>
+            </h3>
+            <div id="collapseThird12" class="accordion-collapse collapse" aria-labelledby="headingThird12" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Virtual whiteboard sibling to Lucidchart (sticky notes, freeform ideation, voting).</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Good for open-ended brainstorming with a structured "vote/cluster" workflow, more structured than Microsoft Whiteboard.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Overlaps heavily with Whiteboard/Padlet; Cortland does not currently license the Lucid suite, so adopting this means a separate subscription rather than something already covered.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Teams post sticky-note ideas for a design problem, then vote on which to prototype first.</li>
+                        <li>Students sort interview quotes into color-coded themes to spot patterns before writing up findings.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/office/WA200002583" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird13">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird13" aria-expanded="false" aria-controls="collapseThird13">
+                    Whiteboard.chat for Edu
+                </button>
+            </h3>
+            <div id="collapseThird13" class="accordion-collapse collapse" aria-labelledby="headingThird13" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Each student gets their own copy of a class board; teacher sees all student boards in real time with subject-specific manipulatives, timers, and locking controls.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> The "teacher monitors every individual board live" model is strong for formative assessment during problem-solving; purpose-built by/for teachers.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Strongest evidence and community is K-12; less name recognition at the university level; can feel feature-heavy for a simple use case.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Every student works the same practice problem while the instructor watches all boards at once for common mistakes.</li>
+                        <li>The instructor quietly joins a struggling student's board to correct grammar without singling them out in class.</li>
+                        <li>Students annotate a shared reading in the margins, showing the instructor which passages caused confusion.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/web-apps/WA200002881" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird14">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird14" aria-expanded="false" aria-controls="collapseThird14">
+                    Glose Education
+                </button>
+            </h3>
+            <div id="collapseThird14" class="accordion-collapse collapse" aria-labelledby="headingThird14" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Social e-book reading/annotation (margin comments, shared highlights); now owned by Pearson.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Genuinely good fit for literature/humanities close-reading and social annotation pedagogy.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Since the Pearson acquisition, product direction/continuity has been uncertain &mdash; verify current availability and roadmap before committing a course to it.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students highlight and comment on a shared novel as they read, so the instructor knows what to discuss in class.</li>
+                        <li>Students annotate a primary source and reply to each other's margin comments before ever meeting in class.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird15">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird15" aria-expanded="false" aria-controls="collapseThird15">
+                    Pear Deck
+                </button>
+            </h3>
+            <div id="collapseThird15" class="accordion-collapse collapse" aria-labelledby="headingThird15" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Interactive layer on PowerPoint/Google Slides &mdash; embeds live questions, drawing responses, and draggable prompts into the deck itself.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Evidence-informed formative-assessment design (question embedded exactly where content is taught); strong K-12 base now expanding into intro-level higher ed.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Free tier limits question types/response history; smoothest with Google Slides, more friction in a PowerPoint-only Teams environment.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>A question embedded in a biology slide has every student answer before the instructor reveals the explanation.</li>
+                        <li>Students type a thesis statement into a slide; anonymous examples are compared and discussed as a class.</li>
+                        <li>Students drag a dot onto a spectrum slide to show their opinion before a discussion starts.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/office/WA200000094" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird16">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird16" aria-expanded="false" aria-controls="collapseThird16">
+                    AhaSlides
+                </button>
+            </h3>
+            <div id="collapseThird16" class="accordion-collapse collapse" aria-labelledby="headingThird16" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Live polls, quizzes, word clouds, spinner wheel, brainstorm boards.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Solid free tier relative to Mentimeter; playful extra formats (spinner, ratings).</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Less established trust/track record in academic literature compared with Mentimeter/Poll Everywhere/Vevox.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>A spinner wheel randomly picks which group presents first, removing any perception of favoritism.</li>
+                        <li>A live quiz on unit terms shows results in real time so students know what still needs review.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/saas/wa200005531" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird17">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird17" aria-expanded="false" aria-controls="collapseThird17">
+                    Padlet
+                </button>
+            </h3>
+            <div id="collapseThird17" class="accordion-collapse collapse" aria-labelledby="headingThird17" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Digital corkboard for posting text, images, links, video, audio in a shared space (grid, stream, map, timeline layouts).</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Very strong, well-documented adoption across disciplines; flexible for brainstorming, galleries, or discussion boards; low technical barrier for students.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Free tier caps number of boards; can become visually cluttered in very large classes without moderation.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students post a weekly photo assignment and comment on two classmates' work.</li>
+                        <li>Students post short video reflections on the reading and reply to each other's posts.</li>
+                        <li>Each team pins its preliminary findings so everyone can scan all teams' results before presentations.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/vi-vn/product/office/sa000000035" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird19">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird19" aria-expanded="false" aria-controls="collapseThird19">
+                    Vevox
+                </button>
+            </h3>
+            <div id="collapseThird19" class="accordion-collapse collapse" aria-labelledby="headingThird19" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Live polling, Q&amp;A, and quizzes purpose-built for lecture halls; strong native PowerPoint/Teams integration and robust anonymity controls. Free tier supports up to 100 participants.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Built specifically for higher-ed lecture contexts (strong UK university adoption); accessibility and anonymity handling are a genuine strength for sensitive-topic discussions.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Smaller global mindshare than Mentimeter/Poll Everywhere outside the UK; some poll types (word cloud, surveys, export) gated behind paid tiers.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students anonymously ask questions about a sensitive policy topic without their name being visible.</li>
+                        <li>A poll built directly into PowerPoint gets answered without the instructor leaving the presentation.</li>
+                        <li>Students submit anonymous questions on a topic they wouldn't feel comfortable asking out loud.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/office/wa200001749" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird21">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird21" aria-expanded="false" aria-controls="collapseThird21">
+                    MindMup
+                </button>
+            </h3>
+            <div id="collapseThird21" class="accordion-collapse collapse" aria-labelledby="headingThird21" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Free, simple browser-based mind-mapping tool.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Genuinely free with no forced sign-in for basic use; fast to learn.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Thinner feature set than Mindomo/Lucidchart (styling, collaboration polish); storage limits without a paid/Google-Drive-linked account.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Students quickly sketch out the causes of a historical event with no account needed.</li>
+                        <li>A student maps an argument's claim, reasons, and objections to check their essay's logic before submitting.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-us/product/office/wa200001759" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header" id="headingThird24">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThird24" aria-expanded="false" aria-controls="collapseThird24">
+                    YuJa Plugin
+                </button>
+            </h3>
+            <div id="collapseThird24" class="accordion-collapse collapse" aria-labelledby="headingThird24" data-bs-parent="#accordionTeamsThirdParty">
+                <div class="accordion-body">
+                    <p>Automatically or manually imports Teams meeting recordings into the YuJa Enterprise Video Platform.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Affordances / Benefits:</strong> Reliable, low-maintenance workflow tool; Cortland already runs YuJa as its lecture-capture platform, so recordings flow automatically into the library instructors and students already use.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Caveats / Limitations:</strong> Infrastructure/workflow tool, not a direct pedagogy tool on its own &mdash; it automates a pipeline rather than adding classroom interactivity.</p>
+                        </div>
+                    </div>
+                    <p><strong>Concrete Use Cases:</strong></p>
+                    <ul>
+                        <li>Lecture recordings auto-upload to a searchable library so absent students can jump to the part they need.</li>
+                        <li>A semester of guest lectures builds a searchable archive future cohorts can watch after the fact.</li>
+                    </ul>
+                    <a href="https://appsource.microsoft.com/en-gb/product/office/WA200005678" class="ctl-btn" target="_blank" rel="noopener">Get This App in Teams</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

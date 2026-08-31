@@ -1,0 +1,289 @@
+
+<p class="lead">Your syllabus is more than a list of dates and policies&mdash;it&rsquo;s an invitation to learning, a tool for transparency, and a foundation for building an inclusive, student-centered classroom. The Center for Teaching and Learning encourages faculty to design syllabi that clearly communicate expectations and foster a sense of belonging from day one. Below, you will find the university&rsquo;s syllabus requirements and resources to help you create a document that not only meets policy but also inspires student engagement and success.</p>
+
+<nav class="ctl-article-toc" aria-label="On this page">
+<span class="ctl-article-toc-label">On This Page</span>
+<ul>
+<li><a href="#syllabus-requirements">Syllabus Requirements</a></li>
+<li><a href="#required-statements">Required Statements</a></li>
+<li><a href="#academic-integrity-statement">Academic Integrity Statement</a></li>
+<li><a href="#artificial-intelligence-statement">Artificial Intelligence Statement</a></li>
+<li><a href="#disability-statement">Disability Statement</a></li>
+<li><a href="#diversity-statement">Diversity Statement</a></li>
+<li><a href="#inclusive-learning-environment-statement">Inclusive Learning Environment Statement</a></li>
+<li><a href="#title-ix-statement">Title IX Statement</a></li>
+<li><a href="#optional-sections">Optional Sections</a></li>
+</ul>
+</nav>
+
+<h2 id="syllabus-requirements">Syllabus Requirements</h2>
+<p>Syllabi should have a standard format to make your expectations clear to your students.</p>
+<p>Each syllabus should be given out during the first weeks of classes and must include all items listed in the five categories outlined below (Chapter 220.02 of the SUNY Cortland Handbook).</p>
+
+<div class="ctl-req-grid">
+<div class="ctl-req-card">
+<h3 id="general-information">General Information</h3>
+<ul>
+<li>Name of the institution (SUNY Cortland)</li>
+<li>Name of the department (lead department in cross-listed)</li>
+<li>Term and year of the course</li>
+</ul>
+</div>
+<div class="ctl-req-card">
+<h3 id="instructor-information">Instructor Information</h3>
+<ul>
+<li>Name of instructor(s)</li>
+<li>Office location and hours</li>
+<li>Instructor&rsquo;s SUNY Cortland email address</li>
+<li>Campus telephone number</li>
+</ul>
+</div>
+<div class="ctl-req-card">
+<h3 id="course-information">Course Information</h3>
+<ul>
+<li>Course prefix, number, title, and credit hours</li>
+<li>Catalog course description/course objectives</li>
+<li>Student learning outcomes</li>
+<li>Required course materials (e.g., textbooks, journal articles, library and/or online resources)</li>
+<li>Class meeting times</li>
+<li>Description of assignments and approximate dates</li>
+<li>Assessment method and grading policy</li>
+<li>Attendance policy</li>
+</ul>
+</div>
+<div class="ctl-req-card">
+<h3 id="course-attribute-designation">Approved Course Attribute Designation</h3>
+<ul>
+<li>General Education (GE) category</li>
+<li>Writing Intensive (WI)</li>
+<li>Presentation (PRES)</li>
+<li>Liberal Arts (LASR)</li>
+</ul>
+</div>
+</div>
+
+<p>Department specific course requirements are needed for some programs. Faculty should consult with their respective department guidelines for additional requirements.</p>
+
+<h2 id="required-statements">Required Statements</h2>
+<p>The statements listed below must be included either as full text in the syllabus, or a link may be provided within the syllabus that directs students to the section of the SUNY Cortland Handbook in which the statements are provided.</p>
+
+<h3 id="academic-integrity-statement">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusAcademicIntegrity" aria-expanded="false" aria-controls="ctlSyllabusAcademicIntegrity">
+<span>Academic Integrity Statement</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusAcademicIntegrity">
+<div class="ctl-collapse-panel">
+<p>Faculty must include in all syllabi a reference to upholding academic integrity and intolerance of academic dishonesty.</p>
+<p><strong>Suggested wording:</strong></p>
+<blockquote>
+<p>All students are expected to uphold academic integrity standards. Plagiarism is defined as taking the ideas of others and using them as one's own without due credit. Students who cheat in examinations, course assignments, or plagiarize in this course may be disciplined in accordance with university rules and regulations. (SUNY Cortland Handbook, Chapter 340)</p>
+</blockquote>
+</div>
+</div>
+
+<h3 id="artificial-intelligence-statement">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusAI" aria-expanded="false" aria-controls="ctlSyllabusAI">
+<span>Artificial Intelligence Statement</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusAI">
+<div class="ctl-collapse-panel">
+<p>Starting in the Spring 2026 semester, all faculty are required to include a syllabus statement outlining the course&rsquo;s policies related to Generative AI. Choose the option below that best fits your course:</p>
+<div class="ctl-option-grid">
+<div class="ctl-option-card">
+<p class="ctl-option-label"><strong>Option 1 (Custom):</strong> Write a Generative AI syllabus statement of your own.</p>
+</div>
+<div class="ctl-option-card">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusAIOption2" aria-expanded="false" aria-controls="ctlSyllabusAIOption2">
+<span><strong>Option 2 (All Use Prohibited)</strong></span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+<div class="collapse mt-2" id="ctlSyllabusAIOption2">
+<blockquote>
+<p>The use of Generative AI is not permitted in this course. Since this course emphasizes your writing as a process of your thinking, I am only interested in your own, original writing.</p>
+</blockquote>
+</div>
+</div>
+<div class="ctl-option-card">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusAIOption3" aria-expanded="false" aria-controls="ctlSyllabusAIOption3">
+<span><strong>Option 3 (Mixed Use by Assignment)</strong></span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+<div class="collapse mt-2" id="ctlSyllabusAIOption3">
+<blockquote>
+<p>In this course, some assignments will allow for or encourage the use of Generative AI. You must attend to what is allowed on an assignment-by-assignment basis.</p>
+</blockquote>
+</div>
+</div>
+<div class="ctl-option-card">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusAIOption4" aria-expanded="false" aria-controls="ctlSyllabusAIOption4">
+<span><strong>Option 4 (Use with Caution and Disclosure)</strong></span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+<div class="collapse mt-2" id="ctlSyllabusAIOption4">
+<blockquote>
+<p>Generative AI may be used within this course. Beware that some information may be inaccurate, biased, or incomplete based on the training of the AI tool. Also, beware that overreliance on Generative AI could stifle your own writing, critical thinking, or creative process. You are responsible for ensuring that your use of Generative AI is transparent and that your information is accurate. You must disclose details about your use of GenAI. Do not simply use your assignment to prompt GenAI and turn in that output.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<h3 id="disability-statement">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusDisability" aria-expanded="false" aria-controls="ctlSyllabusDisability">
+<span>Disability Statement</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusDisability">
+<div class="ctl-collapse-panel">
+<p><strong>Required wording:</strong></p>
+<blockquote>
+<p>As part of SUNY Cortland's commitment to a diverse, equitable, and inclusive environment, we strive to provide students with equal access to all courses. If you believe you will require accommodations in this course, please place a request with the Disability Resources Office at disability.resources@cortland.edu or call 607-753-2967. Please note that accommodations are generally not provided retroactively so timely contact with the Disability Resources Office is important. All students should consider meeting with their course instructor who may be helpful in other ways. (SUNY Cortland Handbook, Chapter 745)</p>
+</blockquote>
+</div>
+</div>
+
+<h3 id="diversity-statement">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusDiversity" aria-expanded="false" aria-controls="ctlSyllabusDiversity">
+<span>Diversity Statement</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusDiversity">
+<div class="ctl-collapse-panel">
+<p><strong>Required wording:</strong></p>
+<blockquote>
+<p>SUNY Cortland is dedicated to the premise that every individual is important in a unique way and contributes to the overall quality of the institution. We define diversity broadly to include all aspects of human difference. The university is committed to inclusion, equity, and access and thus committed to creating and sustaining a climate that is equitable, respectful and free from prejudice for students, faculty and staff. We value diversity in the learning environment and know that it enhances our ability to inspire students to learn, lead and serve in a changing world. We are committed to promoting a diverse and inclusive campus through the recruitment and retention of faculty, staff and students. As a community, we hold important the democracy of ideas, tempered by a commitment to free speech and the standards of inquiry and debate. To this end, we are dedicated to developing and sustaining a learning environment where it is safe to explore our differences and celebrate the richness inherent in our pluralistic society. (SUNY Cortland Handbook, Chapter 130)</p>
+</blockquote>
+</div>
+</div>
+
+<h3 id="inclusive-learning-environment-statement">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusInclusiveLearning" aria-expanded="false" aria-controls="ctlSyllabusInclusiveLearning">
+<span>Inclusive Learning Environment Statement</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusInclusiveLearning">
+<div class="ctl-collapse-panel">
+<p><strong>Required wording:</strong></p>
+<blockquote>
+<p>SUNY Cortland is committed to a diverse, equitable and inclusive environment. The course instructor honors this commitment and respects and values differences. All students enrolled in this course are expected to be considerate of others, promote a collaborative and supportive educational environment, and demonstrate respect for individuals with regard to ability or disability, age, ethnicity, gender, gender identity/expression, race, religion, sex, sexual orientation, socio-economic status or other aspects of identity. In an environment that fosters inclusion, students have the opportunity to bring their various identities into conversation as they find helpful, but are not expected to represent or speak for an entire group of people who share aspects of an identity. If you have any questions or concerns about this statement, contact the Institutional Equity and Inclusion Office at 607-753-2263.</p>
+</blockquote>
+</div>
+</div>
+
+<h3 id="title-ix-statement">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusTitleIX" aria-expanded="false" aria-controls="ctlSyllabusTitleIX">
+<span>Title IX Statement</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusTitleIX">
+<div class="ctl-collapse-panel">
+<p><strong>Required wording:</strong></p>
+<blockquote>
+<p>Title IX, when combined with New York Human Rights Law and the New York Education Law 129-B, prohibits discrimination, harassment and violence based on sex, gender, gender identity/expression, and/or sexual orientation in the education setting. The federal Clery Act and NY Education Law 129-B provide certain rights and responsibilities after an incident of sexual or interpersonal violence. When a violation occurs, victims and survivors are eligible for campus and community resources. Where the university has jurisdiction, it may investigate and take action in accordance with university policy. If you or someone you know wishes to report discrimination based in sex, gender, gender identity/expression, and/or sexual orientation, or wishes to report sexual harassment, sexual violence, stalking or relationship violence, please contact the Title IX Coordinator at 607-753-4550, or visit cortland.edu/titleix to learn about all reporting options and resources. (Updated by SUNY Legal Feb. 1, 2018)</p>
+</blockquote>
+</div>
+</div>
+
+<h2 id="optional-sections">Optional Sections</h2>
+
+<h3 id="important-dates">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusImportantDates" aria-expanded="false" aria-controls="ctlSyllabusImportantDates">
+<span>Important Dates</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusImportantDates">
+<div class="ctl-collapse-panel">
+<p>The <a href="https://www2.cortland.edu/offices/registrars-office/faculty/syllabus-resources.dot">Registrar&rsquo;s syllabus resources page</a> is updated every semester with important dates for you and your students. It also includes links to course descriptions and other information faculty may need for their syllabus.</p>
+</div>
+</div>
+
+<h3 id="starfish-notice">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusStarfish" aria-expanded="false" aria-controls="ctlSyllabusStarfish">
+<span>Starfish Notice</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusStarfish">
+<div class="ctl-collapse-panel">
+<blockquote>
+<p>You may see emails from starfish@cortland.edu regarding your academic performance in class as well as any recommendations to support you. To access Starfish, login to myRedDragon and select the Starfish tab to set up your profile. Make sure you check your email daily and respond to any notifications or recommendations you receive. Starfish is helpful and easy to use as you connect with me and all the resources on our campus.</p>
+</blockquote>
+</div>
+</div>
+
+<h3 id="counseling-and-wellness">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusCounseling" aria-expanded="false" aria-controls="ctlSyllabusCounseling">
+<span>Counseling and Wellness</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusCounseling">
+<div class="ctl-collapse-panel">
+<blockquote>
+<p>The Counseling Center provides short-term therapeutic services to facilitate students&rsquo; personal, social and educational adjustment while at college. Professional counselors assist students in dealing with major psychological issues as well as developmental concerns often related to interpersonal relationships, family issues and individual identity concerns.</p>
+</blockquote>
+<p>Van Hoesen Hall, Room B-44 / 607-753-4728</p>
+<p>Services include:</p>
+<ul>
+<li>Individual and group counseling</li>
+<li>Consultation and referral</li>
+<li>Crisis management/intervention</li>
+</ul>
+</div>
+</div>
+
+<h3 id="cortland-cupboard">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusCupboard" aria-expanded="false" aria-controls="ctlSyllabusCupboard">
+<span>Cortland Cupboard</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusCupboard">
+<div class="ctl-collapse-panel">
+<blockquote>
+<p>The SUNY Cortland Cupboard (campus food pantry) is open for students in need of food and personal hygiene items at no cost. There is no application required to access the Cupboard. Each student needs their SUNY Cortland ID card to swipe in.</p>
+</blockquote>
+<p>Located in Old Main Basement, Room B-05 / 607-753-2066 / cortland.cupboard@cortland.edu</p>
+</div>
+</div>
+
+<h3 id="course-withdrawal-policy">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusWithdrawal" aria-expanded="false" aria-controls="ctlSyllabusWithdrawal">
+<span>Course Withdrawal Policy</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusWithdrawal">
+<div class="ctl-collapse-panel">
+<blockquote>
+<p>Course withdrawals begin after the add/drop period for the term. Students are not permitted to withdraw from classes during the last three weeks of semester courses. The standard deadline for full-term courses is November 15 in the Fall and April 15 in the Spring. In the event that the deadlines fall on the weekend, the next business day will be used. Consult the academic calendar page for specific dates and deadlines.</p>
+<p>Due to fluctuating dates, add/drop dates and withdrawal deadlines for summer and winter sessions are established prior to the term and published on the summer session site and winter session site.</p>
+<p>Nonattendance does not mean a student has dropped or withdrawn from a course. Students who have not attended class and have not officially dropped or withdrawn from the course will receive a grade of E. Please refer to the university catalog section B.04 for more details regarding the class attendance policy.</p>
+</blockquote>
+</div>
+</div>
+
+<h3 id="cortland-clothes-closet">
+<button class="ctl-mission-toggle w-100 d-flex justify-content-between align-items-center text-start" type="button" data-bs-toggle="collapse" data-bs-target="#ctlSyllabusClothesCloset" aria-expanded="false" aria-controls="ctlSyllabusClothesCloset">
+<span>Cortland Clothes Closet</span>
+<i class="bi bi-chevron-down" aria-hidden="true"></i>
+</button>
+</h3>
+<div class="collapse" id="ctlSyllabusClothesCloset">
+<div class="ctl-collapse-panel">
+<blockquote>
+<p>The SUNY Cortland Clothing Closet, Dragons Dress for Success, was created in Spring 2019 by the Student Government Association (SGA). The service is offered by SGA with support from Career Services and the SUNY Cortland Cupboard. Students in need of professional clothing for internships, student teaching and job interviews are encouraged to stop by the Clothing Closet located in Old Main, Room B-05.</p>
+<p>The Clothing Closet is co-located with the SUNY Cortland Cupboard (food pantry).</p>
+</blockquote>
+</div>
+</div>
