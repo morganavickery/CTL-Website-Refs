@@ -1,49 +1,17 @@
-## ============================================================
-## Request Support > Our Services — CtlService cards. Tile grid
-## (.ctl-gh-svc-grid, CSS Grid — not Bootstrap row-cols, see the shared
-## stylesheet note below) — full-width thumbnail on top, then the full
-## service description (no line-clamp/"Read more" toggle — removed
-## 2026-08-07 per user feedback, shows in full every time), an optional
-## "Learn More" expand toggle, then a dedicated "Next Steps" section holding
-## whatever applies per service — the access button (serviceAccessLink/
-## serviceButtonLabel), freeform note text (nextSteps — drop-in hours,
-## "see Make an Appointment below", etc.), or both, pinned to the bottom of
-## the tile (mt-auto) so tiles of uneven description length still line up.
-## isCurrentlyAvailable gates the whole Next Steps section (no badge is shown
-## anymore — it was redundant since every service ends up showing one either
-## way); an unavailable service still shows its description, just with no
-## Next Steps content beneath it. No .ctl-hover-lift/.stretched-link here on
-## purpose — unlike the resource/event/opportunity tiles, a service tile has
-## no single consistent link target (the Next Steps button is optional and
-## external, not a same-widget detail page), so treating the whole tile as
-## one big link would be misleading.
-##
-## Expand/collapse (added 2026-08-12): CtlService gained two fields —
-## longDescription (WYSIWYG) and nextSteps (Textarea, this is the field the
-## project's earlier notes called "nextStepsNote" before it was actually
-## built — renamed here to match the real field variable). Each tile with a
-## non-empty longDescription gets a "Learn More" toggle; clicking it adds
-## .is-expanded to the tile, which the shared stylesheet uses to span the
-## tile across the full grid width (grid-column: 1 / -1) and reveal the
-## longDescription content. Collapsing removes both. This is why the grid
-## switched from Bootstrap's row-cols-* (flexbox-based, can't cleanly make
-## one item span the full row while others keep their normal width) to a
-## plain CSS Grid class, .ctl-gh-svc-grid, defined in the shared stylesheet —
-## same precedent as .ctl-past-events-grid/.ctl-missed-opps-grid.
-##
-## The "Make an Appointment" section on this same page is a separate content
+## Request Support > Our Services — CtlService cards.
+## .ctl-gh-svc-grid (CSS Grid, not Bootstrap row-cols — lets an expanded tile
+## span the full row while others keep normal width). Each tile: thumbnail,
+## full description, optional "Learn More" toggle revealing longDescription
+## (spans the tile to full width when expanded via .is-expanded), then a
+## "Next Steps" section pinned to the tile bottom (mt-auto) holding whatever
+## applies — the access button (serviceAccessLink/serviceButtonLabel),
+## freeform note (nextSteps), or both.
+## isCurrentlyAvailable gates the whole Next Steps section — an unavailable
+## service still shows its description, just no Next Steps content.
+## No .ctl-hover-lift/.stretched-link — a service tile has no single
+## consistent link target, so the whole tile isn't clickable.
+## The "Make an Appointment" section on this page is a separate content
 ## instance of ctl-widget_ctl-staff-profiles.html, not part of this file.
-##
-## Legibility pass (2026-08-14): user feedback that expanded tiles read as a
-## "wall of text." Short description now uses .ctl-gh-svc-lead (line-height/
-## spacing, was plain .card-text). The long-desc div gets a small
-## ".ctl-gh-svc-long-desc-label" heading ("More About This Service") so the
-## expanded content reads as its own section, not a continuation of the lead
-## paragraph, plus a rotating chevron (.ctl-gh-svc-toggle-icon) on the toggle
-## button. All spacing/multi-column reflow logic lives in the shared
-## stylesheet, not here — see styles/ctl-widgets.css's .ctl-gh-svc-long-desc
-## rules.
-## ============================================================
 
 #set($allServices = $dotcontent.pull("+contentType:CtlService +languageId:1 +live:true", 500, "score"))
 
@@ -51,10 +19,8 @@
     <!-- DEBUG: pulled $allServices.size() CtlService record(s) -->
 #end
 
-<!-- .ctl-btn / .ctl-gh-svc-* classes now come from the shared
-     stylesheet (styles/ctl-widgets.css), loaded via the <link> tag added to the
-     sitewide contact-info content block that already renders on every CTL page.
-     No local <style> block needed here anymore. -->
+<!-- .ctl-btn / .ctl-gh-svc-* classes are defined in the shared stylesheet
+     (styles/ctl-widgets.css). -->
 
 <div class="ctl-gh-section">
     <h2 class="mb-4">Our Services</h2>

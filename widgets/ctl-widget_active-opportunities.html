@@ -1,16 +1,12 @@
-## ============================================================
 ## Funding > Current Opportunities — active/open opportunities listing.
 ## Pulls CtlActivity, filters to isOpportunity + signupDeadline in the future
 ## (or blank = ongoing), sorted ascending by deadline. Single-column cards:
 ## thumbnail, categories, deadline, amount, description, Apply/Details button.
 ## Links to the shared activity-detail page. The expired half of this listing
-## lives separately in ctl-widget_missed-opportunities_past-recipients.html.
-## Cards use .ctl-listing-card + .ctl-hover-lift (styles/ctl-widgets.css) for
-## the same lift-on-hover animation as the home nav tiles / resource cards
-## (added 2026-08-07). Whole tile is clickable to the detail page (title link
-## carries .stretched-link, same day) — the Apply button still works
-## independently on top of it via a z-index rule in the shared stylesheet.
-## ============================================================
+## lives separately in ctl-widget_missed-opportunities.html.
+## Whole tile links to the detail page (.stretched-link on the title); the
+## Apply button still works independently on top of it (z-index rule in the
+## shared stylesheet).
 
 #set($now = $date.getDate())
 #set($nowMs = $now.getTime())

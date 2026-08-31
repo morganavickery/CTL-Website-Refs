@@ -1,11 +1,9 @@
-## ============================================================
 ## CTL Staff profiles — full single-column bio cards for CtlPersonnel where
 ## affiliations contains "CTL". Placed on About the CTL > Meet the CTL Staff,
 ## and reused as a 2nd content instance on Request Support ("Make an
 ## Appointment" section) — the $sectionHeading widget field (Text, falls back
 ## to "Meet the CTL Staff") is what differs between the two instances.
-## Compact FDC/grid cards live separately in ctl-widget_fdc-member-grid_
-## faculty-development-committee.html.
+## Compact FDC/grid cards live separately in ctl-widget_fdc-member-grid.html.
 ##
 ## Need to know:
 ## - pronouns is a RADIO field -> .selectValue, mapped to display label via
@@ -54,16 +52,13 @@
     <!-- DEBUG: pulled $allPersonnel.size() CtlPersonnel record(s) total -- ctl=$ctlPersonnel.size() -->
 #end
 
-## per-instance field -- see header note above.
 #set($sectionHeading = "$!sectionHeading")
 #if($sectionHeading == "")
     #set($sectionHeading = "Meet the CTL Staff")
 #end
 
-<!-- .ctl-btn / .ctl-gh-staff-* classes now come from the shared stylesheet
-     (styles/ctl-widgets.css), loaded via the <link> tag added to the sitewide
-     contact-info content block that already renders on every CTL page. No local
-     <style> block needed here anymore. -->
+<!-- .ctl-btn / .ctl-gh-staff-* classes are defined in the shared stylesheet
+     (styles/ctl-widgets.css). -->
 
 <div class="ctl-gh-section">
     <h2 class="mb-4">$sectionHeading</h2>

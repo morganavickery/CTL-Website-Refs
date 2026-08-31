@@ -1,4 +1,3 @@
-## ============================================================
 ## Welcome to the CTL — Upcoming Events & Opportunities carousel.
 ## Pulls CtlActivity, filters to isEvent/isOpportunity, computes a per-record
 ## relevant date (eventStartDate/eventEndDate for events, signupDeadline/
@@ -7,22 +6,18 @@
 ## to /centers/ctl/activities/{urlMapPattern}. Badge handles the
 ## both-event-and-opportunity case.
 ##
-## Velocity engine limits that shape the sort code below: no map literals, no
+## Velocity engine limits shaping the sort code below: no map literals, no
 ## $foreach.count, no inline arithmetic inside .get()/[] (pre-compute the
 ## index into a variable first), and [m..n] is descending when m > n — use
 ## fixed ranges + #if guards, never bounds derived from a value that can hit
 ## zero.
 ##
-## Note: .ctl-hscroll CSS/JS is duplicated in
-## ctl-widget_featured-instructional-resources.html on purpose (each carousel
-## widget is self-contained); its button-binding script guards against
-## double-binding since both carousels can appear on the same page.
-## ============================================================
+## .ctl-hscroll CSS/JS is duplicated in ctl-widget_featured-instructional-resources.html
+## (each carousel widget is self-contained); the button-binding script guards
+## against double-binding since both carousels can appear on the same page.
 
-<!-- .ctl-hscroll* / .ctl-activity-card classes now come from the shared
-     stylesheet (styles/ctl-widgets.css), loaded via the <link> tag added to the
-     sitewide contact-info content block that already renders on every CTL page.
-     No local <style> block needed here anymore. -->
+<!-- .ctl-hscroll* / .ctl-activity-card classes are defined in the shared
+     stylesheet (styles/ctl-widgets.css). -->
 
 <div class="container py-4">
   <h2 class="h3 fw-bold mb-4">Upcoming Events &amp; Opportunities</h2>

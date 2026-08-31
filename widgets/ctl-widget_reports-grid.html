@@ -1,47 +1,17 @@
-## ============================================================
-## About the CTL > Impact & Reports — downloadable annual reports grid
-## (new 2026-08-06). Sits below content blocks/ctl-content_outcomes-overview.html
-## on the same page. Stays in widgets/ (unlike its two sibling pieces above
-## it on the page) because it pulls live CtlReport data rather than
-## rendering static copy — see content blocks/ctl-content_impact-reports-intro.html's
-## header for the full 3-piece breakdown.
+## Impact & Reports — downloadable annual reports grid. Sits below
+## content blocks/ctl-content_outcomes-overview.html on the same page.
 ##
-## ⚠ NOT YET BUILDABLE LIVE — proposes a new content type, CtlReport,
-## that does not exist in dotCMS yet. This widget's Velocity assumes that
-## schema; nothing will render until the type + fields below are created.
-## Flagging this now rather than leaving the file empty, per this session's
-## request to stub out every not-started widget.
+## NOT YET LIVE — depends on a CtlReport content type that doesn't exist
+## in dotCMS yet. Proposed fields:
+##   reportTitle      | Text                | e.g. "2024-2025 Annual Report"
+##   reportYearLabel  | Text                | Display label, e.g. "2024-2025"
+##   reportYearStart  | Text (whole number) | Sort key, e.g. 2024
+##   reportSummary    | Textarea            | 1-2 sentence blurb
+##   reportThumbnail  | Image               | FileAssetMap — .path + .fileName
+##   reportFile       | File                | FileAssetMap — .path + .fileName
 ##
-## Why a new content type instead of reusing CtlAttachment (which already
-## holds downloadable files elsewhere): CtlAttachment has "no parent-link
-## field... reached only via relationship from CtlActivity/CtlActivitySession/
-## CtlInstructionalResource" (dotCMS Variable Map.md) — it can't be pulled
-## standalone with no parent record to hang it off. Annual reports aren't
-## attached to an Activity or Instructional Resource, so a small dedicated
-## type (same pattern as CtlService/CtlPersonnel: simple, no URL map) is
-## cleaner than forcing a fake parent relationship just to reach it.
-##
-## Proposed CtlReport fields (create in dotCMS before this goes live):
-##   reportTitle      | Text                | Required. e.g. "2024-2025 Annual Report"
-##   reportYearLabel   | Text                | Required. Display label, e.g. "2024-2025"
-##   reportYearStart  | Text (whole number) | Required. Sort key, e.g. 2024 — same
-##                                             pattern as CtlPersonnel's `rank`: labeled
-##                                             "Text" in the editor but already a
-##                                             java.lang.Long at the Velocity layer, so
-##                                             use it directly as a sort key, no String
-##                                             round-trip (see CLAUDE.md gotchas).
-##   reportSummary    | Textarea            | Optional. 1-2 sentence blurb.
-##   reportThumbnail  | Image               | Optional. FileAssetMap — .path + .fileName.
-##   reportFile       | File                | Required. FileAssetMap (NOT BinaryMap,
-##                                             despite the "File" field-type name) —
-##                                             .path + .fileName, same pattern as
-##                                             videoFile/thumbnail (see CLAUDE.md).
-##
-## Sorted descending by reportYearStart (most recent first) — bubble sort
-## with a fixed-bound range ([0..99] + explicit #if guards), NOT a range
-## derived from $sorted.size(), per the CLAUDE.md gotcha on Velocity's
-## [m..n] descending-when-m>n behavior crashing the last outer pass.
-## ============================================================
+## Sorted descending by reportYearStart via bubble sort with a fixed-bound
+## range ([0..99] + #if guards) — see CLAUDE.md's Velocity range-operator gotcha.
 
 #set($allReports = $dotcontent.pull("+contentType:CtlReport +languageId:1 +live:true +deleted:false", 100, "score"))
 

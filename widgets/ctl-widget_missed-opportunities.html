@@ -1,17 +1,10 @@
-## ============================================================
 ## Funding > Past Recipients — "Missed Connections" section.
 ## Pulls CtlActivity, filters to isOpportunity + signupDeadline in the past.
 ## Collapsible (arrow-toggle) 2-column grid (1-column under 768px):
 ## categories, "Expired" badge, 2-line-clamped description, View Details
-## button (no amount shown, no apply link). Sits alongside a separate,
-## not-yet-built widget listing actual past award recipients/winners.
-## Cards use .ctl-listing-card-compact + .ctl-listing-card-muted +
-## .ctl-hover-lift (styles/ctl-widgets.css) for the same lift-on-hover
-## animation as the home nav tiles / resource cards (added 2026-08-07). Whole
-## tile is clickable to the detail page (title link carries .stretched-link,
-## same day) — title and View Details button already pointed at the same
-## URL here, so this just widens the click target.
-## ============================================================
+## button (no amount shown, no apply link). Sits alongside a separate widget
+## listing actual past award recipients/winners.
+## Whole tile links to the detail page (.stretched-link on the title).
 
 #set($now = $date.getDate())
 #set($nowMs = $now.getTime())
@@ -37,10 +30,8 @@
     </div>
 #end
 
-<!-- .ctl-missed-opps-grid / .ctl-missed-opp-desc now come from the shared
-     stylesheet (styles/ctl-widgets.css), loaded via the <link> tag added to the
-     sitewide contact-info content block that already renders on every CTL page.
-     No local <style> block needed here anymore. -->
+<!-- .ctl-missed-opps-grid / .ctl-missed-opp-desc are defined in the shared
+     stylesheet (styles/ctl-widgets.css). -->
 
 <div style="margin-top: 56px;">
     <div id="ctlMissedOppsToggle" style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
