@@ -1,5 +1,4 @@
-<h2 style="text-align: left;">Resources for Equitable and Accessible Course Help (REACH)</h2>
-<p>Cortland REACH is a collaborative initiative run by the Center for Teaching and Learning (CTL), Disability Resources, Technology Services, and the Memorial Library. We're also taking the opportunity to move beyond Title II to support the integration of Universal Design for Learning (<abbr>UDL</abbr>) techniques because we know that all our students can benefit from broad incorporation of UDL.&nbsp;</p>
+<p>This is a collaborative initiative run by the Center for Teaching and Learning (CTL), Disability Resources, Technology Services, and the Memorial Library. We're also taking the opportunity to move beyond Title II to support the integration of Universal Design for Learning (<abbr>UDL</abbr>) techniques because we know that all our students can benefit from broad incorporation of UDL.&nbsp;</p>
 <h3>What is Title II?</h3>
 <p>Beginning April 24, 2027, Cortland must ensure that all its digital materials conform to Title II Regulations. If you'd like to read the full requirement, see the <a href="https://www.ada.gov/law-and-regs/regulations/title-ii-2010-regulations/#-35200-requirements-for-web-and-mobile-accessibility" target="_blank" rel="noopener">Americans with Disability Act, Title II Regulations</a>.&nbsp;&nbsp;</p>
 <p>Title II is not a new requirement. It has been around for years.&nbsp; Last year, the federal government established a timeline for satisfying the requirement. In doing so, they shifted the responsibility from the individual to the university.&nbsp;</p>
@@ -15,19 +14,12 @@
 
 <h2 style="text-align: center;">Available Services</h2>
 
-<!-- ============================================================
-     Consultation tiles (added 2026-08-20) — static links to the 3
-     consultation services described in the text above, styled with the
-     same .ctl-gh-svc-* classes as Request Support > Our Services
-     (widgets/ctl-widget_our-services.html / styles/ctl-widgets.css) so the
-     tiles look identical to a service card. This block is static markup,
-     not a $dotcontent.pull() loop — it isn't reading CtlService records,
-     just reusing that widget's CSS for a matching look, per the
-     content-blocks-hold-static-copy convention (see CLAUDE.md). Update
-     these three tiles by hand if the consultation offerings/links change. -->
+<!-- Static markup, not a $dotcontent.pull() loop -- reuses the .ctl-gh-svc-*
+     classes from widgets/ctl-widget_our-services.html (see
+     styles/ctl-widgets.css) so these tiles match the Request Support > Our
+     Services card look. Update links/text by hand if offerings change. -->
 <div class="ctl-gh-section">
-    <h2 class="mb-4" style="text-align: left;">Book a Consultation</h2>
-    <div class="ctl-gh-svc-grid">
+    <div class="ctl-gh-svc-grid ctl-gh-svc-grid--2col">
 
         <div class="ctl-gh-svc-tile">
             <div class="card h-100 ctl-gh-svc-card">
@@ -69,27 +61,6 @@
             </div>
         </div>
 
-    </div>
-</div>
-
-<!-- ============================================================
-     Research Help tiles (added 2026-08-20) — same .ctl-gh-svc-* styling as
-     the "Book a Consultation" grid above. Two tiles: "Ask a Librarian" (live
-     chat — "Chat/IM" and "Ask A Librarian" from the source content were two
-     overlapping descriptions of the same service with two different links;
-     merged into one tile per user decision, using the library contact/help
-     page link rather than the raw LibAnswers widget URL) and "Find
-     Already-Mediated Materials", which per user request consolidates
-     ONESearch, OER (SUNY OER Services + the Primo OER collection), and
-     Interlibrary Loan into one tile's Next Steps section (each with its own
-     button, all opening in a new tab), plus a Materials Requests blurb with
-     no button — no request-form URL was provided when this was written; add
-     one if/when available. -->
-<div class="ctl-gh-section">
-    <h2 class="mb-4" style="text-align: left;">Research Help</h2>
-    <p>The Research Help desk, located in the main lobby next to the Help Center, is staffed by librarians who can help you find trustworthy information and cite it. You can also chat with a librarian 24/7, or make a one-on-one research appointment to work with the librarian who supports your specific major.</p>
-    <div class="ctl-gh-svc-grid">
-
         <div class="ctl-gh-svc-tile">
             <div class="card h-100 ctl-gh-svc-card">
                 <div class="card-body d-flex flex-column">
@@ -103,25 +74,62 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<div class="ctl-gh-section">
+    <h2 class="mb-4" style="text-align: left;">Find Already-Mediated Materials</h2>
+    <p>Search, request, and borrow materials the library has already reviewed and organized for you &mdash; from course readings to openly licensed content.</p>
+    <div class="ctl-gh-svc-grid ctl-gh-svc-grid--2col">
+
         <div class="ctl-gh-svc-tile">
             <div class="card h-100 ctl-gh-svc-card">
                 <div class="card-body d-flex flex-column">
-                    <h3 class="h5 card-title">Find Already-Mediated Materials</h3>
-                    <p class="ctl-gh-svc-lead small">Search, request, and borrow materials the library has already reviewed and organized for you &mdash; from course readings to openly licensed content.</p>
+                    <h3 class="h5 card-title">ONESearch</h3>
+                    <p class="ctl-gh-svc-lead small">The library's discovery service. Search books, e-books, videos, articles, digital media, and more in one place.</p>
                     <div class="ctl-gh-svc-next-steps mt-auto">
                         <span class="ctl-gh-svc-next-steps-label">Next Steps</span>
-
-                        <div class="ctl-gh-svc-next-steps-note"><strong>ONESearch</strong> &mdash; the library's discovery service. Search books, e-books, videos, articles, digital media, and more in one place.</div>
                         <a href="https://suny-cor.primo.exlibrisgroup.com/discovery/search?vid=01SUNY_COR:01SUNY_COR&amp;lang=en" class="ctl-btn ctl-gh-svc-btn" role="button" target="_blank" rel="noopener" aria-label="Search ONESearch (opens in new tab)">Search ONESearch</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="ctl-gh-svc-next-steps-note"><strong>Open Educational Resources (OER)</strong> &mdash; free, openly licensed course materials, supported by SUNY OER Services (SOS).</div>
+        <div class="ctl-gh-svc-tile">
+            <div class="card h-100 ctl-gh-svc-card">
+                <div class="card-body d-flex flex-column">
+                    <h3 class="h5 card-title">Open Educational Resources (OER)</h3>
+                    <p class="ctl-gh-svc-lead small">Free, openly licensed course materials, supported by SUNY OER Services (SOS).</p>
+                    <div class="ctl-gh-svc-next-steps mt-auto">
+                        <span class="ctl-gh-svc-next-steps-label">Next Steps</span>
                         <a href="https://oer.suny.edu/courses/" class="ctl-btn ctl-gh-svc-btn" role="button" target="_blank" rel="noopener" aria-label="Visit SUNY OER Services (opens in new tab)">SUNY OER Services</a>
                         <a href="https://suny-cor.primo.exlibrisgroup.com/discovery/collectionDiscovery?vid=01SUNY_COR:01SUNY_COR&amp;lang=en" class="ctl-btn ctl-gh-svc-btn" role="button" target="_blank" rel="noopener" aria-label="Browse the OER collection (opens in new tab)">Browse OER Collection</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="ctl-gh-svc-next-steps-note"><strong>Interlibrary Loan</strong> &mdash; need a book or article the library doesn't have? We can request it from libraries across the country. 607-753-2928</div>
+        <div class="ctl-gh-svc-tile">
+            <div class="card h-100 ctl-gh-svc-card">
+                <div class="card-body d-flex flex-column">
+                    <h3 class="h5 card-title">Interlibrary Loan</h3>
+                    <p class="ctl-gh-svc-lead small">Need a book or article the library doesn't have? We can request it from libraries across the country. 607-753-2928</p>
+                    <div class="ctl-gh-svc-next-steps mt-auto">
+                        <span class="ctl-gh-svc-next-steps-label">Next Steps</span>
                         <a href="https://cortland-illiad-oclc-org.sunycortland.idm.oclc.org/illiad/illiad.dll" class="ctl-btn ctl-gh-svc-btn" role="button" target="_blank" rel="noopener" aria-label="Request an item via Interlibrary Loan (opens in new tab)">Request via ILLiad</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="ctl-gh-svc-next-steps-note"><strong>Materials Requests</strong> &mdash; ask the library to add a book, video, journal, or database to its collection.</div>
+        <div class="ctl-gh-svc-tile">
+            <div class="card h-100 ctl-gh-svc-card">
+                <div class="card-body d-flex flex-column">
+                    <h3 class="h5 card-title">Materials Requests</h3>
+                    <p class="ctl-gh-svc-lead small">Ask the library to add a book, video, journal, or database to its collection.</p>
+                    <div class="ctl-gh-svc-next-steps mt-auto">
+                        <span class="ctl-gh-svc-next-steps-label">Next Steps</span>
+                        <a href="https://sites.cortland.edu/library/2024/02/01/faculty-tip-how-to-place-material-requests-and-course-reserves/" class="ctl-btn ctl-gh-svc-btn" role="button" target="_blank" rel="noopener" aria-label="Learn how to place material requests and course reserves (opens in new tab)">How to Request Materials</a>
                     </div>
                 </div>
             </div>
