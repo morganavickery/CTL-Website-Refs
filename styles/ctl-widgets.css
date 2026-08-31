@@ -1,5 +1,5 @@
 /* ============================================================
-   CTL Website — Shared Widget Stylesheet
+   CTL Website — Shared Widget Stylesheet v8.21.26
    ============================================================
    One shared stylesheet for every widget under widgets/, replacing the
    <style> block each widget used to carry on its own. Uploaded to dotCMS as
@@ -14,7 +14,7 @@
    use that to find the right rule when a page's styling needs a change.
    Class prefixes hint at origin but aren't fully reliable on their own:
    `.ctl-gh-*` = the old "Get Help" widget lineage (now Our Services + the
-   staff/FDC personnel cards), `.ctl-res-*` = the For Course Design resource
+   staff/FDC personnel cards), `.ctl-res-*` = the For Instructional Design resource
    listing + its homepage carousel twin, `.ctl-ir-*` = the resource DETAIL
    page specifically (its own separate copies of similar-looking classes —
    see the mismatch note further down). When a section says a class isn't
@@ -23,38 +23,6 @@
    HTML always wins over a class of the same intent.
    ============================================================ */
 
-/* Design tokens reused throughout below: CTL's brand maroon (SUNY Cortland
-   Secondary color "Deep Red", #8A2A2B), the brand's Warm Gray 1 / Cool Gray 1
-   / Cool Gray 8 repurposed for borders/backgrounds/secondary text, plus the
-   "closed or expired" status colors (Bootstrap's default danger-alert
-   palette — a functional UI-state color, not part of the brand palette, and
-   left as-is on purpose, since "closed" isn't a brand-identity concern the
-   way an active call-to-action badge is).
-
-   FIXED 2026-08-07 (dev-checklist "Colors used for events should be within
-   our brand identity"): the Registration/Application status badges on
-   Activity Detail previously used Bootstrap's info-blue/warning-yellow here
-   too (`#cfe2ff`/`#084298`, `#fff3cd`/`#856404`) — those are now set inline
-   per-instance to `--ctl-maroon-tint`/`--ctl-maroon` (Registration) and
-   `--ctl-maroon`/`#fff` (Application, filled solid to read as the more
-   selective/urgent of the two) directly in ctl-site_activity-detail.html,
-   so the former `--ctl-warn-*` tokens below were removed as unused.
-
-   FIXED 2026-08-07 (dev-checklist "Side scroll cards" — carousel type-badge
-   colors, the still-open half of the same brand-color issue above): the
-   homepage carousel's Event/Opportunity/"Event & Opportunity" type badges
-   (`ctl-widget_upcoming-activities-carousel.html`) used Bootstrap's
-   `text-bg-success`/`text-bg-primary`/`text-bg-dark`, none of which are
-   brand colors. Two type labels sharing one card meant the existing
-   tint-maroon/solid-maroon pair (see above) couldn't tell all three states
-   apart on its own, so this introduces one additional brand-safe hue —
-   Secondary color "Deep Navy" (`#04202E`, listed alongside Deep Red in the
-   brand style guide's secondary palette) — for Opportunity, mirroring the
-   maroon tint/solid tokens as `--ctl-navy`/`--ctl-navy-tint`. Combined
-   Event & Opportunity keeps the solid-maroon/white treatment (most
-   emphasis, same logic as "Application Required" above); Event alone uses
-   maroon tint; Opportunity alone uses navy tint. See the badge assignment
-   in ctl-widget_upcoming-activities-carousel.html. */
 :root {
   --ctl-maroon: #8A2A2B;
   --ctl-maroon-tint: rgba(138, 42, 43, 0.05);
@@ -432,7 +400,7 @@
 }
 
 /* Same scroll-snap technique as .ctl-hscroll above, under its own
-   .ctl-ir-hscroll* name. Used on: For Course Design resource detail page,
+   .ctl-ir-hscroll* name. Used on: For Instructional Design resource detail page,
    the "Related Resources" row. .ctl-ir-hscroll-btn/-wrap below are defined
    but NOT currently referenced by that widget — it has no prev/next button
    markup yet, so its row scrolls by touch/trackpad only (see mismatch note
@@ -535,7 +503,7 @@
 
 
 /* ============================================================
-   Resource cards — For Course Design listing page and its homepage
+   Resource cards — For Instructional Design listing page and its homepage
    "Featured Resources" carousel twin (same card markup on purpose, so a
    featured card looks identical in both places). The listing page's cards
    also carry .ctl-hover-lift (added 2026-08-07, see that class above) —
@@ -617,7 +585,7 @@
   margin-top: 4px;
 }
 
-/* For Course Design listing page only — maroon border + tint on the top 3
+/* For Instructional Design listing page only — maroon border + tint on the top 3
    pinned "featured" cards (sorted by last-modified date). Not needed on
    the homepage carousel since that only ever shows featured items. */
 .ctl-res-card.is-featured {
@@ -771,8 +739,52 @@
   margin-top: 6px;
 }
 
+/* Bare-element selectors (not classes) so any <table> a content author
+   pastes into any CtlInstructionalResource's WYSIWYG `body` field is
+   styled automatically — the WYSIWYG editor doesn't let authors add
+   classes, so this can't rely on one. display:block + overflow-x:auto on
+   the table itself lets it scroll horizontally on narrow screens without
+   needing a wrapper div the pasted markup won't have. */
+.ctl-ir-body table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.5rem;
+}
+.ctl-ir-body td,
+.ctl-ir-body th {
+  border: 1px solid var(--ctl-border);
+  padding: 0.6rem 0.9rem;
+  vertical-align: top;
+}
+.ctl-ir-body td p,
+.ctl-ir-body th p {
+  margin: 0;
+}
+.ctl-ir-body table tr:first-child td,
+.ctl-ir-body table thead th {
+  background: var(--ctl-gray-bg);
+  border-bottom: 2px solid var(--ctl-maroon);
+  font-weight: 700;
+}
+.ctl-ir-body table tbody tr:not(:first-child):nth-child(even) td {
+  background: #fafafa;
+}
+/* Optional modifier for a checkbox/status first column (e.g. a checklist
+   article) — only takes effect if that class survives into the body HTML,
+   which requires editing the WYSIWYG source view directly. */
+.ctl-ir-body .ctl-table-checklist td:first-child {
+  width: 2.5rem;
+  text-align: center;
+  font-size: 1.1rem;
+}
+.ctl-ir-body .ctl-table-checklist td:nth-child(2) {
+  width: 24%;
+}
+
 /* ============================================================
-   Filter bar + topic pill cloud — For Course Design LISTING page only
+   Filter bar + topic pill cloud — For Instructional Design LISTING page only
    (not the detail page, not the homepage carousel): the Format/Modality
    radio filters and the collapsible Topics pill cloud above the grid.
    ============================================================ */
@@ -1015,6 +1027,13 @@
     grid-template-columns: 1fr;
   }
 }
+/* Modifier for a 4-tile grid that should read as 2x2 instead of the default
+   3-wide layout (e.g. articles/ctl-content_reach.html's Available Services
+   section) — the existing responsive breakpoints above already collapse to
+   2 and then 1 column, so this only needs to override the desktop width. */
+.ctl-gh-svc-grid--2col {
+  grid-template-columns: repeat(2, 1fr);
+}
 .ctl-gh-svc-tile {
   min-width: 0;
 }
@@ -1122,6 +1141,8 @@
 .ctl-gh-svc-btn {
   padding: 4px 12px;
   font-size: 0.72rem;
+  white-space: normal;
+  text-align: center;
 }
 
 /* ============================================================
@@ -1135,16 +1156,18 @@
    fine at any width it's likely to appear at).
    ============================================================ */
 .ctl-session-block {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 .ctl-session-block:last-child {
   margin-bottom: 0;
 }
 .ctl-session-block-heading {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 1.4rem;
+  font-weight: 800;
   color: var(--ctl-maroon);
-  margin-bottom: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ctl-maroon-tint);
 }
 .ctl-session-item {
   border: 1px solid var(--ctl-border);
@@ -1157,7 +1180,7 @@
 }
 .ctl-session-toggle {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   width: 100%;
@@ -1193,18 +1216,47 @@
   align-items: center;
   gap: 4px;
 }
-.ctl-session-summary {
+/* Right-hand cluster: tags (top-right corner of the tile) + chevron. */
+.ctl-session-toggle-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.ctl-session-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 0 14px 12px;
-  background: var(--ctl-gray-bg);
+  justify-content: flex-end;
+  gap: 4px;
+}
+/* Deliberately NOT styled like .ctl-btn/.ctl-badge (solid fill, pill
+   radius) — those visual cues read as "clickable" on this page, and these
+   tags aren't. Outline chip + neutral weight reads as a descriptive label
+   instead. */
+.ctl-session-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: var(--ctl-maroon);
+  border: 1px solid var(--ctl-border);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  cursor: default;
+}
+.ctl-session-tag i {
+  font-size: 0.75rem;
+  color: var(--ctl-maroon);
 }
 .ctl-session-toggle-icon {
   flex-shrink: 0;
   font-size: 0.75rem;
   color: var(--ctl-maroon);
   transition: transform 0.15s ease;
+  margin-top: 3px;
 }
 .ctl-session-toggle[aria-expanded="true"] .ctl-session-toggle-icon {
   transform: rotate(180deg);
@@ -1251,6 +1303,26 @@
 .ctl-session-material-link:hover,
 .ctl-session-material-link:focus-visible {
   text-decoration: underline;
+}
+.ctl-session-citation {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--ctl-border);
+}
+.ctl-session-citation-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-gray-text);
+  margin-bottom: 8px;
+}
+.ctl-session-citation-text {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 0;
 }
 
 /* ============================================================
@@ -1327,6 +1399,156 @@
   font-size: 0.85rem;
   color: var(--ctl-gray-text);
   margin-top: 4px;
+}
+
+/* Flagship stat — spans the full grid row, pairs an icon with a large stat
+   and a fill bar against a baseline marker. Descriptive only (current value
+   vs. baseline) — no semester/year labels. Place it first inside
+   .ctl-outcomes-grid. */
+.ctl-outcome-feature {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  border: 1px solid var(--ctl-maroon);
+  border-radius: 8px;
+  padding: 24px 28px;
+  background: var(--ctl-maroon-tint);
+}
+.ctl-outcome-feature-icon i {
+  font-size: 2.4rem;
+  color: var(--ctl-maroon);
+}
+.ctl-outcome-feature-body {
+  flex: 1;
+  min-width: 0;
+}
+.ctl-outcome-feature-stat {
+  display: block;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ctl-maroon);
+}
+.ctl-outcome-feature-headline {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--ctl-gray-text);
+  margin: 2px 0 12px;
+}
+.ctl-outcome-feature-track {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: #fff;
+  border: 1px solid var(--ctl-border);
+  overflow: visible;
+}
+.ctl-outcome-feature-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--ctl-maroon);
+  overflow: hidden;
+}
+.ctl-outcome-feature-baseline {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 16px;
+  background: var(--ctl-gray-text);
+  transform: translateX(-1px);
+}
+.ctl-outcome-feature-caption {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--ctl-gray-text);
+  margin-top: 8px;
+}
+@media (max-width: 480px) {
+  .ctl-outcome-feature {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ============================================================
+   Impact & Reports — grants secured. Separate from .ctl-outcomes-grid: a
+   total bar followed by a per-grant breakdown, each grant's fill sized to
+   its share of the total.
+   ============================================================ */
+.ctl-grants-section {
+  margin: 8px 0 40px;
+}
+.ctl-grants-total {
+  border: 1px solid var(--ctl-maroon);
+  border-radius: 8px;
+  padding: 20px 24px;
+  background: var(--ctl-maroon-tint);
+  margin-bottom: 20px;
+}
+.ctl-grants-total-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.ctl-grants-total-label {
+  font-size: 0.9rem;
+  color: var(--ctl-gray-text);
+}
+.ctl-grants-total-stat {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ctl-maroon);
+}
+.ctl-grants-total-track {
+  height: 14px;
+  border-radius: 7px;
+  background: #fff;
+  border: 1px solid var(--ctl-border);
+  overflow: hidden;
+}
+.ctl-grants-total-fill {
+  height: 100%;
+  border-radius: 7px;
+  background: var(--ctl-maroon);
+}
+.ctl-grants-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.ctl-grants-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+.ctl-grants-item-note {
+  color: var(--ctl-gray-text);
+  font-size: 0.8rem;
+}
+.ctl-grants-item-amount {
+  font-weight: 700;
+  color: var(--ctl-maroon);
+  white-space: nowrap;
+}
+.ctl-grants-item-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--ctl-gray-bg);
+  overflow: hidden;
+}
+.ctl-grants-item-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--ctl-maroon);
+  opacity: 0.6;
 }
 
 /* ============================================================
@@ -1412,4 +1634,169 @@
 }
 .ctl-mission-toggle[aria-expanded="true"] .bi-chevron-down {
   transform: rotate(180deg);
+}
+
+/* ============================================================
+   Generic content tables — for static content blocks/articles that
+   render a plain HTML <table> (no widget/Velocity involved). Add
+   class="ctl-table" to any table that needs borders/padding/a readable
+   header row instead of unstyled browser-default borders. Wrap in a
+   <div class="table-responsive"> so wide tables scroll on narrow
+   viewports rather than overflowing the page.
+   ============================================================ */
+.ctl-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.5rem;
+}
+.ctl-table td,
+.ctl-table th {
+  border: 1px solid var(--ctl-border);
+  padding: 0.6rem 0.9rem;
+  vertical-align: top;
+}
+.ctl-table td p,
+.ctl-table th p {
+  margin: 0;
+}
+.ctl-table thead th,
+.ctl-table tr:first-child td {
+  background: var(--ctl-gray-bg);
+  border-bottom: 2px solid var(--ctl-maroon);
+  font-weight: 700;
+}
+.ctl-table tbody tr:not(:first-child):nth-child(even) td {
+  background: #fafafa;
+}
+
+/* Modifier for tables whose first column is a checkbox/status marker
+   (e.g. articles/online learning checklist.html) — narrows and centers
+   that column instead of letting it take an even share of the width. */
+.ctl-table-checklist td:first-child {
+  width: 2.5rem;
+  text-align: center;
+  font-size: 1.1rem;
+}
+.ctl-table-checklist td:nth-child(2) {
+  width: 24%;
+}
+
+/* ============================================================
+   Article-body skimmability classes — for use inside a
+   CtlInstructionalResource's `body` field (rendered into .ctl-ir-body on
+   the resource detail page, ctl-site_instRes-detail) or any other WYSIWYG
+   body copy, not by any widget's own template markup. An in-page jump nav,
+   a 2-up grid for short requirement-style lists, collapsible panels for
+   long verbatim text (paired with .ctl-mission-toggle above for the
+   trigger), and a comparison-card grid for content meant to stay visible
+   side by side. Requires editing the WYSIWYG source view directly, since
+   the editor doesn't offer these as formatting options.
+   ============================================================ */
+/* Outline-style indent: h2 stays flush left, everything else (h3 and all
+   body content — paragraphs, lists, the toc, statement/collapse blocks)
+   indents one step in, so h3 reads as nested under its h2 instead of
+   lining up with it, and prose isn't flush against the same edge as a
+   top-level heading. Only targets direct children of .ctl-ir-body —
+   content already inside a card/panel (which has its own padding) isn't
+   double-indented. */
+.ctl-ir-body > *:not(h2) {
+  margin-left: 20px;
+}
+.ctl-article-toc {
+  background: var(--ctl-gray-bg);
+  border: 1px solid var(--ctl-border);
+  border-radius: 8px;
+  padding: 18px 22px;
+  margin: 24px 0;
+}
+.ctl-article-toc-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-gray-text);
+  margin-bottom: 10px;
+}
+.ctl-article-toc ul {
+  columns: 2;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.ctl-article-toc li {
+  break-inside: avoid;
+  margin-bottom: 6px;
+}
+.ctl-article-toc a {
+  color: var(--ctl-maroon);
+  text-decoration: none;
+}
+.ctl-article-toc a:hover,
+.ctl-article-toc a:focus-visible {
+  text-decoration: underline;
+}
+@media (max-width: 575px) {
+  .ctl-article-toc ul {
+    columns: 1;
+  }
+}
+.ctl-req-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0 28px;
+}
+@media (max-width: 767px) {
+  .ctl-req-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ctl-req-card {
+  border: 1px solid var(--ctl-border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  background: #fff;
+}
+.ctl-req-card h3 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+.ctl-req-card ul {
+  margin-bottom: 0;
+}
+.ctl-req-card li {
+  margin-bottom: 4px;
+}
+.ctl-req-card li:last-child {
+  margin-bottom: 0;
+}
+.ctl-collapse-panel {
+  border: 1px solid var(--ctl-border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 10px 0 28px;
+  background: #fff;
+}
+.ctl-collapse-panel blockquote:last-child,
+.ctl-collapse-panel p:last-child,
+.ctl-collapse-panel ul:last-child {
+  margin-bottom: 0;
+}
+.ctl-option-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin: 16px 0 28px;
+}
+.ctl-option-card {
+  border: 1px solid var(--ctl-border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  background: #fff;
+}
+.ctl-option-card > *:last-child {
+  margin-bottom: 0;
+}
+.ctl-option-label {
+  margin-bottom: 8px;
 }
