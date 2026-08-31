@@ -1,20 +1,17 @@
-## ============================================================
-## About the CTL > Impact & Reports — list-of-outcomes stat tiles (new
-## 2026-08-06; moved to `content blocks/` 2026-08-07 — static copy like this
-## is a content block, not a widget). Sits below
-## ctl-content_impact-reports-intro.html on the same page. Static/manually-
-## updated content, NOT pulled from a content type — institutional
-## accomplishment numbers like these are compiled once a year from external
-## sources (survey data, event logs, etc.), not authored per-record in
-## dotCMS, so there's no natural content type for them to live in. Same
-## "hardcode it, edit the file directly" convention as
-## widgets/ctl-widget_home-nav-tiles.html's welcome text and tile grid.
-##
-## Numbers below are PLACEHOLDERS — replace with real figures before this
-## goes live. Uses .ctl-outcomes-grid / .ctl-outcome-tile (shared
-## stylesheet, styles/ctl-widgets.css) — an auto-fill grid, so adding or
-## removing a tile doesn't require a breakpoint rewrite.
-## ============================================================
+## Impact & Reports stat tiles. Sits below ctl-content_impact-reports-intro.html.
+## Manually updated static numbers (compiled yearly from external sources) —
+## no content type, edit the file directly. Three sections, each stat living
+## in exactly one to avoid double-counting: "Our Outcomes" (center-wide/
+## high-level only), "Grants Secured" (total bar + per-grant breakdown),
+## "Accessibility & Title II" (all accessibility/Title II figures).
+## The $56,433 "distributed to faculty" figure (Our Outcomes) is a different
+## total than the $46,000 grants-secured total (Grants Secured) — grants CTL
+## received vs. money CTL then paid out to faculty; not yet reconciled against
+## the source report's own figures, verify before publishing.
+
+<!-- .ctl-outcomes-grid / .ctl-outcome-tile / .ctl-outcome-feature /
+     .ctl-grants-section classes are defined in the shared stylesheet
+     (styles/ctl-widgets.css). -->
 
 <h2 class="mb-3">Our Outcomes</h2>
 <p style="color: var(--ctl-gray-text);">A snapshot of the CTL's reach over the past academic year.</p>
@@ -23,38 +20,149 @@
 
     <div class="ctl-outcome-tile">
         <i class="bi bi-people-fill" aria-hidden="true"></i>
-        <span class="ctl-outcome-stat">000</span>
-        <span class="ctl-outcome-label">Faculty &amp; staff served</span>
+        <span class="ctl-outcome-stat">304</span>
+        <span class="ctl-outcome-label">Unique faculty hosted across CTL events</span>
     </div>
 
     <div class="ctl-outcome-tile">
-        <i class="bi bi-calendar-event-fill" aria-hidden="true"></i>
-        <span class="ctl-outcome-stat">000</span>
-        <span class="ctl-outcome-label">Workshops &amp; events hosted</span>
+        <i class="bi bi-chat-heart-fill" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">862</span>
+        <span class="ctl-outcome-label">Student thank-you notes sent to 338 faculty through Cortland Apple</span>
     </div>
 
     <div class="ctl-outcome-tile">
-        <i class="bi bi-book-half" aria-hidden="true"></i>
-        <span class="ctl-outcome-stat">000</span>
-        <span class="ctl-outcome-label">Courses redesigned</span>
+        <i class="bi bi-life-preserver" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">500</span>
+        <span class="ctl-outcome-label">Ed-tech help tickets resolved for 270 faculty</span>
     </div>
 
     <div class="ctl-outcome-tile">
         <i class="bi bi-cash-coin" aria-hidden="true"></i>
-        <span class="ctl-outcome-stat">$000,000</span>
-        <span class="ctl-outcome-label">Awarded in grants &amp; fellowships</span>
+        <span class="ctl-outcome-stat">$56,433</span>
+        <span class="ctl-outcome-label">Distributed directly to faculty in funding &amp; stipends</span>
     </div>
 
     <div class="ctl-outcome-tile">
-        <i class="bi bi-building" aria-hidden="true"></i>
-        <span class="ctl-outcome-stat">00</span>
-        <span class="ctl-outcome-label">Departments &amp; offices partnered with</span>
+        <i class="bi bi-mic-fill" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">121</span>
+        <span class="ctl-outcome-label">Attendees at the Teaching &amp; Learning Conference (53 presenters, 27 sessions)</span>
     </div>
 
     <div class="ctl-outcome-tile">
-        <i class="bi bi-emoji-smile-fill" aria-hidden="true"></i>
-        <span class="ctl-outcome-stat">00%</span>
-        <span class="ctl-outcome-label">Participant satisfaction rate</span>
+        <i class="bi bi-headset" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">196</span>
+        <span class="ctl-outcome-label">Individual Brightspace support meetings</span>
+    </div>
+
+</div>
+
+<h3 class="mt-4 mb-3">Grants Secured</h3>
+<div class="ctl-grants-section">
+
+    <div class="ctl-grants-total">
+        <div class="ctl-grants-total-header">
+            <span class="ctl-grants-total-label">Total grants secured</span>
+            <span class="ctl-grants-total-stat">$46,000</span>
+        </div>
+        <div class="ctl-grants-total-track">
+            <div class="ctl-grants-total-fill" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <ul class="ctl-grants-list">
+
+        <li class="ctl-grants-item">
+            <div class="ctl-grants-item-row">
+                <span class="ctl-grants-item-name">IITG Grant <span class="ctl-grants-item-note">— OER &amp; AI</span></span>
+                <span class="ctl-grants-item-amount">$30,000</span>
+            </div>
+            <div class="ctl-grants-item-track">
+                <div class="ctl-grants-item-fill" style="width: 65.2%;"></div>
+            </div>
+        </li>
+
+        <li class="ctl-grants-item">
+            <div class="ctl-grants-item-row">
+                <span class="ctl-grants-item-name">EIT Grant <span class="ctl-grants-item-note">— Title II</span></span>
+                <span class="ctl-grants-item-amount">$10,000</span>
+            </div>
+            <div class="ctl-grants-item-track">
+                <div class="ctl-grants-item-fill" style="width: 21.7%;"></div>
+            </div>
+        </li>
+
+        <li class="ctl-grants-item">
+            <div class="ctl-grants-item-row">
+                <span class="ctl-grants-item-name">Cortland Auxiliary Services Grant <span class="ctl-grants-item-note">— Conference</span></span>
+                <span class="ctl-grants-item-amount">$6,000</span>
+            </div>
+            <div class="ctl-grants-item-track">
+                <div class="ctl-grants-item-fill" style="width: 13.0%;"></div>
+            </div>
+        </li>
+
+    </ul>
+
+</div>
+
+<h3 class="mt-4 mb-3">Accessibility &amp; Title II</h3>
+<div class="ctl-outcomes-grid">
+
+    <div class="ctl-outcome-feature">
+        <div class="ctl-outcome-feature-icon">
+            <i class="bi bi-universal-access-circle" aria-hidden="true"></i>
+        </div>
+        <div class="ctl-outcome-feature-body">
+            <span class="ctl-outcome-feature-stat">85.3%</span>
+            <span class="ctl-outcome-feature-headline">Brightspace accessibility score</span>
+            <div class="ctl-outcome-feature-track">
+                <div class="ctl-outcome-feature-fill" style="width: 85.3%;"></div>
+                <div class="ctl-outcome-feature-baseline" style="left: 66%;" title="Baseline: 66%"></div>
+            </div>
+            <span class="ctl-outcome-feature-caption">Up from a 66% baseline</span>
+        </div>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-file-earmark-check-fill" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">1,806</span>
+        <span class="ctl-outcome-label">Inaccessible scanned PDFs eliminated (2,669 &rarr; 893)</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-patch-check-fill" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">18</span>
+        <span class="ctl-outcome-label">Faculty trained as Title II Ambassadors</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-image-alt" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">3,190</span>
+        <span class="ctl-outcome-label">Documents with alt tags added</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-circle-half" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">2,698</span>
+        <span class="ctl-outcome-label">Documents with color contrast fixed</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-clock-history" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">277</span>
+        <span class="ctl-outcome-label">Hours of 1:1 Title II support, plus 372 emailed questions answered</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-trophy-fill" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">156</span>
+        <span class="ctl-outcome-label">Faculty earned 95%+ accessibility scores (Title II Dean's List)</span>
+    </div>
+
+    <div class="ctl-outcome-tile">
+        <i class="bi bi-pie-chart-fill" aria-hidden="true"></i>
+        <span class="ctl-outcome-stat">20%</span>
+        <span class="ctl-outcome-label">Of all support tickets were accessibility-related</span>
     </div>
 
 </div>
