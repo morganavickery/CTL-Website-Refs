@@ -73,65 +73,65 @@
 #set($happeningNowList = $nowItems)
 
 #if($EDIT_MODE)
-    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+    <div class="ctl-debug-box ctl-debug-box--warn">
         &#128027; DEBUG: $allEvents.size() event record(s), $happeningNowList.size() happening now.
     </div>
 #end
 
 #if($happeningNowList.size() > 0)
 <h2 class="section-title">Happening Now</h2>
-<div class="event-listing-group" style="display: flex; flex-direction: column; gap: 20px; margin-left: 10px; margin-bottom: 30px;">
+<div class="event-listing-group ctl-listing-indent ctl-listing-indent-bottom">
     #foreach($item in $happeningNowList)
-        <div class="ctl-listing-card ctl-hover-lift" style="border-left: 4px solid var(--ctl-maroon); background: var(--ctl-maroon-tint);">
+        <div class="ctl-listing-card ctl-hover-lift ctl-listing-card-now">
             #if("$!item.thumbnail.fileName" != "")
-                <div style="flex: 0 0 200px;">
-                    <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" style="width: 200px; height: 150px; object-fit: cover; border-radius: 6px;" />
+                <div class="ctl-listing-thumb-wrap">
+                    <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" class="ctl-listing-thumb" />
                 </div>
             #end
-            <div style="flex: 1; min-width: 0;">
-                <div style="display: flex; flex-direction: column; margin-bottom: 14px;">
-                    <div style="order: 1; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
-                        <span class="ctl-badge" style="background-color: var(--ctl-maroon); color: #fff;">Happening Now</span>
+            <div class="ctl-listing-body">
+                <div class="ctl-listing-head">
+                    <div class="ctl-listing-tags-row">
+                        <span class="ctl-badge ctl-badge-now">Happening Now</span>
                         #if($item.categories && $item.categories.size() > 0)
                             #foreach($cat in $item.categories)
                                 #if("$!cat.categoryName" != "")
-                                    <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; background-color: var(--ctl-gray-bg); color: #444; border: 1px solid var(--ctl-border); border-radius: 4px; display: inline-block; line-height: 1;">$cat.categoryName</span>
+                                    <span class="ctl-cat-tag">$cat.categoryName</span>
                                 #end
                             #end
                         #end
                     </div>
-                    <h3 style="order: 2; margin: 0; font-size: 1.35rem; font-weight: 700; line-height: 1.3;">
+                    <h3 class="ctl-listing-title">
                         <a href="/centers/ctl/activities/$item.urlMapPattern" class="ctl-listing-title-link stretched-link">$item.title</a>
                     </h3>
                 </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.9rem; color: var(--ctl-gray-text);">
+                <div class="ctl-listing-meta-row">
                     #if("$!item.eventStartDate" != "")
-                        <span style="display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-calendar-event" style="font-size: 0.95rem;"></i>
+                        <span class="ctl-listing-meta-item">
+                            <i class="bi bi-calendar-event ctl-listing-meta-icon"></i>
                             <span>$date.format('MMM d', $item.eventStartDate)#if("$!item.eventEndDate" != "" && $item.eventStartDate != $item.eventEndDate) &ndash; $date.format('MMM d, yyyy', $item.eventEndDate)#else, $date.format('yyyy', $item.eventStartDate)#end</span>
                         </span>
                     #end
-                    #if("$!item.eventStartDate" != "")
-                        <span style="color: var(--ctl-border);">|</span>
-                        <span style="display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-clock" style="font-size: 0.95rem;"></i>
-                            <span>$date.format('h:mma', $item.eventStartDate).toLowerCase()#if("$!item.eventEndDate" != "") &ndash; $date.format('h:mma', $item.eventEndDate).toLowerCase()#end</span>
+                    #if("$!item.eventStartTime" != "")
+                        <span class="ctl-listing-meta-divider">|</span>
+                        <span class="ctl-listing-meta-item">
+                            <i class="bi bi-clock ctl-listing-meta-icon"></i>
+                            <span>$date.format('h:mma', $item.eventStartTime).toLowerCase()#if("$!item.eventEndTime" != "") &ndash; $date.format('h:mma', $item.eventEndTime).toLowerCase()#end</span>
                         </span>
                     #end
                     #if("$!item.eventLocation" != "")
-                        <span style="color: var(--ctl-border);">|</span>
-                        <span style="display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-geo-alt" style="font-size: 0.95rem;"></i>
+                        <span class="ctl-listing-meta-divider">|</span>
+                        <span class="ctl-listing-meta-item">
+                            <i class="bi bi-geo-alt ctl-listing-meta-icon"></i>
                             <span>$item.eventLocation</span>
                         </span>
                     #end
                 </div>
-                <div style="border-top: 1px solid var(--ctl-border); margin-top: 14px; margin-bottom: 14px;"></div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+                <div class="ctl-listing-divider ctl-listing-divider-spaced"></div>
+                <div class="ctl-listing-footer">
                     #if("$!item.shortDescription" != "")
-                        <div style="margin: 0; color: #444; font-size: 0.95rem; flex: 1; line-height: 1.4;">$item.shortDescription</div>
+                        <div class="ctl-listing-desc-inline">$item.shortDescription</div>
                     #end
-                    <div style="flex-shrink: 0;">
+                    <div class="ctl-listing-actions">
                         #if("$!item.registerApplyLink" != "" && "$!item.registerApplyLink" != "http://")
                             <a href="$item.registerApplyLink" target="_blank" class="btn btn-default btn-sm" aria-label="Register for $item.title (opens in new tab)">Register</a>
                         #else
