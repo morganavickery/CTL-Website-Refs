@@ -1,0 +1,271 @@
+## ============================================================
+## Resources > For Technologies — CtlTechSupport listing.
+## dotCMS widget variable: CtlWidgetTechSupportListing
+## Content type: CtlTechSupport (see dotCMS Variable Map.md).
+##
+## Cards link straight out to the TDX/university knowledge base article in
+## a new tab — there is no on-site detail page for these items.
+##
+## Need to know:
+## - toolsCovered/tasksFunctions are Multi-Select fields -> CheckboxMap-style
+##   accessor: .selectedValues holds the stored option VALUE (e.g.
+##   "brightspace"), not the display label ("Brightspace") — map each through
+##   the parallel .values/.options arrays to get the label, same pattern as
+##   this codebase's modality field. Not Category fields, so no .categoryName
+##   iteration.
+## - Both filter facets are checkbox-based multiselect with different logic
+##   across vs. within a facet: OR within a facet (Tool=Brightspace OR YuJa
+##   shows either), AND across facets (Tool=Brightspace AND Task=Grading
+##   narrows to both). This differs from the Instructional Design listing's
+##   topic cloud, which ANDs every selection — don't copy that logic here.
+## ============================================================
+
+#set($allTechItems = $dotcontent.pull("+contentType:CtlTechSupport +languageId:1 +live:true", 500, "score"))
+
+<!-- .ctl-tech-* classes are defined in the shared stylesheet
+     (styles/ctl-widgets.css); card visuals reuse .ctl-res-card/.ctl-res-pill
+     from the Instructional Design listing's shared design system. -->
+
+<div class="ctl-res-listing">
+
+#if($allTechItems.size() == 0)
+
+    <div class="ctl-empty-state">
+        <p>Tech support articles are coming soon &mdash; check back shortly.</p>
+    </div>
+
+#else
+
+    ## ---- Filter bar: search on top, then Tool | Task/Function columns ----
+    <div class="ctl-res-filterbar d-none" id="ctlTechFilterBar">
+        <div class="mb-3">
+            <input type="text" class="form-control form-control-sm ctl-res-search-input" id="ctlTechSearch"
+                   placeholder="Search tech support articles&hellip;" />
+        </div>
+        <div class="row row-cols-1 g-3">
+            <div class="col" id="ctlTechFilterToolCol">
+                <span class="ctl-res-filter-label">Tool</span>
+                <div class="ctl-res-radio-list ctl-tech-checkbox-list ctl-res-subpanel" id="ctlTechFilterTool"></div>
+            </div>
+            <div class="col" id="ctlTechFilterTaskCol">
+                <span class="ctl-res-filter-label">Task / Function</span>
+                <div class="ctl-res-radio-list ctl-tech-checkbox-list ctl-res-subpanel" id="ctlTechFilterTask"></div>
+            </div>
+        </div>
+    </div>
+
+    <p class="ctl-res-count" id="ctlTechCount"></p>
+
+    ## ---- The cards ----
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="ctlTechGrid">
+        #foreach($r in $allTechItems)
+
+            ## --- toolsCovered / tasksFunctions: CheckboxMap selectedValues
+            ##     mapped to display labels via the parallel values/options
+            ##     arrays, then pipe-joined (same pattern as instRes-parent's
+            ##     modality). A blank or literal "false" label is skipped —
+            ##     some records carry a stray "false" selected value that
+            ##     isn't a real configured option; don't let it surface as a
+            ##     badge or filter choice. ---
+            #set($toolStr = "")
+            #if($r.toolsCovered && $r.toolsCovered.selectedValues && $r.toolsCovered.selectedValues.size() > 0)
+                #foreach($sv in $r.toolsCovered.selectedValues)
+                    #set($label = $sv)
+                    #set($idx = 0)
+                    #foreach($v in $r.toolsCovered.values)
+                        #if("$v" == "$sv")
+                            #set($label = $r.toolsCovered.options.get($idx))
+                        #end
+                        #set($idx = $idx + 1)
+                    #end
+                    #if("$!label" != "" && $label.toLowerCase() != "false")
+                        #if($toolStr == "")#set($toolStr = "$!label")#else#set($toolStr = "$toolStr|$!label")#end
+                    #end
+                #end
+            #end
+
+            #set($taskStr = "")
+            #if($r.tasksFunctions && $r.tasksFunctions.selectedValues && $r.tasksFunctions.selectedValues.size() > 0)
+                #foreach($sv in $r.tasksFunctions.selectedValues)
+                    #set($label = $sv)
+                    #set($idx = 0)
+                    #foreach($v in $r.tasksFunctions.values)
+                        #if("$v" == "$sv")
+                            #set($label = $r.tasksFunctions.options.get($idx))
+                        #end
+                        #set($idx = $idx + 1)
+                    #end
+                    #if("$!label" != "" && $label.toLowerCase() != "false")
+                        #if($taskStr == "")#set($taskStr = "$!label")#else#set($taskStr = "$taskStr|$!label")#end
+                    #end
+                #end
+            #end
+
+            <div class="col ctl-tech-card-wrap"
+                 data-tools="$toolStr"
+                 data-tasks="$taskStr">
+                <div class="card h-100 ctl-res-card ctl-hover-lift">
+                    <div class="card-body">
+                        <div>
+                            #foreach($t in $toolStr.split("\|"))
+                                #if($t != "")<span class="ctl-res-fmt-badge">$t</span>#end
+                            #end
+                        </div>
+                        <h3 class="h5 card-title">
+                            <a href="$!r.knowledgeBaseUrl" target="_blank" rel="noopener noreferrer" class="stretched-link">
+                                $!r.articleTitle
+                                <span class="ctl-tech-ext-icon" aria-hidden="true">&#8599;</span>
+                                <span class="visually-hidden">(opens in a new tab)</span>
+                            </a>
+                        </h3>
+                        #if("$!r.shortDescription" != "")
+                            <p class="card-text small ctl-tech-card-desc">$!r.shortDescription</p>
+                        #end
+                        #if($taskStr != "")
+                            <div>
+                                #foreach($tk in $taskStr.split("\|"))
+                                    #if($tk != "")<span class="ctl-res-topic-chip">$tk</span>#end
+                                #end
+                            </div>
+                        #end
+                    </div>
+                </div>
+            </div>
+        #end
+    </div>
+
+    <div id="ctlTechEmpty" class="ctl-empty-state d-none">
+        <p>No tech support articles match your filters.</p>
+        <button type="button" class="ctl-res-pill" id="ctlTechClear">Clear all filters</button>
+    </div>
+
+#end
+</div>
+
+#if($allTechItems.size() > 0)
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var grid = document.getElementById('ctlTechGrid');
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.ctl-tech-card-wrap'));
+    var countEl = document.getElementById('ctlTechCount');
+    var emptyEl = document.getElementById('ctlTechEmpty');
+
+    function attrList(card, attr) {
+        return (card.getAttribute(attr) || '').split('|').map(function(v) { return v.trim(); }).filter(function(v) { return v !== ''; });
+    }
+
+    function collectValues(attr) {
+        var seen = {};
+        var out = [];
+        cards.forEach(function(c) {
+            attrList(c, attr).forEach(function(v) {
+                if (!seen[v]) { seen[v] = true; out.push(v); }
+            });
+        });
+        out.sort();
+        return out;
+    }
+
+    // ---- filter state: both facets are multiselect (checkbox) arrays ----
+    var state = { tools: [], tasks: [], search: '' };
+
+    function matchesFacet(card, attr, selected) {
+        if (selected.length === 0) { return true; }
+        var have = attrList(card, attr);
+        return selected.some(function(v) { return have.indexOf(v) !== -1; });
+    }
+
+    function passesSearch(card) {
+        if (state.search === '') { return true; }
+        return card.textContent.toLowerCase().indexOf(state.search) !== -1;
+    }
+
+    function cardPasses(card, tools, tasks) {
+        return passesSearch(card) && matchesFacet(card, 'data-tools', tools) && matchesFacet(card, 'data-tasks', tasks);
+    }
+
+    function anyMatch(tools, tasks) {
+        return cards.some(function(c) { return cardPasses(c, tools, tasks); });
+    }
+
+    // ---- build a checkbox facet group ----
+    var facetEntries = [];
+    function buildCheckboxGroup(containerId, colId, stateKey, attrName) {
+        var container = document.getElementById(containerId);
+        var values = collectValues(attrName);
+        if (values.length === 0) {
+            document.getElementById(colId).classList.add('d-none');
+            return;
+        }
+        values.forEach(function(v) {
+            var label = document.createElement('label');
+            var input = document.createElement('input');
+            input.type = 'checkbox';
+            input.addEventListener('change', function() {
+                var arr = state[stateKey];
+                var i = arr.indexOf(v);
+                if (input.checked && i === -1) { arr.push(v); }
+                if (!input.checked && i !== -1) { arr.splice(i, 1); }
+                applyFilters();
+            });
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(v));
+            container.appendChild(label);
+            facetEntries.push({ dim: stateKey, value: v, labelEl: label, input: input });
+        });
+    }
+
+    buildCheckboxGroup('ctlTechFilterTool', 'ctlTechFilterToolCol', 'tools', 'data-tools');
+    buildCheckboxGroup('ctlTechFilterTask', 'ctlTechFilterTaskCol', 'tasks', 'data-tasks');
+
+    // ---- search ----
+    var searchBox = document.getElementById('ctlTechSearch');
+    searchBox.addEventListener('input', function() {
+        state.search = searchBox.value.toLowerCase().trim();
+        applyFilters();
+    });
+
+    document.getElementById('ctlTechFilterBar').classList.remove('d-none');
+
+    // ---- dim any checkbox whose addition to the current selection would
+    //      produce zero results, so users see dead ends before clicking ----
+    function updateDimming() {
+        facetEntries.forEach(function(e) {
+            var tools = state.tools, tasks = state.tasks;
+            if (e.input.checked) {
+                // already selected — never dim an active choice
+                e.labelEl.classList.remove('ctl-res-dimmed');
+                return;
+            }
+            if (e.dim === 'tools') { tools = tools.concat([e.value]); }
+            if (e.dim === 'tasks') { tasks = tasks.concat([e.value]); }
+            e.labelEl.classList.toggle('ctl-res-dimmed', !anyMatch(tools, tasks));
+        });
+    }
+
+    function applyFilters() {
+        var shown = 0;
+        cards.forEach(function(c) {
+            var pass = cardPasses(c, state.tools, state.tasks);
+            c.classList.toggle('d-none', !pass);
+            if (pass) { shown++; }
+        });
+
+        emptyEl.classList.toggle('d-none', shown !== 0);
+        countEl.textContent = 'Showing ' + shown + ' of ' + cards.length + ' articles';
+
+        updateDimming();
+    }
+
+    // ---- clear all ----
+    document.getElementById('ctlTechClear').addEventListener('click', function() {
+        state = { tools: [], tasks: [], search: '' };
+        searchBox.value = '';
+        facetEntries.forEach(function(e) { e.input.checked = false; });
+        applyFilters();
+    });
+
+    applyFilters();
+});
+</script>
+#end
