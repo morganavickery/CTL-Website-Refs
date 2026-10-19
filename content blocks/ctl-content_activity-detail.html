@@ -1,13 +1,29 @@
-## Shared CtlActivity detail page — used for both Events and Funding
-## (Current Opportunities / Past Recipients), since CtlActivity is one
-## unified content type (isEvent/isOpportunity). Matches the URL slug
-## against urlMapPattern. Reached via vanity URL forwarding from three
-## listing prefixes; parentLabel/parentUrl below (used for the "Back to X"
-## link and breadcrumb) are set based on which prefix the request came in on.
+## Shared CtlActivity detail page — used for both Events and Opportunities
+## (Awards / Grants & Funding / Programs & Communities / Past Recipients),
+## since CtlActivity is one unified content type (isEvent/isOpportunity).
+## Matches the URL slug against urlMapPattern. Listing widgets currently
+## link directly to this page's own URL (/centers/ctl/activities/{slug}) —
+## vanity URL forwarding from the listing prefixes isn't configured, since
+## that requires dotCMS admin permissions this team doesn't have. So
+## parentLabel/parentUrl below (used for the "Back to X" link and
+## breadcrumb) are resolved from the matched content's own
+## isEvent/isOpportunity/categories fields instead of the URL. The
+## URI-prefix checks further below are dormant under this setup but left in
+## place — if vanity URLs ever do get configured, point the listing widgets
+## at them and this logic takes over automatically with no further code
+## change needed.
+##
+## An opportunity's "back to X" link/breadcrumb is resolved by category,
+## not by active/expired status: each of the three tag pages (Awards,
+## Grants & Funding, Programs & Communities) hosts both its active AND its
+## closed items in one page (see ctl-content_awards_opportunities.html etc.),
+## so there's no separate "expired" listing page to route back to anymore.
+## Priority when an item carries multiple qualifying categories (e.g. both
+## "Award" and "Grant"): Award > Grants & Funding > Programs & Communities.
 ##
 ## Page order: title/heading -> date/time/location -> registration box
-## (Add to Calendar + Register/Apply) -> activity description -> concurrent
-## sessions -> contact. Compensation info and the optional submission-track
+## (Add to Calendar + Register/Apply) -> concurrent sessions -> activity
+## description -> contact. Compensation info and the optional submission-track
 ## box sit adjacent to the registration box; Downloads sits adjacent to the
 ## description.
 ##
@@ -20,11 +36,19 @@
 ## an auto-generated APA7 citation (see that section for date/author details).
 ##
 ## Need to know:
+## - The URL bar always shows /activities/{slug} for every activity, since
+##   listing widgets link there directly and no vanity URL forwarding is
+##   configured (see header above). The breadcrumb and "Back to X" link
+##   still correctly reflect the source listing — resolved from the matched
+##   item's isEvent/isOpportunity/signupDeadline fields, not the URL. See
+##   the $parentResolved fallback block below.
 ## - isConference's checkbox VALUE is capitalized "True", unlike every other
 ##   checkbox on CtlActivity (which use lowercase "true").
-## - CtlActivitySession's Row Sort Order and Abstract fields are all-lowercase
-##   at the schema layer: sessionrowsortorder, sessionabstract (not camelCase).
-##   sessionTimeBlock itself is camelCase and a plain Text field.
+## - CtlActivitySession field variables are mixed-case: sessionAbstract is
+##   camelCase, sessionrowsortorder is all-lowercase. sessionTimeBlock is
+##   camelCase and a plain Text field. Empty fields are omitted from the
+##   record entirely, so a blank value and a wrong variable name look the
+##   same — the edit-mode field dump lists the variables actually present.
 ## - Never name a #foreach loop variable $session — it collides with
 ##   dotCMS/Velocity's built-in HTTP session object and every field reference
 ##   inside the loop silently resolves against the wrong object. Use
@@ -47,23 +71,39 @@
 #set($idxPlus = $idx.intValue() + 1)
 #set($slug = $uri.substring($idxPlus))
 
-## which listing did this request come in on? (survives the vanity forward)
-#if($uri.contains("/funding/current-opportunities/"))
-    #set($parentLabel = "Current Opportunities")
-    #set($parentUrl = "/centers/ctl/funding/current-opportunities/")
-#elseif($uri.contains("/funding/past-recipients/"))
+## Which listing did this request come in on? Checked first from the
+## pre-forward URI, in case vanity URL forwarding for the listing prefixes
+## ever gets configured (see header above) — until then, every request hits
+## /activities/{slug} directly, so none of these checks ever match,
+## $parentResolved stays false, and parentLabel/parentUrl get resolved from
+## the content's own isEvent/isOpportunity/categories fields below once
+## $item is loaded.
+#set($parentResolved = true)
+#if($uri.contains("/opportunities/awards/"))
+    #set($parentLabel = "Awards")
+    #set($parentUrl = "/centers/ctl/opportunities/awards/")
+#elseif($uri.contains("/opportunities/grants-funding/"))
+    #set($parentLabel = "Grants & Funding")
+    #set($parentUrl = "/centers/ctl/opportunities/grants-funding/")
+#elseif($uri.contains("/opportunities/programs-communities/"))
+    #set($parentLabel = "Programs & Communities")
+    #set($parentUrl = "/centers/ctl/opportunities/programs-communities/")
+#elseif($uri.contains("/opportunities/past-recipients/"))
     #set($parentLabel = "Past Recipients")
-    #set($parentUrl = "/centers/ctl/funding/past-recipients/")
+    #set($parentUrl = "/centers/ctl/opportunities/past-recipients/")
+#elseif($uri.contains("/events/"))
+    #set($parentLabel = "Events")
+    #set($parentUrl = "/centers/ctl/events/")
 #else
-    ## Default / fallback covers /events/ and any direct hits on /activities/
+    #set($parentResolved = false)
     #set($parentLabel = "Events")
     #set($parentUrl = "/centers/ctl/events/")
 #end
 
-#if($slug == "activity-detail" || $slug == "events" || $slug == "funding" || $slug == "current-opportunities" || $slug == "past-recipients" || $slug == "index" || $slug == "index.dot" || $slug == "")
-    <div style="background: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 6px;">
-        <h4 style="margin-top: 0;">🛠️ Editor System Template View</h4>
-        <p>No activity slug detected. To preview, publish this page and click a card from the Events, Current Opportunities, or Past Recipients page.</p>
+#if($slug == "activity-detail" || $slug == "events" || $slug == "opportunities" || $slug == "awards" || $slug == "grants-funding" || $slug == "programs-communities" || $slug == "past-recipients" || $slug == "index" || $slug == "index.dot" || $slug == "")
+    <div class="ctl-warn-box">
+        <h4>🛠️ Editor System Template View</h4>
+        <p>No activity slug detected. To preview, publish this page and click a card from the Events, Awards, Grants &amp; Funding, or Programs &amp; Communities page.</p>
     </div>
 #else
     #set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1", 100, "score"))
@@ -74,12 +114,47 @@
         #end
     #end
     #if($EDIT_MODE)
-        <div style="background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+        <div class="ctl-debug-box ctl-debug-box--info">
             &#128027; DEBUG (pipeline): slug="$slug" | $allActivities.size() total CtlActivity record(s) pulled | $matchList.size() matched this slug
         </div>
     #end
     #if($matchList.size() > 0)
         #set($item = $matchList.get(0))
+
+        #if(!$parentResolved)
+            ## No vanity URL forwarding is configured (see header), so this
+            ## always runs — resolve breadcrumb/back-link from the content's
+            ## own isEvent/isOpportunity/categories fields. A pure
+            ## opportunity routes by category (Award > Grants & Funding >
+            ## Programs & Communities); anything else (event, or both/
+            ## neither) keeps the Events default above.
+            #set($isEventFallback = $item.isEvent.selectedValues.contains("true"))
+            #set($isOppFallback = $item.isOpportunity.selectedValues.contains("true"))
+            #if($isOppFallback && !$isEventFallback)
+                #set($hasAwardFallback = false)
+                #set($hasGrantFallback = false)
+                #if($item.categories && $item.categories.size() > 0)
+                    #foreach($cat in $item.categories)
+                        #set($catNameFallback = "$!cat.categoryName")
+                        #if($catNameFallback == "Award")
+                            #set($hasAwardFallback = true)
+                        #elseif($catNameFallback == "Grant" || $catNameFallback == "Fellowship" || $catNameFallback == "Teaching Grant" || $catNameFallback == "Research Grant")
+                            #set($hasGrantFallback = true)
+                        #end
+                    #end
+                #end
+                #if($hasAwardFallback)
+                    #set($parentLabel = "Awards")
+                    #set($parentUrl = "/centers/ctl/opportunities/awards/")
+                #elseif($hasGrantFallback)
+                    #set($parentLabel = "Grants & Funding")
+                    #set($parentUrl = "/centers/ctl/opportunities/grants-funding/")
+                #else
+                    #set($parentLabel = "Programs & Communities")
+                    #set($parentUrl = "/centers/ctl/opportunities/programs-communities/")
+                #end
+            #end
+        #end
 
         #set($isEventItem = $item.isEvent.selectedValues.contains("true"))
         #set($isOppItem = $item.isOpportunity.selectedValues.contains("true"))
@@ -107,7 +182,7 @@
                 #set($dbgDefsClass = $item.sessiontimeblockdefinitions.class.name)
                 #set($dbgDefsKeys = $item.sessiontimeblockdefinitions.keySet())
             #end
-            <div style="background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+            <div class="ctl-debug-box ctl-debug-box--info">
                 &#128027; DEBUG (Concurrent Sessions gate) for "$item.title" &mdash;<br/>
                 isConference.selectedValues: $dbgIsConfRaw (class: $dbgIsConfClass)<br/>
                 isConferenceItem (computed): $isConferenceItem<br/>
@@ -117,16 +192,20 @@
             </div>
         #end
 
+        ## Past = end date (or start date if no end) strictly before today,
+        ## compared as 'yyyyMMdd' day keys via String.compareTo() — same as the
+        ## Events listing blocks. A raw epoch-ms comparison would mark a
+        ## same-day event past, since date fields resolve to midnight.
         #set($isPastEvent = false)
         #if($isEventItem)
+            #set($todayKey = $date.format('yyyyMMdd', $now))
+            #set($compareKey = "")
             #if("$!item.eventEndDate" != "")
-                #set($compareMs = $item.eventEndDate.getTime())
+                #set($compareKey = $date.format('yyyyMMdd', $item.eventEndDate))
             #elseif("$!item.eventStartDate" != "")
-                #set($compareMs = $item.eventStartDate.getTime())
-            #else
-                #set($compareMs = false)
+                #set($compareKey = $date.format('yyyyMMdd', $item.eventStartDate))
             #end
-            #if($compareMs && $compareMs < $nowMs)
+            #if($compareKey != "" && $compareKey.compareTo($todayKey) < 0)
                 #set($isPastEvent = true)
             #end
         #end
@@ -154,15 +233,15 @@
         <!-- .ctl-tag / .ctl-badge-closed / .ctl-btn / .ctl-info-row / .ctl-deadline-box*
              are defined in the shared stylesheet (styles/ctl-widgets.css). -->
 
-        <article style="max-width: 860px;">
+        <article class="ctl-detail-article">
 
             ## ---- 1. Activity title / heading ----
             #if("$!item.thumbnail.fileName" != "")
-                <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" style="width: 100%; max-height: 360px; object-fit: cover; border-radius: 8px; margin-bottom: 24px;" />
+                <img src="$item.thumbnail.path$item.thumbnail.fileName" alt="$item.title" class="ctl-detail-thumb" />
             #end
 
             #if($item.categories && $item.categories.size() > 0)
-                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                <div class="ctl-detail-tags-row">
                     #foreach($cat in $item.categories)
                         #if("$!cat.categoryName" != "")
                             <span class="ctl-tag">$cat.categoryName</span>
@@ -171,10 +250,10 @@
                 </div>
             #end
 
-            <h2 style="margin-top: 0;">$item.title</h2>
+            <h2 class="ctl-detail-heading">$item.title</h2>
 
             ## ---- 2. Date, time, location ----
-            <div class="ctl-info-row" style="margin-bottom: 12px;">
+            <div class="ctl-info-row ctl-detail-meta-row">
                 #if($isEventItem && "$!item.eventStartDate" != "")
                     <span><i class="bi bi-calendar-event"></i> $date.format('MMM d', $item.eventStartDate)#if("$!item.eventEndDate" != "" && $item.eventStartDate != $item.eventEndDate) &ndash; $date.format('MMM d, yyyy', $item.eventEndDate)#else, $date.format('yyyy', $item.eventStartDate)#end</span>
                 #end
@@ -252,14 +331,14 @@ END:VCALENDAR")
                 <div class="ctl-deadline-box ctl-deadline-box-primary">
                     <div class="ctl-info-row">
                         <span class="ctl-badge" style="background-color: $badgeBg; color: $badgeColor;">$badgeText</span>
-                        #if("$!item.signupDeadline" != "")
-                            <span style="flex: 1; min-width: 140px;">Deadline: $date.format('MMMM d, yyyy', $item.signupDeadline)</span>
-                        #else
-                            <span style="flex: 1; min-width: 140px;">Ongoing</span>
-                        #end
                         #if($isSignupClosed)
-                            <span class="ctl-badge-closed">Closed</span>
-                        #elseif("$!item.registerApplyLink" != "" && "$!item.registerApplyLink" != "http://")
+                            <span class="ctl-detail-deadline-text ctl-badge-closed">Closed</span>
+                        #elseif("$!item.signupDeadline" != "")
+                            <span class="ctl-detail-deadline-text ctl-badge-due">Due $date.format('MMMM d, yyyy', $item.signupDeadline)</span>
+                        #else
+                            <span class="ctl-detail-deadline-text ctl-badge-open">Open</span>
+                        #end
+                        #if(!$isSignupClosed && "$!item.registerApplyLink" != "" && "$!item.registerApplyLink" != "http://")
                             <a href="$item.registerApplyLink" target="_blank" class="ctl-btn" aria-label="$ctaLabel for $item.title (opens in new tab)">$ctaLabel</a>
                         #end
                         #if($showAddToCalendar)
@@ -285,9 +364,10 @@ END:VCALENDAR")
             ## Compensation info: kept adjacent to the registration box since it's
             ## the same kind of "signup-adjacent fact" as the deadline/badge above.
             #if("$!item.oppAmountPaid" != "" || "$!item.oppLaborExpectation" != "")
-                <div class="ctl-info-row" style="background: var(--ctl-gray-bg); border-radius: 6px; padding: 10px 14px; margin-bottom: 24px;">
+                <div class="ctl-info-row ctl-detail-comp-box">
                     #if("$!item.oppAmountPaid" != "")
-                        <span><i class="bi bi-cash-stack"></i> <strong>#if(!$item.oppAmountPaid.startsWith("$"))$#end$item.oppAmountPaid</strong></span>
+                        #set($amtVal = "$!item.oppAmountPaid")
+                        <span><i class="bi bi-cash-stack"></i> <strong>#if($amtVal.matches('^\$?[0-9][0-9,]*(\.[0-9]+)?$') && !$amtVal.startsWith("$"))$#end$amtVal</strong></span>
                     #end
                     #if("$!item.oppLaborExpectation" != "")
                         <span><i class="bi bi-info-circle"></i> $item.oppLaborExpectation</span>
@@ -304,11 +384,11 @@ END:VCALENDAR")
                 #end
                 <div class="ctl-deadline-box ctl-deadline-box-optional">
                     <div class="ctl-info-row">
-                        <span class="ctl-badge" style="background-color: var(--ctl-gray-bg); color: var(--ctl-gray-text);">$submissionBadgeText</span>
+                        <span class="ctl-badge ctl-badge-neutral">$submissionBadgeText</span>
                         #if("$!item.submissionDeadline" != "")
-                            <span style="flex: 1; min-width: 140px;">Deadline: $date.format('MMMM d, yyyy', $item.submissionDeadline)</span>
+                            <span class="ctl-detail-deadline-text">Deadline: $date.format('MMMM d, yyyy', $item.submissionDeadline)</span>
                         #else
-                            <span style="flex: 1; min-width: 140px;">Ongoing</span>
+                            <span class="ctl-detail-deadline-text">Ongoing</span>
                         #end
                         #if($isSubmissionClosed)
                             <span class="ctl-badge-closed">Closed</span>
@@ -319,35 +399,7 @@ END:VCALENDAR")
                 </div>
             #end
 
-            ## ---- 4. Activity description ----
-            #if("$!item.longDescription" != "")
-                <div style="line-height: 1.7; font-size: 1rem; color: #333; margin-bottom: 28px;">$item.longDescription</div>
-            #end
-
-            #if($item.attachments && $item.attachments.size() > 0)
-                <div style="margin-bottom: 32px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Downloads</h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 500px;">
-                        #foreach($file in $item.attachments)
-                            #if("$!file.ctlAttachmentfile.fileName" != "")
-                                <a href="$file.ctlAttachmentfile.path$file.ctlAttachmentfile.fileName" target="_blank" rel="noopener" class="btn btn-default" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 0; overflow: hidden; text-align: left; text-transform: uppercase;">
-                                    <div style="width: 54px; height: 54px; flex-shrink: 0; background-color: #ffffff !important; color: var(--ctl-maroon) !important; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor;">
-                                        <div style="width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-file-earmark-pdf" style="font-size: 1.25rem; opacity: 0.5;"></i>
-                                        </div>
-                                    </div>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; flex: 1; padding: 0 16px; gap: 12px;">
-                                        <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; line-height: 1.2;">$file.ctlAttachmentlabel</span>
-                                        <i class="bi bi-download" style="font-size: 0.95rem; font-weight: 700; display: inline-flex; flex-shrink: 0;"></i>
-                                    </div>
-                                </a>
-                            #end
-                        #end
-                    </div>
-                </div>
-            #end
-
-            ## ---- 5. Concurrent Sessions (if applicable) ----
+            ## ---- 4. Concurrent Sessions (if applicable) ----
             ## Gated on isConference (not just activitySessions.size() > 0) so a
             ## non-conference activity never shows this UI even if a session got
             ## related to it by mistake.
@@ -380,7 +432,7 @@ END:VCALENDAR")
 
                 #if($EDIT_MODE)
                     #set($dbgFirst = $allSessions.get(0))
-                    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+                    <div class="ctl-debug-box ctl-debug-box--warn">
                         &#128027; DEBUG: $allSessions.size() session(s) related.
                         First session &mdash; sessionTimeBlock: "$!dbgFirst.sessionTimeBlock"
                         (class: $dbgFirst.sessionTimeBlock.class.name) |
@@ -393,7 +445,7 @@ END:VCALENDAR")
                     ## alongside each field's raw value + class, to tell a genuinely-blank
                     ## field apart from a stale/wrong-version object or an unresolved
                     ## reference (which silently drops the rest of the line too).
-                    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.75rem; font-family: monospace;">
+                    <div class="ctl-debug-box ctl-debug-box--warn ctl-debug-box-sm">
                         &#128027; DEBUG (per-session field dump):<br/>
                         #foreach($dbgS in $allSessions)
                             id=$dbgS.identifier | inode=$dbgS.inode | live=$dbgS.live | working=$dbgS.working | modDate=$dbgS.modDate<br/>
@@ -401,7 +453,8 @@ END:VCALENDAR")
                             title="$!dbgS.sessionTitle" (class: $dbgS.sessionTitle.class.name)
                             room="$!dbgS.sessionRoom" (class: $dbgS.sessionRoom.class.name)
                             speakers="$!dbgS.sessionSpeakers" (class: $dbgS.sessionSpeakers.class.name)
-                            abstract="$!dbgS.sessionabstract" (class: $dbgS.sessionabstract.class.name)<br/>
+                            abstract="$!dbgS.sessionAbstract" (class: $dbgS.sessionAbstract.class.name)<br/>
+                            &nbsp;&nbsp;field variables on this record: $!dbgS.contentObject.map.keySet()<br/>
                         #end
                     </div>
                 #end
@@ -409,16 +462,24 @@ END:VCALENDAR")
                 <!-- .ctl-session-* classes are defined in the shared stylesheet
                      (styles/ctl-widgets.css). -->
 
-                <div class="ctl-sessions-section" style="margin-bottom: 32px; border-top: 1px solid var(--ctl-border); padding-top: 20px;">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Sessions</h3>
+                <div class="ctl-sessions-section ctl-section-divider">
+                    <h3 class="ctl-subheading">Sessions</h3>
 
                     ## Fixed ORDER list, not a numeric [1..20] range — sessionTimeBlock can
                     ## hold a non-numeric key (e.g. "Lunch") that needs to render between
                     ## numeric blocks, which a pure ascending-integer loop can't place, and
                     ## Key-Value field iteration order isn't guaranteed. Add any future
-                    ## non-numeric block key here in its intended position.
+                    ## non-numeric block key here in its intended position. Any
+                    ## sessionTimeBlock value not in this list is appended after it
+                    ## (in first-seen order) so its sessions still render.
                     #set($sessionIdCounter = 0)
-                    #set($blockOrder = ["1", "2", "3", "Lunch", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
+                    #set($blockOrder = ["0", "1", "2", "3", "Lunch", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
+                    #foreach($s in $allSessions)
+                        #set($extraKey = "$!s.sessionTimeBlock")
+                        #if($extraKey != "" && !$blockOrder.contains($extraKey))
+                            #set($dummy = $blockOrder.add($extraKey))
+                        #end
+                    #end
                     #foreach($blockNumStr in $blockOrder)
                         #set($blockSessions = [])
                         #foreach($s in $allSessions)
@@ -428,7 +489,7 @@ END:VCALENDAR")
                         #end
 
                         #if($EDIT_MODE)
-                            <div style="background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; border-radius: 4px; padding: 4px 10px; margin-bottom: 4px; font-size: 0.72rem; font-family: monospace;">
+                            <div class="ctl-debug-box-compact ctl-debug-box--neutral">
                                 &#128027; DEBUG (block $blockNumStr): $blockSessions.size() session(s) matched this time block
                             </div>
                         #end
@@ -521,8 +582,8 @@ END:VCALENDAR")
                                             </span>
                                         </button>
                                         <div class="ctl-session-body" id="$sessionAnchorId" hidden>
-                                            #if("$!sessItem.sessionabstract" != "")
-                                                <div class="ctl-session-abstract">$sessItem.sessionabstract</div>
+                                            #if("$!sessItem.sessionAbstract" != "")
+                                                <div class="ctl-session-abstract">$sessItem.sessionAbstract</div>
                                             #end
                                             #if($sessItem.sessionAttachments && $sessItem.sessionAttachments.size() > 0)
                                                 <div class="ctl-session-materials">
@@ -544,7 +605,7 @@ END:VCALENDAR")
                                             ## APA's "Last, F. M." form.
                                             <div class="ctl-session-citation">
                                                 <span class="ctl-session-citation-label">Suggested Citation (APA 7)</span>
-                                                <p class="ctl-session-citation-text">$!sessItem.sessionSpeakers. #if("$!citeDateStr" != "")($citeDateStr).#else(n.d.).#end <em>$!sessItem.sessionTitle</em> [Conference session]. $item.title#if("$!item.eventLocation" != ""), $item.eventLocation#end.</p>
+                                                <p class="ctl-session-citation-text">$!sessItem.sessionSpeakers. #if("$!citeDateStr" != "")($citeDateStr).#else(n.d.).#end <em>$!sessItem.sessionTitle</em> [Conference session]. $item.title, SUNY Cortland.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -555,25 +616,57 @@ END:VCALENDAR")
                 </div>
             #end
 
+            ## ---- 5. Activity description ----
+            #if("$!item.longDescription" != "")
+                <div class="ctl-detail-description">$item.longDescription</div>
+            #end
+
+            #if($item.attachments && $item.attachments.size() > 0)
+                <div class="ctl-section-divider">
+                    <h3 class="ctl-subheading">Downloads</h3>
+                    <div class="ctl-downloads-list">
+                        #foreach($file in $item.attachments)
+                            #if("$!file.ctlAttachmentfile.fileName" != "")
+                                <a href="$file.ctlAttachmentfile.path$file.ctlAttachmentfile.fileName" target="_blank" rel="noopener" class="btn btn-default ctl-download-btn" aria-label="Download $file.ctlAttachmentlabel (opens in new tab)">
+                                    <div class="ctl-download-icon-wrap">
+                                        <div class="ctl-download-icon-inner">
+                                            <i class="bi bi-file-earmark-pdf ctl-download-icon"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ctl-download-info">
+                                        <span class="ctl-download-label">$file.ctlAttachmentlabel</span>
+                                        <i class="bi bi-download ctl-download-chevron"></i>
+                                    </div>
+                                </a>
+                            #end
+                        #end
+                    </div>
+                </div>
+            #end
+
             ## ---- 6. Contact ----
+            ## primaryContact is free text ("Name, email" format) - the email
+            ## portion (if any) is auto-linked as mailto: via regex; the rest
+            ## of the string renders as plain text.
             #if("$!item.primaryContact" != "")
-                <dl style="font-size: 0.95rem; border-top: 1px solid var(--ctl-border); padding-top: 20px; margin-bottom: 28px;">
-                    <dt style="font-weight: 700;">Contact</dt>
-                    <dd style="margin: 2px 0 0 0;">$item.primaryContact</dd>
+                #set($contactHtml = $item.primaryContact.replaceAll('([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})', '<a href="mailto:$1">$1</a>'))
+                <dl class="ctl-detail-contact">
+                    <dt>Contact</dt>
+                    <dd>$contactHtml</dd>
                 </dl>
             #end
 
-            <p style="margin-top: 40px;">
-                <a href="$parentUrl" style="color: inherit;">&larr; Back to $parentLabel</a>
+            <p class="ctl-detail-back-link">
+                <a href="$parentUrl" class="ctl-link-inherit">&larr; Back to $parentLabel</a>
             </p>
 
         </article>
 
     #else
-        <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
+        <div class="ctl-empty-state">
             <h2>Not Found</h2>
             <p>Sorry, this item could not be found or may have been removed.</p>
-            <a href="$parentUrl" style="color: inherit;">Return to $parentLabel</a>
+            <a href="$parentUrl" class="ctl-link-inherit">Return to $parentLabel</a>
         </div>
     #end
 #end
@@ -606,7 +699,7 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Session accordion toggle -- independent of the title/breadcrumb script
    above (that block assumes $item exists; the Not Found / editor-preview
    branches don't render this markup at all, so this binds safely either
-   way). Double-bind guard matches ctl-widget_our-services.html's
+   way). Double-bind guard matches ctl-content_our-services.html's
    ctl-gh-svc-toggle pattern. */
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.ctl-session-toggle').forEach(function(btn) {
