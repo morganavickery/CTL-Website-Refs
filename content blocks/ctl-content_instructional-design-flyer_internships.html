@@ -1,0 +1,53 @@
+<!-- Instructional Design career-awareness intro — sits at the top of
+     articles/internships. Web-native redesign (not a flyer recreation):
+     follows the same idioms already used across this site's static intro
+     content blocks (e.g. ctl-content_opportunities-overview_opportunities.html) —
+     Bootstrap Icons (bi bi-*), Bootstrap heading/utility classes, and the
+     shared --ctl-maroon brand accent from styles/ctl-widgets.css — rather
+     than a bespoke typographic system. Only the icon/benefits-grid/QR
+     layout needs custom CSS below; everything else rides on Bootstrap.
+     Accessibility: one real heading ("Love design & education?") gives
+     screen-reader users a meaningful entry point before the page's two
+     internship <h2>s further down; every other line is plain body copy,
+     not a heading.
+     No QR code/URL here — this block already lives on the CTL site, so a
+     link back to it would be redundant. -->
+<style>
+  .ctl-id-intro {
+    max-width: 640px;
+  }
+  .ctl-id-accent {
+    color: var(--ctl-maroon);
+    font-style: italic;
+    font-weight: 200;
+
+  }
+  .ctl-id-benefits {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    margin-left: 1.5rem;
+  }
+  .ctl-id-benefits li {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+  }
+  .ctl-id-benefits i {
+    color: var(--ctl-maroon);
+    margin-right: 0.1rem;
+    flex-shrink: 0;
+  }
+</style>
+<div class="ctl-id-intro">
+  <h2 class="h3 fw-bold">Love design &amp; education?</h2>
+  <p class="lead">Not sure if you want to be a <strong>K-12 teacher</strong>? You might be destined to become an <strong class="ctl-id-accent">instructional designer</strong>.</p>
+  <p>Come join the Center for Teaching &amp; Learning &mdash; we help your instructors...</p>
+  <ul class="ctl-id-benefits">
+    <li><i class="bi bi-check2-circle" aria-hidden="true"></i> <strong>Design</strong> course materials</li>
+    <li><i class="bi bi-check2-circle" aria-hidden="true"></i> <strong>Connect</strong> with their students</li>
+    <li><i class="bi bi-check2-circle" aria-hidden="true"></i> Teach more <strong>inclusively</strong></li>
+    <li><i class="bi bi-check2-circle" aria-hidden="true"></i> Make materials more <strong>accessible</strong></li>
+    <li><i class="bi bi-check2-circle" aria-hidden="true"></i> <strong>Research</strong> their own classrooms</li>
+  </ul>
+</div>
