@@ -1,0 +1,159 @@
+## Opportunities landing page — master list. Pulls every CtlActivity with
+## isOpportunity checked, regardless of category, and renders one compact
+## table (not the card treatment used on Awards/Grants & Funding/Programs &
+## Communities) so the whole set stays scannable in one place. An item
+## counts as closed if its signupDeadline has passed OR signupCapacityReached
+## is manually checked (same isClosedByOverride/isClosedByDate pattern as
+## ctl-content_activity-detail.html). Open items are sorted first (soonest
+## deadline first), then closed items beneath (most recently closed first)
+## — each row's Status column shows Open/Closed. This is a widget, not a
+## static content block, because it has to
+## stay current with live CtlActivity data (see CLAUDE.md's Widget vs.
+## Content Block distinction). Sits alongside the static overview content
+## block (ctl-content_opportunities-overview_opportunities.html) which
+## carries the tile grid to the Awards / Programs & Communities / Grants &
+## Funding / Past Recipients subpages.
+
+#set($now = $date.getDate())
+#set($nowMs = $now.getTime())
+#set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1 +live:true +deleted:false", 100, "score"))
+
+#set($allOpps = [])
+#foreach($item in $allActivities)
+    #if($item.isOpportunity.selectedValues.contains("true"))
+        #set($dummy = $allOpps.add($item))
+    #end
+#end
+
+#set($activeList = [])
+#set($expiredList = [])
+#foreach($opp in $allOpps)
+    #set($isClosedByOverride = $opp.signupCapacityReached.selectedValues.contains("true"))
+    #set($isClosedByDate = false)
+    #if("$!opp.signupDeadline" != "" && $opp.signupDeadline.getTime() < $nowMs)
+        #set($isClosedByDate = true)
+    #end
+    #if($isClosedByOverride || $isClosedByDate)
+        #set($dummy = $expiredList.add($opp))
+    #else
+        #set($dummy = $activeList.add($opp))
+    #end
+#end
+
+## Sort active list by deadline ascending (soonest first)
+#set($sortedActive = $activeList)
+#foreach($i in [0..99])
+    #if($i < $sortedActive.size())
+        #foreach($j in [0..99])
+            #set($k = $j + 1)
+            #if($k < $sortedActive.size())
+                #set($a = $sortedActive.get($j))
+                #set($b = $sortedActive.get($k))
+                #if("$!a.signupDeadline" != "" && "$!b.signupDeadline" != "")
+                    #if($a.signupDeadline.getTime() > $b.signupDeadline.getTime())
+                        #set($dummy = $sortedActive.set($j, $b))
+                        #set($dummy = $sortedActive.set($k, $a))
+                    #end
+                #end
+            #end
+        #end
+    #end
+#end
+
+## Sort expired list by deadline descending (most recently closed first).
+## Guarded on both sides same as the active-list sort above — a manually
+## closed item (signupCapacityReached, no deadline) has a blank
+## signupDeadline, and calling .getTime() on that blanks the render with no
+## error (see CLAUDE.md's Velocity gotchas), so unlike the active list this
+## can't reuse an unguarded comparison.
+#set($sortedExpired = $expiredList)
+#foreach($i in [0..99])
+    #if($i < $sortedExpired.size())
+        #foreach($j in [0..99])
+            #set($k = $j + 1)
+            #if($k < $sortedExpired.size())
+                #set($a = $sortedExpired.get($j))
+                #set($b = $sortedExpired.get($k))
+                #if("$!a.signupDeadline" != "" && "$!b.signupDeadline" != "")
+                    #if($a.signupDeadline.getTime() < $b.signupDeadline.getTime())
+                        #set($dummy = $sortedExpired.set($j, $b))
+                        #set($dummy = $sortedExpired.set($k, $a))
+                    #end
+                #end
+            #end
+        #end
+    #end
+#end
+
+## Concatenate: active rows first, then expired rows
+#set($allRows = [])
+#foreach($opp in $sortedActive)
+    #set($dummy = $allRows.add($opp))
+#end
+#foreach($opp in $sortedExpired)
+    #set($dummy = $allRows.add($opp))
+#end
+
+#if($EDIT_MODE)
+    <div class="ctl-debug-box ctl-debug-box--warn">
+        &#128027; DEBUG: $allOpps.size() opportunity record(s) total, $sortedActive.size() open, $sortedExpired.size() closed.
+    </div>
+#end
+
+<div class="ctl-mt-56">
+    <h2 class="section-title">All Opportunities</h2>
+    <p class="ctl-section-subtext">Every current and past CTL award, grant, and program in one list, regardless of category.</p>
+
+    #if($allRows.size() == 0)
+        <p class="ctl-listing-empty ctl-listing-empty-pad">No opportunities on record yet.</p>
+    #else
+        <div class="table-responsive">
+            <table class="ctl-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Deadline</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    #foreach($opp in $allRows)
+                        #set($rowClosedByOverride = $opp.signupCapacityReached.selectedValues.contains("true"))
+                        #set($rowClosedByDate = false)
+                        #if("$!opp.signupDeadline" != "" && $opp.signupDeadline.getTime() < $nowMs)
+                            #set($rowClosedByDate = true)
+                        #end
+                        #set($isClosed = ($rowClosedByOverride || $rowClosedByDate))
+                        <tr>
+                            <td><a href="/centers/ctl/activities/$opp.urlMapPattern">$opp.title</a></td>
+                            <td>
+                                #if($opp.categories && $opp.categories.size() > 0)
+                                    #foreach($cat in $opp.categories)
+                                        #if("$!cat.categoryName" != "")
+                                            <span class="ctl-cat-tag#if($isClosed) ctl-cat-tag-muted#end">$cat.categoryName</span>
+                                        #end
+                                    #end
+                                #end
+                            </td>
+                            <td>
+                                #if("$!opp.signupDeadline" != "")
+                                    $date.format('MMMM d, yyyy', $opp.signupDeadline)
+                                #else
+                                    Ongoing
+                                #end
+                            </td>
+                            <td>
+                                #if($isClosed)
+                                    <span class="ctl-badge-closed-compact">Closed</span>
+                                #else
+                                    <span class="ctl-badge-open">Open</span>
+                                #end
+                            </td>
+                        </tr>
+                    #end
+                </tbody>
+            </table>
+        </div>
+    #end
+</div>

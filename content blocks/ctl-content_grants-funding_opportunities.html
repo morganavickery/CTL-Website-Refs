@@ -1,0 +1,236 @@
+## Opportunities > Grants & Funding — CtlActivity opportunities tagged
+## "Grant", "Fellowship", "Teaching Grant", or "Research Grant".
+## Pulls all isOpportunity records, keeps only those carrying at least one
+## of those four categories, then splits into an active list (cards) and a
+## collapsible "Missed Connections" section — an item lands there if its
+## signupDeadline has passed OR signupCapacityReached is manually checked
+## (same isClosedByOverride/isClosedByDate pattern as
+## ctl-content_activity-detail.html). Same card/collapse treatment as
+## ctl-content_awards_opportunities.html and
+## ctl-content_programs-communities_opportunities.html — those three content blocks
+## differ only in their category filter and copy. An item with multiple
+## categories (e.g. both "Grant" and "Award") can legitimately appear on
+## more than one of the three tag pages.
+## Whole tile links to the shared activity-detail page (.stretched-link on
+## the title); the Apply button still works independently on top of it
+## (z-index rule in the shared stylesheet).
+
+#set($now = $date.getDate())
+#set($nowMs = $now.getTime())
+#set($allActivities = $dotcontent.pull("+contentType:CtlActivity +languageId:1 +live:true +deleted:false", 100, "score"))
+
+#set($allOpps = [])
+#foreach($item in $allActivities)
+    #if($item.isOpportunity.selectedValues.contains("true"))
+        #set($dummy = $allOpps.add($item))
+    #end
+#end
+
+#set($tagged = [])
+#foreach($opp in $allOpps)
+    #set($isMatch = false)
+    #if($opp.categories && $opp.categories.size() > 0)
+        #foreach($cat in $opp.categories)
+            #set($catName = "$!cat.categoryName")
+            #if($catName == "Grant" || $catName == "Fellowship" || $catName == "Teaching Grant" || $catName == "Research Grant")
+                #set($isMatch = true)
+            #end
+        #end
+    #end
+    #if($isMatch)
+        #set($dummy = $tagged.add($opp))
+    #end
+#end
+
+#set($activeList = [])
+#set($expiredList = [])
+#foreach($opp in $tagged)
+    #set($isClosedByOverride = $opp.signupCapacityReached.selectedValues.contains("true"))
+    #set($isClosedByDate = false)
+    #if("$!opp.signupDeadline" != "" && $opp.signupDeadline.getTime() < $nowMs)
+        #set($isClosedByDate = true)
+    #end
+    #if($isClosedByOverride || $isClosedByDate)
+        #set($dummy = $expiredList.add($opp))
+    #else
+        #set($dummy = $activeList.add($opp))
+    #end
+#end
+
+## Sort active list by deadline ascending (soonest first)
+#set($sortedActive = $activeList)
+#foreach($i in [0..99])
+    #if($i < $sortedActive.size())
+        #foreach($j in [0..99])
+            #set($k = $j + 1)
+            #if($k < $sortedActive.size())
+                #set($a = $sortedActive.get($j))
+                #set($b = $sortedActive.get($k))
+                #if("$!a.signupDeadline" != "" && "$!b.signupDeadline" != "")
+                    #if($a.signupDeadline.getTime() > $b.signupDeadline.getTime())
+                        #set($dummy = $sortedActive.set($j, $b))
+                        #set($dummy = $sortedActive.set($k, $a))
+                    #end
+                #end
+            #end
+        #end
+    #end
+#end
+
+## Sort expired list by deadline descending (most recently closed first).
+## Guarded on both sides same as the active-list sort above — a manually
+## closed item (signupCapacityReached, no deadline) has a blank
+## signupDeadline, and calling .getTime() on that blanks the render with no
+## error (see CLAUDE.md's Velocity gotchas), so unlike the active list this
+## can't reuse an unguarded comparison.
+#set($sortedExpired = $expiredList)
+#foreach($i in [0..99])
+    #if($i < $sortedExpired.size())
+        #foreach($j in [0..99])
+            #set($k = $j + 1)
+            #if($k < $sortedExpired.size())
+                #set($a = $sortedExpired.get($j))
+                #set($b = $sortedExpired.get($k))
+                #if("$!a.signupDeadline" != "" && "$!b.signupDeadline" != "")
+                    #if($a.signupDeadline.getTime() < $b.signupDeadline.getTime())
+                        #set($dummy = $sortedExpired.set($j, $b))
+                        #set($dummy = $sortedExpired.set($k, $a))
+                    #end
+                #end
+            #end
+        #end
+    #end
+#end
+
+#if($EDIT_MODE)
+    <div class="ctl-debug-box ctl-debug-box--warn">
+        &#128027; DEBUG: $allOpps.size() opportunity record(s) total, $tagged.size() tagged Grant/Fellowship/Teaching Grant/Research Grant, $sortedActive.size() active, $sortedExpired.size() in Missed Connections.
+    </div>
+#end
+
+<h2 class="section-title">Grants &amp; Funding</h2>
+<div class="opp-listing-group ctl-listing-indent">
+    #if($sortedActive.size() > 0)
+        #foreach($opp in $sortedActive)
+            <div class="ctl-listing-card ctl-hover-lift">
+                #if("$!opp.thumbnail.fileName" != "")
+                    <div class="ctl-listing-thumb-wrap">
+                        <img src="$opp.thumbnail.path$opp.thumbnail.fileName" alt="$opp.title" class="ctl-listing-thumb" />
+                    </div>
+                #end
+                <div class="ctl-listing-body">
+                    <div class="ctl-listing-head">
+                        #if($opp.categories && $opp.categories.size() > 0)
+                            <div class="ctl-listing-tags-row">
+                                #foreach($cat in $opp.categories)
+                                    #if("$!cat.categoryName" != "")
+                                        <span class="ctl-cat-tag">$cat.categoryName</span>
+                                    #end
+                                #end
+                            </div>
+                        #end
+                        <h3 class="ctl-listing-title">
+                            <a href="/centers/ctl/activities/$opp.urlMapPattern" class="ctl-listing-title-link stretched-link">$opp.title</a>
+                        </h3>
+                    </div>
+
+                    <div class="ctl-listing-meta-row">
+                        #if("$!opp.signupDeadline" != "")
+                            <span class="ctl-listing-meta-item">
+                                <i class="bi bi-calendar-x ctl-listing-meta-icon"></i>
+                                <span><strong>Deadline:</strong> $date.format('MMMM d, yyyy', $opp.signupDeadline)</span>
+                            </span>
+                        #end
+
+                        #if("$!opp.oppAmountPaid" != "")
+                            #if("$!opp.signupDeadline" != "")
+                                <span class="ctl-listing-meta-divider">|</span>
+                            #end
+                            #set($amtVal = "$!opp.oppAmountPaid")
+                            <span class="ctl-listing-meta-item">
+                                <i class="bi bi-cash-stack ctl-listing-meta-icon"></i>
+                                <span><strong>Amount:</strong> #if($amtVal.matches('^\$?[0-9][0-9,]*(\.[0-9]+)?$') && !$amtVal.startsWith("$"))$#end$amtVal</span>
+                            </span>
+                        #end
+                    </div>
+                    <div class="ctl-listing-divider ctl-listing-divider-spaced"></div>
+                    <div class="ctl-listing-footer">
+                        #if("$!opp.shortDescription" != "")
+                            <div class="ctl-listing-desc-inline">$opp.shortDescription</div>
+                        #end
+                        <div class="ctl-listing-actions">
+                            #if("$!opp.registerApplyLink" != "" && "$!opp.registerApplyLink" != "http://")
+                                <a href="$opp.registerApplyLink" target="_blank" class="btn btn-default btn-sm" aria-label="Apply for $opp.title (opens in new tab)">Apply</a>
+                            #else
+                                <a href="/centers/ctl/activities/$opp.urlMapPattern" class="btn btn-default btn-sm" aria-label="View details for $opp.title">View Details</a>
+                            #end
+                        </div>
+                    </div>
+                </div>
+            </div>
+        #end
+    #else
+        <p class="ctl-listing-empty ctl-listing-empty-pad">No open grant or funding calls at this time.</p>
+    #end
+</div>
+
+<div class="ctl-mt-56">
+    <div id="ctlGrantsMissedToggle" class="ctl-collapse-toggle">
+        <h2 class="section-title">Missed Connections</h2>
+        <span id="ctlGrantsMissedArrow" aria-hidden="true" class="ctl-collapse-arrow">&#9660;</span>
+    </div>
+    <p class="ctl-collapse-subtext">Grant and funding calls that are no longer accepting applications.</p>
+
+    <div id="ctlGrantsMissedList" class="ctl-missed-opps-grid ctl-listing-indent is-collapsed">
+        #if($sortedExpired.size() > 0)
+            #foreach($opp in $sortedExpired)
+                <div class="ctl-listing-card-compact ctl-listing-card-muted ctl-hover-lift">
+                    #if("$!opp.thumbnail.fileName" != "")
+                        <img src="$opp.thumbnail.path$opp.thumbnail.fileName" alt="$opp.title" class="ctl-listing-compact-thumb" />
+                    #end
+                    <div class="ctl-listing-head">
+                        #if($opp.categories && $opp.categories.size() > 0)
+                            <div class="ctl-listing-tags-row">
+                                #foreach($cat in $opp.categories)
+                                    #if("$!cat.categoryName" != "")
+                                        <span class="ctl-cat-tag ctl-cat-tag-muted">$cat.categoryName</span>
+                                    #end
+                                #end
+                            </div>
+                        #end
+                        <h3 class="ctl-listing-title ctl-listing-title-compact ctl-listing-title-muted">
+                            <a href="/centers/ctl/activities/$opp.urlMapPattern" class="ctl-listing-title-link stretched-link">$opp.title</a>
+                        </h3>
+                    </div>
+
+                    <div class="ctl-listing-meta-row ctl-listing-meta-row-tight">
+                        <span class="ctl-badge-closed-compact">Closed</span>
+                    </div>
+                    <div class="ctl-listing-divider"></div>
+
+                    #if("$!opp.shortDescription" != "")
+                        <div class="ctl-missed-opp-desc ctl-listing-desc-block ctl-listing-desc-muted">$opp.shortDescription</div>
+                    #end
+                    <div>
+                        <a href="/centers/ctl/activities/$opp.urlMapPattern" class="btn btn-default btn-sm" aria-label="View details for $opp.title">View Details</a>
+                    </div>
+                </div>
+            #end
+        #else
+            <p class="ctl-listing-empty ctl-listing-empty-pad">No closed grant or funding calls found.</p>
+        #end
+    </div>
+</div>
+
+<script>
+(function () {
+    var toggle = document.getElementById('ctlGrantsMissedToggle');
+    var list = document.getElementById('ctlGrantsMissedList');
+    var arrow = document.getElementById('ctlGrantsMissedArrow');
+    if (!toggle || !list || !arrow) { return; }
+    toggle.addEventListener('click', function () {
+        var collapsed = list.classList.toggle('is-collapsed');
+        arrow.innerHTML = collapsed ? '&#9660;' : '&#9650;';
+    });
+})();
+</script>

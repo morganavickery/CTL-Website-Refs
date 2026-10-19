@@ -1,0 +1,156 @@
+## Opportunities > Past Recipients — actual award/grant/fellowship WINNERS.
+##
+## Backed by CtlPersonnel, not a dedicated content type: a recipient entry
+## is any CtlPersonnel record's `honorRecieved` (Relationship -> CtlActivity)
+## whose activity carries an "Award", "Grant", "Fellowship", "Teaching
+## Grant", or "Research Grant" category — i.e. an honor that would appear on
+## the Awards or Grants & Funding pages. Honors tagged only with a
+## Programs & Communities-type category (Book Club, Workshop, etc.) don't
+## qualify as a "past recipient" entry.
+##
+## `honorRecieved` can hold multiple honors per person — this renders ONE
+## ROW PER QUALIFYING HONOR, not one row per person, so a person with
+## multiple awards is intentionally listed multiple times (once per honor).
+## Built as parallel arrays (recipPersonList / recipHonorList, same index =
+## same row) since this Velocity engine has no map literals to pair a
+## person with a specific honor otherwise.
+##
+## CtlPersonnel has no per-honor date/granting-body field — the `affiliation`
+## and `yearAwarded` fields were removed from the schema. Year and the
+## "tag" badge are derived from the honor (CtlActivity) itself instead:
+## year is parsed from a trailing "(YYYY)" in the honor's `title` (that
+## suffix is a required naming convention for any CtlActivity meant to be
+## linked as a past-recipient honor — see CLAUDE.md), and the tag is
+## whichever qualifying category matched first (e.g. "Award", "Grant").
+##
+## Sorted descending by that parsed year via bubble sort with a
+## fixed-bound range ([0..99] + #if guards) — see CLAUDE.md's Velocity
+## range-operator gotcha. Year strings are compared with .compareTo()
+## (not `<`/`>`, which never evaluates true String-vs-String in this
+## engine) since they're fixed 4-digit strings, so lexicographic order
+## matches numeric order. Sorts all three parallel arrays in lockstep.
+
+#set($allPersonnel = $dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true +deleted:false", 500, "score"))
+
+#set($recipPersonList = [])
+#set($recipHonorList = [])
+#set($recipYearList = [])
+#set($recipTagList = [])
+#foreach($p in $allPersonnel)
+    #if($p.honorRecieved && $p.honorRecieved.size() > 0)
+        #foreach($honor in $p.honorRecieved)
+            #set($qualifies = false)
+            #set($tag = "")
+            #if($honor.categories && $honor.categories.size() > 0)
+                #foreach($cat in $honor.categories)
+                    #set($catName = "$!cat.categoryName")
+                    #if($catName == "Award" || $catName == "Grant" || $catName == "Fellowship" || $catName == "Teaching Grant" || $catName == "Research Grant")
+                        #set($qualifies = true)
+                        #if($tag == "")
+                            #set($tag = $catName)
+                        #end
+                    #end
+                #end
+            #end
+            #if($qualifies)
+                #set($year = "0000")
+                #set($t = "$!honor.title")
+                #set($openIdx = $t.lastIndexOf("("))
+                #set($closeIdx = $t.lastIndexOf(")"))
+                #if($openIdx >= 0 && $closeIdx > $openIdx)
+                    #set($openPlus = $openIdx.intValue() + 1)
+                    #set($candidate = $t.substring($openPlus, $closeIdx))
+                    #if($candidate.matches('^[0-9]{4}$'))
+                        #set($year = $candidate)
+                    #end
+                #end
+                #set($dummy = $recipPersonList.add($p))
+                #set($dummy = $recipHonorList.add($honor))
+                #set($dummy = $recipYearList.add($year))
+                #set($dummy = $recipTagList.add($tag))
+            #end
+        #end
+    #end
+#end
+
+#foreach($i in [0..99])
+    #if($i < $recipPersonList.size())
+        #foreach($j in [0..99])
+            #set($k = $j + 1)
+            #if($k < $recipPersonList.size())
+                #set($aYear = $recipYearList.get($j))
+                #set($bYear = $recipYearList.get($k))
+                #if($aYear.compareTo($bYear) < 0)
+                    #set($aPerson = $recipPersonList.get($j))
+                    #set($bPerson = $recipPersonList.get($k))
+                    #set($aHonor = $recipHonorList.get($j))
+                    #set($bHonor = $recipHonorList.get($k))
+                    #set($aTag = $recipTagList.get($j))
+                    #set($bTag = $recipTagList.get($k))
+                    #set($dummy = $recipPersonList.set($j, $bPerson))
+                    #set($dummy = $recipPersonList.set($k, $aPerson))
+                    #set($dummy = $recipHonorList.set($j, $bHonor))
+                    #set($dummy = $recipHonorList.set($k, $aHonor))
+                    #set($dummy = $recipYearList.set($j, $bYear))
+                    #set($dummy = $recipYearList.set($k, $aYear))
+                    #set($dummy = $recipTagList.set($j, $bTag))
+                    #set($dummy = $recipTagList.set($k, $aTag))
+                #end
+            #end
+        #end
+    #end
+#end
+
+#if($EDIT_MODE)
+    <div class="ctl-debug-box ctl-debug-box--warn">
+        &#128027; DEBUG: $allPersonnel.size() CtlPersonnel record(s) total, $recipPersonList.size() qualifying
+        honor row(s) (Award/Grant/Fellowship/Teaching Grant/Research Grant only). If this is always 0, check
+        that award-winning CtlPersonnel records have honorRecieved populated and that the linked CtlActivity
+        carries one of those five categories.
+    </div>
+#end
+
+<div class="ctl-mt-56">
+    <h2 class="section-title mb-2">Past Recipients</h2>
+    <p class="ctl-section-subtext">Faculty and staff who've received CTL grants, fellowships, and awards.</p>
+
+    #if($recipPersonList.size() == 0)
+        <p class="ctl-listing-empty ctl-listing-empty-pad">No past recipients on record yet.</p>
+    #else
+        <div class="ctl-past-recipients-grid">
+            #foreach($i in [0..999])
+                #if($i < $recipPersonList.size())
+                    #set($rec = $recipPersonList.get($i))
+                    #set($honor = $recipHonorList.get($i))
+                    #set($year = $recipYearList.get($i))
+                    #set($tag = $recipTagList.get($i))
+                    <div class="ctl-listing-card">
+                        #if("$!rec.headshotPhoto.fileName" != "")
+                            <img src="$rec.headshotPhoto.path$rec.headshotPhoto.fileName" alt="" class="ctl-recipient-photo" />
+                        #end
+                        <div class="ctl-listing-body">
+                            #if($tag != "")
+                                <div class="ctl-recipient-tags-row">
+                                    <span class="ctl-tag">$tag</span>
+                                </div>
+                            #end
+                            <h3 class="ctl-recipient-name">$!rec.name</h3>
+                            #if($year != "0000" || "$!rec.department" != "")
+                                <p class="ctl-recipient-meta">
+                                    #if($year != "0000")$year#end
+                                    #if($year != "0000" && "$!rec.department" != "") &middot; #end
+                                    #if("$!rec.department" != "")$rec.department#end
+                                </p>
+                            #end
+                            #if("$!honor.title" != "")
+                                <p class="ctl-recipient-summary">
+                                    <a href="/centers/ctl/activities/$!honor.urlMapPattern">$!honor.title</a>
+                                </p>
+                            #end
+                        </div>
+                    </div>
+                #end
+            #end
+        </div>
+    #end
+</div>

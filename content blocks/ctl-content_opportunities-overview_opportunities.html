@@ -1,0 +1,69 @@
+## Opportunities L1 landing page: static overview text + a tile grid to the
+## Awards / Programs & Communities / Grants & Funding / Past Recipients
+## subpages. No data pulls — edit text/hrefs directly. Tiles use
+## .ctl-nav-tile (shared stylesheet). The landing page's "master list" of
+## every opportunity regardless of category is a separate widget
+## (ctl-content_all-opportunities_opportunities.html, placed below this
+## block on the page) since it has to pull live content.
+
+<div class="ctl-landing-blurb">
+    <p>
+        The CTL offers internal awards, grants, and programs that support faculty and staff
+        in improving teaching and learning at Cortland. Browse by category below, or see who's
+        received funding and recognition in past cycles.
+    </p>
+</div>
+
+<div class="container py-4">
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+
+    <div class="col">
+      <a href="/centers/ctl/opportunities/awards" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-trophy fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">Awards</h3>
+          </div>
+          <p class="card-text mb-0">Recognition for excellence in teaching and learning.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/opportunities/grants-funding" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-cash-coin fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">Grants &amp; Funding</h3>
+          </div>
+          <p class="card-text mb-0">Grants, fellowships, teaching grants, and research grants.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/opportunities/programs-communities" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-people fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">Programs &amp; Communities</h3>
+          </div>
+          <p class="card-text mb-0">Book clubs, communities of practice, working groups, workshops, and more.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col">
+      <a href="/centers/ctl/opportunities/past-recipients" class="card h-100 text-decoration-none text-body ctl-nav-tile">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-award fs-3" aria-hidden="true"></i>
+            <h3 class="h5 fw-bold mb-0 card-title">Past Recipients</h3>
+          </div>
+          <p class="card-text mb-0">See who's won past awards, grants, and fellowships.</p>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</div>
