@@ -26,7 +26,7 @@
 #end
 
 #if($EDIT_MODE && $hiddenCount > 0)
-    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.9rem;">
+    <div class="ctl-editor-notice">
         &#128736;&#65039; <strong>Editors only:</strong> $hiddenCount item(s) hidden from this listing because "Reviewed By" is empty.
     </div>
 #end
@@ -38,17 +38,17 @@
 
 #if($visibleResources.size() == 0)
 
-    <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
+    <div class="ctl-empty-state">
         <p>Resources are coming soon &mdash; check back shortly.</p>
     </div>
 
 #else
 
     ## ---- Filter bar: search on top, then Format | Modality | Topics columns ----
-    <div class="ctl-res-filterbar" id="ctlResFilterBar" style="display:none;">
+    <div class="ctl-res-filterbar d-none" id="ctlResFilterBar">
         <div class="mb-3">
-            <input type="text" class="form-control form-control-sm" id="ctlResSearch"
-                   placeholder="Search resources&hellip;" style="max-width: 320px;" />
+            <input type="text" class="form-control form-control-sm ctl-res-search-input" id="ctlResSearch"
+                   placeholder="Search resources&hellip;" />
         </div>
         <div class="mb-3" id="ctlResFilterTopicCol">
             <span class="ctl-res-filter-label">Topics</span>
@@ -119,6 +119,15 @@
 
             #set($cardDesc = "$!r.shortDescription")
 
+            ## --- body: WYSIWYG -> tags stripped, entities escaped, dropped
+            ##     into a hidden node below so search (which matches against
+            ##     card.textContent) also reaches the long description ---
+            #set($bodyPlain = "$!r.body")
+            #set($bodyPlain = $bodyPlain.replaceAll('<[^>]*>', ' '))
+            #set($bodyPlain = $bodyPlain.replaceAll('&', '&amp;'))
+            #set($bodyPlain = $bodyPlain.replaceAll('<', '&lt;'))
+            #set($bodyPlain = $bodyPlain.replaceAll('>', '&gt;'))
+
             <div class="col ctl-res-card-wrap"
                  data-format="$fmtStr"
                  data-modality="$modStr"
@@ -149,13 +158,14 @@
                                 #end
                             </div>
                         #end
+                        <div class="d-none" aria-hidden="true">$bodyPlain</div>
                     </div>
                 </div>
             </div>
         #end
     </div>
 
-    <div id="ctlResEmpty" style="display:none; padding: 40px; text-align: center; color: var(--ctl-gray-text);">
+    <div id="ctlResEmpty" class="ctl-empty-state d-none">
         <p>No resources match your filters.</p>
         <button type="button" class="ctl-res-pill" id="ctlResClear">Clear all filters</button>
     </div>
@@ -174,13 +184,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // ---- topic schema: parent categories and their child topics ----
     // Keep in sync with the dotCMS category tree. Topics found on cards but not
     // listed here fall into a "More Topics" group, so new topics still filter.
+    // A topic can appear in more than one group's children array (e.g. "Interactivity"
+    // spans Course Materials & Tooling + Student Engagement) - it will render its own
+    // pill under each heading it's listed in, all wired to the same filter value.
     var TOPIC_SCHEMA = [
-        { parent: 'Course Policies, Norms, & Expectations', children: ['Attendance', 'Grade Scheme', 'Expectations for Participation', 'Assignments', 'Student Access to Materials', 'Student Wellbeing', 'Academic Integrity', 'Communication'] },
-        { parent: 'Curriculum Design', children: ['Content + Sequencing', 'Learning Objectives', 'Course Planning / Schedule'] },
-        { parent: 'Student Engagement', children: ['Peer Collaboration', 'Interactive Tech', 'Activity Design'] },
-        { parent: 'Assessment & Grading', children: ['Formative Assessment', 'Summative Assessment', 'Rubric Design', 'Giving Feedback', 'Grading', 'Resubmission'] },
-        { parent: 'Course Materials & Tooling', children: ['Title II Remediation', 'OER', 'Selecting Readings / Textbooks', 'Lectures + Slides', 'AI Use'] },
-        { parent: 'Classroom Climate & Student Voice', children: ['Course Evals', 'Feedback Systems', 'Inclusive Instruction', 'Intellectual Respect', 'A Culture of Care'] }
+        { parent: 'Course Policies, Norms, & Expectations', children: ['Grade Schemes', 'AI Use', 'Attendance', 'Student Wellbeing', 'Participation', 'Communication', 'Accessibility', 'Course Planning / Schedule', 'Resubmission', 'Syllabi'] },
+        { parent: 'Curriculum Design', children: ['Activity Design', 'Lectures + Slides', 'Assignments', 'Learning Objectives & Sequencing'] },
+        { parent: 'Student Engagement', children: ['Peer Collaboration', 'Interactivity', 'Activity Design', 'Inclusive Instruction', 'Assignments'] },
+        { parent: 'Assessment & Grading', children: ['Grading', 'Academic Integrity', 'Formative Assessment', 'Rubric Design', 'Summative Assessment', 'Giving Feedback', 'Resubmission'] },
+        { parent: 'Course Materials & Tooling', children: ['Interactivity', 'Technologies', 'Title II Remediation', 'OER', 'Selecting Readings / Textbooks', 'Lectures + Slides', 'AI Use', 'Accessing Materials', 'Accessibility', 'Course Planning / Schedule', 'Syllabi'] },
+        { parent: 'Classroom Climate & Student Voice', children: ['Course Evals', 'Feedback Systems', 'Student Wellbeing', 'Communication'] }
     ];
     var PARENT_NAMES = {};
     TOPIC_SCHEMA.forEach(function(g) { PARENT_NAMES[g.parent] = true; });
@@ -283,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var container = document.getElementById(containerId);
         var values = collectValues(attrName);
         if (values.length === 0) {
-            document.getElementById(colId).style.display = 'none';
+            document.getElementById(colId).classList.add('d-none');
             return;
         }
         function mk(value, labelText, checked) {
@@ -317,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var topicEntries = [];
 
     if (topicValues.length === 0) {
-        document.getElementById('ctlResFilterTopicCol').style.display = 'none';
+        document.getElementById('ctlResFilterTopicCol').classList.add('d-none');
     } else {
         var presentTopics = {};
         topicValues.forEach(function(v) { presentTopics[v] = true; });
@@ -325,8 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function makeTopicPill(v) {
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'ctl-res-pill';
-            btn.style.margin = '3px';
+            btn.className = 'ctl-res-pill ctl-res-topic-pill';
             btn.textContent = v;
             btn.addEventListener('click', function() {
                 var token = 'topic:' + v;
@@ -376,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
         applyFilters();
     });
 
-    document.getElementById('ctlResFilterBar').style.display = '';
+    document.getElementById('ctlResFilterBar').classList.remove('d-none');
 
     // ---- cross-section dimming: grey out (but keep clickable) any option whose
     //      combination with the current selections has zero exact matches ----
@@ -429,14 +441,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (divider.parentNode) { divider.parentNode.removeChild(divider); }
-        cards.forEach(function(c) { c.style.display = 'none'; });
+        cards.forEach(function(c) { c.classList.add('d-none'); });
 
         function byBase(a, b) {
             return Number(a.card.getAttribute('data-base')) - Number(b.card.getAttribute('data-base'));
         }
 
         fulls.sort(byBase);
-        fulls.forEach(function(r) { r.card.style.display = ''; grid.appendChild(r.card); });
+        fulls.forEach(function(r) { r.card.classList.remove('d-none'); grid.appendChild(r.card); });
 
         if (partials.length > 0) {
             partials.sort(function(a, b) { return (b.score - a.score) || byBase(a, b); });
@@ -447,13 +459,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     grid.appendChild(divider);
                     dividerPlaced = true;
                 }
-                r.card.style.display = '';
+                r.card.classList.remove('d-none');
                 grid.appendChild(r.card);
             });
         }
 
         var shown = fulls.length + partials.length;
-        emptyEl.style.display = (shown === 0) ? '' : 'none';
+        emptyEl.classList.toggle('d-none', shown !== 0);
         if (n === 0) {
             countEl.textContent = 'Showing ' + fulls.length + ' of ' + cards.length + ' resources';
         } else if (fulls.length > 0) {
