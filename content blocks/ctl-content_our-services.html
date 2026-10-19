@@ -1,6 +1,7 @@
 ## Request Support > Our Services — CtlService cards.
-## .ctl-gh-svc-grid (CSS Grid, not Bootstrap row-cols — lets an expanded tile
-## span the full row while others keep normal width). Each tile: thumbnail,
+## .ctl-gh-svc-grid--2col (CSS Grid, 2 wide on desktop, 1 on mobile; not
+## Bootstrap row-cols — lets an expanded tile span the full row while others
+## keep normal width). Each tile: thumbnail,
 ## full description, optional "Learn More" toggle revealing longDescription
 ## (spans the tile to full width when expanded via .is-expanded), then a
 ## "Next Steps" section pinned to the tile bottom (mt-auto) holding whatever
@@ -8,15 +9,71 @@
 ## freeform note (nextSteps), or both.
 ## isCurrentlyAvailable gates the whole Next Steps section — an unavailable
 ## service still shows its description, just no Next Steps content.
+## serviceAccessLink can point either to an external tool (e.g. a scheduling
+## page or form) or to another page on this site (e.g. a service's own
+## standalone detail page, like Request a GIFT at
+## /centers/ctl/pages/request-a-gift) — a link starting with "/" is treated
+## as internal and rendered as a normal same-tab link; anything else opens
+## in a new tab. A service with its own detail page should have its
+## longDescription field left empty so the inline "Learn More" expand
+## doesn't duplicate/compete with that page — the Next Steps button becomes
+## its only "learn more" affordance.
+## nextSteps is freeform Textarea text (no rich-text link tool available to
+## the content editor), so any typed email address is auto-linked as
+## mailto: via regex, same pattern as CtlActivity's primaryContact on
+## ctl-content_activity-detail.html.
 ## No .ctl-hover-lift/.stretched-link — a service tile has no single
 ## consistent link target, so the whole tile isn't clickable.
 ## The "Make an Appointment" section on this page is a separate content
-## instance of ctl-widget_ctl-staff-profiles.html, not part of this file.
+## instance of ctl-content_ctl-staff-profiles.html, not part of this file.
 
 #set($allServices = $dotcontent.pull("+contentType:CtlService +languageId:1 +live:true", 500, "score"))
 
+## Order: $pinnedNames first (in listed order, matched case-insensitively on
+## serviceName), then everything else A-Z by serviceName. Sorted here since
+## pull() sort-by-field returns empty on this instance. Fixed [0..99] ranges
+## with bounds guards cap the alphabetical sort at 100 services.
+#set($pinnedNames = ["design lab drop-in hours", "one-on-one consultations"])
+#set($pinned = [])
+#foreach($pn in $pinnedNames)
+    #foreach($s in $allServices)
+        #set($nm = "$!s.serviceName")
+        #if($nm.trim().toLowerCase() == $pn)
+            #set($ok = $pinned.add($s))
+        #end
+    #end
+#end
+#set($rest = [])
+#foreach($s in $allServices)
+    #set($nm = "$!s.serviceName")
+    #if(!$pinnedNames.contains($nm.trim().toLowerCase()))
+        #set($ok = $rest.add($s))
+    #end
+#end
+#set($restCount = $rest.size())
+#foreach($i in [0..99])
+    #if($i < $restCount)
+        #foreach($j in [0..99])
+            #set($k = $j + 1)
+            #if($k < $restCount)
+                #set($svcA = $rest.get($j))
+                #set($svcB = $rest.get($k))
+                #set($nameA = "$!svcA.serviceName")
+                #set($nameB = "$!svcB.serviceName")
+                #if($nameA.compareToIgnoreCase($nameB) > 0)
+                    #set($rest[$j] = $svcB)
+                    #set($rest[$k] = $svcA)
+                #end
+            #end
+        #end
+    #end
+#end
+#set($sortedServices = [])
+#set($ok = $sortedServices.addAll($pinned))
+#set($ok = $sortedServices.addAll($rest))
+
 #if($EDIT_MODE)
-    <!-- DEBUG: pulled $allServices.size() CtlService record(s) -->
+    <!-- DEBUG: pulled $allServices.size() CtlService record(s), $pinned.size() pinned -->
 #end
 
 <!-- .ctl-btn / .ctl-gh-svc-* classes are defined in the shared stylesheet
@@ -26,13 +83,13 @@
     <h2 class="mb-4">Our Services</h2>
 
     #if($allServices.size() == 0)
-        <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
+        <div class="ctl-empty-state">
             <p>Service information is coming soon &mdash; check back shortly.</p>
         </div>
     #else
-        <div class="ctl-gh-svc-grid" id="ctlGhSvcList">
+        <div class="ctl-gh-svc-grid ctl-gh-svc-grid--2col" id="ctlGhSvcList">
             #set($svcIndex = 0)
-            #foreach($s in $allServices)
+            #foreach($s in $sortedServices)
                 #set($svcIndex = $svcIndex + 1)
 
                 #set($isAvailable = false)
@@ -41,16 +98,22 @@
                 #end
 
                 #set($hasBtn = false)
+                #set($isInternalLink = false)
                 #if($isAvailable && "$!s.serviceAccessLink" != "")
                     #set($hasBtn = true)
                     #set($btnLabel = "$!s.serviceButtonLabel")
                     #if($btnLabel == "")
                         #set($btnLabel = "Access this Service")
                     #end
+                    #if($s.serviceAccessLink.startsWith("/"))
+                        #set($isInternalLink = true)
+                    #end
                 #end
                 #set($hasNote = false)
+                #set($nextStepsHtml = "")
                 #if($isAvailable && "$!s.nextSteps" != "")
                     #set($hasNote = true)
+                    #set($nextStepsHtml = $s.nextSteps.replaceAll('([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})', '<a href="mailto:$1">$1</a>'))
                 #end
                 #set($hasLongDesc = false)
                 #if("$!s.longDescription" != "")
@@ -85,10 +148,14 @@
                                 <div class="ctl-gh-svc-next-steps mt-auto">
                                     <span class="ctl-gh-svc-next-steps-label">Next Steps</span>
                                     #if($hasNote)
-                                        <div class="ctl-gh-svc-next-steps-note">$!s.nextSteps</div>
+                                        <div class="ctl-gh-svc-next-steps-note">$nextStepsHtml</div>
                                     #end
                                     #if($hasBtn)
-                                        <a href="$!s.serviceAccessLink" class="ctl-btn ctl-gh-svc-btn" role="button" target="_blank" rel="noopener" aria-label="$btnLabel: $!s.serviceName (opens in new tab)">$btnLabel</a>
+                                        #if($isInternalLink)
+                                            <a href="$!s.serviceAccessLink" class="ctl-btn ctl-gh-svc-btn" role="button" aria-label="$btnLabel: $!s.serviceName">$btnLabel</a>
+                                        #else
+                                            <a href="$!s.serviceAccessLink" class="ctl-btn ctl-gh-svc-btn" role="button" target="_blank" rel="noopener" aria-label="$btnLabel: $!s.serviceName (opens in new tab)">$btnLabel</a>
+                                        #end
                                     #end
                                 </div>
                             #end

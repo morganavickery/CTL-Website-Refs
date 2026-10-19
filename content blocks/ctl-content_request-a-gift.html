@@ -1,0 +1,112 @@
+<!-- Request a GIFT (Group Instructional Feedback Technique) service detail
+     page, at /centers/ctl/pages/request-a-gift. Standalone page, not in main
+     nav — reached only via the Request Support "Our Services" tile's
+     serviceAccessLink field (ctl-content_our-services.html, CtlService
+     record) pointing at this URL. Static content block, no
+     $dotcontent.pull(). .ctl-btn is the shared CTA button class
+     (styles/ctl-widgets.css); .ctl-gift-step* below is scoped to this block
+     only. -->
+<style>
+  .ctl-gift-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.25rem;
+  }
+  .ctl-gift-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .ctl-gift-step-num {
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--ctl-maroon);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .ctl-gift-step-body {
+    padding-top: 0.15rem;
+  }
+  .ctl-gift-step-body h4 {
+    margin: 0 0 0.35rem;
+  }
+  .ctl-gift-step-body p,
+  .ctl-gift-step-body ul {
+    margin: 0 0 0.5rem;
+  }
+  .ctl-gift-step-body > :last-child {
+    margin-bottom: 0;
+  }
+</style>
+
+<h2 class="lead">Group Instructional Feedback Technique</h2>
+
+<p>
+  Ever wondered whether your course materials, assignments, or class structure are really
+  working for your students? A GIFT might help you answer those questions! GIFTs are
+  low-stakes, anonymous, mid-semester check-ins facilitated by a CTL staff member with your
+  students, designed to help you make mid-course adjustments, improve communication with
+  your students, increase student engagement, and build a healthy culture of reciprocal
+  feedback.
+</p>
+
+<a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=tBmbbEfIKkSknG2df9riMOApkogfhY1GtuAtTZXOdzdUMUtSRlkwMUxTUEJEWTlRTzJEWUpGNFpCWi4u" class="ctl-btn mb-4" role="button" target="_blank" rel="noopener" aria-label="Request a GIFT (opens in new tab)">Request a GIFT</a>
+
+<h3>Is a GIFT right for you?</h3>
+<p>GIFTs can help faculty who are&hellip;</p>
+<ul>
+  <li>Trying something new and wondering whether it is working.</li>
+  <li>Struggling with a particularly quiet or unengaged group of students.</li>
+  <li>Hoping to gather evidence on their successful teaching strategies.</li>
+  <li>New to the university or to teaching in general.</li>
+  <li>Experienced, but worried their classes are getting stale and looking for student suggestions on how to improve.</li>
+  <li>Interested in touching base with their students and getting feedback.</li>
+</ul>
+
+<h3>How a GIFT works</h3>
+<ol class="ctl-gift-steps" role="list">
+
+  <li class="ctl-gift-step">
+    <span class="ctl-gift-step-num" aria-hidden="true">1</span>
+    <div class="ctl-gift-step-body">
+      <h4>Initial Meeting / Request</h4>
+      <p>Once the GIFT is requested, the faculty member works with a CTL staff member to review the GIFT process, schedule the class visit, and discuss any concerns about the course.</p>
+    </div>
+  </li>
+
+  <li class="ctl-gift-step">
+    <span class="ctl-gift-step-num" aria-hidden="true">2</span>
+    <div class="ctl-gift-step-body">
+      <h4>GIFT Offering</h4>
+      <p>The GIFT moderator shows up to class on the selected day and meets with students (alone) for approximately 30 minutes. During that time, the moderator puts the students into groups and asks them four questions:</p>
+      <ul>
+        <li>What about this course helps you learn the material for the subject matter?</li>
+        <li>What about this course does <strong>NOT</strong> help you learn the material for the subject matter?</li>
+        <li>What could <strong>YOU</strong> (students) do to improve your own learning?</li>
+        <li>What suggestions do you have for future versions of this course?</li>
+      </ul>
+    </div>
+  </li>
+
+  <li class="ctl-gift-step">
+    <span class="ctl-gift-step-num" aria-hidden="true">3</span>
+    <div class="ctl-gift-step-body">
+      <h4>GIFT Consensus</h4>
+      <p>After the student groups answer the questions, the moderator leads a whole-class discussion where the groups share their answers, and the class comes to a consensus on their advice to the instructor.</p>
+    </div>
+  </li>
+
+</ol>
+
+<h3>Instructor Feedback</h3>
+<p>After the GIFT is complete, the moderator writes a report sharing the student feedback and shares that report with the instructor.</p>
+<p>All GIFT reports are completely confidential. Instructors can choose to keep the report confidential or share it as part of their annual review materials as a means of demonstrating successful teaching. Instructors are encouraged to discuss the feedback with their students.</p>
+
+<a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=tBmbbEfIKkSknG2df9riMOApkogfhY1GtuAtTZXOdzdUMUtSRlkwMUxTUEJEWTlRTzJEWUpGNFpCWi4u" class="ctl-btn mt-3" role="button" target="_blank" rel="noopener" aria-label="Request a GIFT (opens in new tab)">Request a GIFT</a>
