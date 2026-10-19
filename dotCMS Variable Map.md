@@ -40,33 +40,36 @@ Field names ("Variable") are the Velocity variable used in templates/widgets, e.
 | `eventEndDate` | Date | No | Blank = single-day event. |
 | `eventStartTime` | Time | No | — |
 | `eventEndTime` | Time | No | — |
-| `oppAmountPaid` | Text | No | Numbers only; `$` added by the template. |
+| `oppAmountPaid` | Text | No | Numeric values (e.g. `500`, `1,500.00`) get `$` prepended by the template; non-numeric values (e.g. `Free Book Copy`) render as entered, no `$`. Already-prefixed values (`$500`) are left as-is either way. |
 | `oppLaborExpectation` | Textarea | No | \~10 words, what earns the compensation. |
 | `sessiontimeblockdefinitions` | Key-Value | No | Live schema variable is all-lowercase (not camelCase `sessionTimeBlockDefinitions`). Key = block number, Value = display label. Multi-track conferences only. |
 | `activitySessions` | Relationship → CtlActivitySession | No | Multi-track conferences only. |
 
 ### CTL_Activity_Types (category tree)
 
-Top-level category — Name: `CTL_Activity_Types` · Key/Variable: `ctlactivitytypes` · 16 child categories.
+Top-level category — Name: `CTL_Activity_Types` · Key/Variable: `ctlactivitytypes` · 19 child categories.
 
 | Name | Key | Variable | Sort |
 |----|----|----|----|
-| Award | `award` | `award` | 0 |
-| Book Club | `bookClub` | `bookClub` | 0 |
-| Community of Practice | `communityOfPractice` | `communityOfPractice` | 0 |
-| Conference | `conference` | `conference` | 0 |
-| Fellowship | `fellowship` | `fellowship` | 0 |
-| Grant | `grant` | `grant` | 0 |
-| Information Session | `informationSession` | `informationSession` | 0 |
-| Paid | `paid` | `paid` | 0 |
-| Presentation | `presentation` | `presentation` | 0 |
-| Professional Development | `professionalDevelopment` | `professionalDevelopment` | 0 |
-| Research Grant | `researchGrant` | `researchGrant` | 0 |
-| Service | `service` | `service` | 0 |
-| Teaching Grant | `teachingGrant` | `teachingGrant` | 0 |
-| Working Group | `workingGroup` | `workingGroup` | 0 |
-| Working Session | `workingSession` | `workingSession` | 0 |
-| Workshop | `workshop` | `workshop` | 0 |
+| Award | `award` | `award` | 1 |
+| Book Club | `bookClub` | `bookClub` | 2 |
+| Community of Practice | `communityOfPractice` | `communityOfPractice` | 3 |
+| Conference | `conference` | `conference` | 4 |
+| Fellowship | `fellowship` | `fellowship` | 5 |
+| Grant | `grant` | `grant` | 6 |
+| Information Session | `informationSession` | `informationSession` | 7 |
+| Paid | `paid` | `paid` | 8 |
+| Presentation | `presentation` | `presentation` | 9 |
+| Professional Development | `professionalDevelopment` | `professionalDevelopment` | 10 |
+| Research Grant | `researchGrant` | `researchGrant` | 11 |
+| Service | `service` | `service` | 12 |
+| Teaching Grant | `teachingGrant` | `teachingGrant` | 13 |
+| Working Group | `workingGroup` | `workingGroup` | 14 |
+| Working Session | `workingSession` | `workingSession` | 15 |
+| Workshop | `workshop` | `workshop` | 16 |
+| New Faculty | `newFaculty` | `newFaculty` | 17 |
+| Staff | `staff` | `staff` | 18 |
+| FDC | `fdc` | `fdc` | 19 |
 
 
 ## CtlActivitySession — conference session sub-records
@@ -81,7 +84,7 @@ Top-level category — Name: `CTL_Activity_Types` · Key/Variable: `ctlactivityt
 | `sessionTitle` | Text | Yes | Shown on the collapsed bar. |
 | `sessionSpeakers` | Text | Yes | Comma-separated names. |
 | `sessionTags` | Text | No | Comma-separated free-form keywords; split/trimmed for badges. |
-| `sessionabstract` | WYSIWYG | Yes | All-lowercase schema variable (not camelCase). Shown when expanded. |
+| `sessionAbstract` | WYSIWYG | Yes | camelCase (unlike `sessionrowsortorder`). Shown when expanded. |
 | `sessionAttachments` | Relationship → CtlAttachment | No | Own relationship, separate from the parent activity's. |
 
 
@@ -127,7 +130,7 @@ relationship field on CtlActivity/CtlInstructionalResource/CtlActivitySession).
 | `featured` | Radio | No | `.selectValue` ("yes"/"no"). |
 | `relatedInstructionalResources` | Relationship → CtlInstructionalResource | No | Self-relationship. |
 | `relatedEvents` | Relationship → CtlActivity | No | — |
-| `relatedTechSupport` | Relationship → CtlTechSupport | No | Schema exists; CtlTechSupport itself isn't built yet. |
+| `relatedTechSupport` | Relationship → CtlTechSupport | No | |
 
 ### CTL_Inst. Resource_Types (category tree)
 
@@ -203,9 +206,10 @@ Top-level category — Name: `CTL_Inst. Resource_Frameworks` · Key/Variable:
 Note: sort jumps from 22 to 24 (no 23) in the live data — a gap in the source export, not a doc error.
 
 
-## CtlPersonnel — CTL/FDC staff and affiliates
+## CtlPersonnel — CTL/FDC staff, affiliates, and past award/grant recipients
 
-* **Base Type:** Content · No URL Map — all personnel render on About the CTL (Meet the CTL Staff) / Request Support.
+* **Base Type:** Content · No URL Map — all personnel render on About the CTL (Meet the CTL Staff) / Request Support / Opportunities > Past Recipients.
+* Form is organized into a default section plus three tabs — **CTL Staff**, **FDC**, **Associate** — and a **Recipients** tab holding `honorRecieved`. The tab grouping is editor-UI organization only; it has no effect on Velocity access (every field is still `$item.fieldVar` regardless of which tab it lives on).
 
 | Variable | Field Type | Note |
 |----|----|----|
@@ -213,16 +217,21 @@ Note: sort jumps from 22 to 24 (no 23) in the live data — a gap in the source 
 | `pronouns` | Radio | `.selectValue` + parallel `.values`/`.options` lookup for the display label. `"dont show pronouns"` is a real option, treated as blank. |
 | `headshotPhoto` | Image | FileAssetMap — `.path` + `.fileName`. |
 | `jobTitle` | Text | Shown on its own line on the FDC grid card. |
+| `department` | Text | Academic/administrative department. Distinct from `degrees` — don't conflate the two. |
 | `degrees` | Text | e.g. "PhD," "MSEd." On the FDC grid card, a case-insensitive "phd" substring appends ", PhD" to the displayed name; other degree values aren't otherwise rendered. |
-| `serviceYearStart` / `serviceYearEnd` | Text (whole number) | FDC term-of-service years, shown on the FDC grid card as "2022-2024" (falls back to just the start year if only one is set). |
-| `rank` | Text (whole number) | Sort key, ascending, blank sorts last. Runtime type is already `java.lang.Long` despite the "Text" editor label — use `$item.rank` directly, no String round-trip. |
-| `affiliations` | Checkbox | Values are capitalized — `"CTL"`, `"FDC"`, `"Other"` — `.contains()` is case-sensitive. Only `CTL` and `FDC` are currently used in the IA. |
+| `affiliations` | Checkbox (multi) | Values are capitalized — `"CTL"`, `"FDC"`, `"Affiliate"`, `"Recipient"`, `"Other"` — `.contains()` is case-sensitive. A record can hold more than one (e.g. an actual FDC committee member who also won an award is `"FDC,Recipient"`). `CTL` gates Meet the CTL Staff/Request Support; `FDC` gates the FDC grid; `Affiliate` is for Faculty Associates (Associate tab); `Recipient` marks a past-honor-only record with no other staff role. |
 | `emailCortlandEdu` | Text | Rendered as `mailto:`; link hidden if empty. |
-| `bookWithMeFullLink` | Text | External booking URL; "Meet with Me" button hidden if empty. |
-| `websitePromo` | Text (URL) | Shown on both instances of the staff-profiles widget. |
+| `websitePromo` | Text (URL) | Shown on both instances of the staff-profiles widget. Only populate with an actual URL — a page title/label with no link should be left blank. |
 | `buttonLabel` | Text | Label for the `websitePromo` button, falls back to "Visit My Website." Distinct from CtlService's `serviceButtonLabel`. |
-| `areasOfExpertise` | Textarea | One bullet per line (splits on `\n`). |
-| `howICanHelp` | Textarea | Same one-bullet-per-line convention. |
+| `rank` | Text (whole number) | **CTL Staff tab.** Sort key, ascending, blank sorts last. Runtime type is already `java.lang.Long` despite the "Text" editor label — use `$item.rank` directly, no String round-trip. |
+| `bookWithMeFullLink` | Text | **CTL Staff tab.** External booking URL; "Meet with Me" button hidden if empty. |
+| `areasOfExpertise` | Textarea | **CTL Staff tab.** One bullet per line (splits on `\n`). |
+| `howICanHelp` | Textarea | **CTL Staff tab.** Same one-bullet-per-line convention. |
+| `serviceYearStart` / `serviceYearEnd` | Text (whole number) | **FDC tab.** FDC term-of-service years, shown on the FDC grid card as "2022-2024" (falls back to just the start year if only one is set). |
+| `associateTitle` | Text | **Associate tab.** Role label, e.g. "SoTL Faculty Associate" (hint: `"_____ Associate"`). For Faculty Associates — not yet rendered by any content block. |
+| `roleDescription` | Textarea | **Associate tab.** What the associate role covers. |
+| `termYearStart` / `termYearEnd` | Text | **Associate tab.** Associate's term years — separate field pair from the FDC tab's `serviceYearStart`/`serviceYearEnd`, don't conflate. |
+| `honorRecieved` | Relationship → CtlActivity (multi) | **Recipients tab.** One entry per honor won. A person shows up as a Past Recipient once per honor whose linked CtlActivity carries an Award/Grant/Fellowship/Teaching Grant/Research Grant category — see `ctl-content_past-award-recipients_opportunities.html`. No per-honor date lives on CtlPersonnel: that content block parses the year from a required `(YYYY)` suffix on each honor's own CtlActivity `title` instead. |
 
 
 ## CtlService — Request Support page service cards
@@ -245,7 +254,7 @@ No sort-order field — display order is whatever the pull returns.
 
 ## CtlReport — annual reports (PROPOSED, not yet created in dotCMS)
 
-For `widgets/ctl-widget_reports-grid.html` (About the CTL > Impact & Reports).
+For `content blocks/ctl-content_reports-grid.html` (About the CTL > Impact & Reports).
 
 | Variable | Field Type | Req? | Note |
 |----|----|----|----|
@@ -257,21 +266,76 @@ For `widgets/ctl-widget_reports-grid.html` (About the CTL > Impact & Reports).
 | `reportFile` | File | Yes | FileAssetMap — `.path` + `.fileName`. |
 
 
-## CtlPastRecipient — past award/grant/fellowship winners (PROPOSED, not yet created in dotCMS)
+## CtlTechSupport — KB article index
 
-For `widgets/ctl-widget_past-award-recipients_past-recipients.html` (Funding > Past Recipients).
-Distinct from CtlActivity, which models the call/opportunity itself — this models the person
-who won it, optionally linking back via `relatedActivity`.
+dotCMS content type name "CTL Tech Resource", variable `CtlTechSupport`. For
+`content blocks/ctl-content_tech-support-listing_technologies.html` (Resources > For
+Technologies). Each card links straight out to its TDX/university knowledge base article in
+a new tab.
+
+The content type has a `urlMapPattern` (`/centers/ctl/resources/technology-resources/{urlTitle}`)
+and a detail page configured, but there is no `urlTitle` field on the type — this routing is
+unused/dead (the content block links out directly, per above) and will not resolve if hit. Leave
+it alone unless asked to build an on-site detail page for these records.
 
 | Variable | Field Type | Req? | Note |
 |----|----|----|----|
-| `recipientName` | Text | Yes | — |
-| `awardYearLabel` | Text | Yes | Display label, e.g. "2024-2025." |
-| `awardYearStart` | Text (whole number) | Yes | Sort key, e.g. `2024`. Same runtime-Long pattern as `rank`/`reportYearStart`. |
-| `awardCategories` | Category (multi) | No | Reuses the `CTL_Activity_Types` tree. |
-| `department` | Text | No | — |
-| `summary` | Textarea | No | What they did / won it for. |
-| `photo` | Image | No | FileAssetMap — `.path` + `.fileName`. |
-| `relatedActivity` | Relationship → CtlActivity | No | Links back to the original opportunity call, if still live. |
+| `articleTitle` | Text | No | Listing-card title, matches the KB article's own title. |
+| `shortDescription` | Textarea | No | Listing-card blurb. |
+| `knowledgeBaseUrl` | Text | No | External TDX/KB article link; card opens it in a new tab (`target="_blank"`). |
+| `toolsCovered` | Multi-Select | No | What platform the article covers. Options below. |
+| `tasksFunctions` | Multi-Select | No | What task/function the article addresses. Options below. |
+| `host1` | Host-Folder | Yes | Site/folder identifier, same pattern as other CSV imports. |
+
+`toolsCovered`/`tasksFunctions` are Multi-Select fields (not Category), so editors can
+add/reorder options directly on the field in Content Types — no separate Categories admin
+step. Access in Velocity via CheckboxMap-style accessor: `$r.toolsCovered.selectedValues` /
+`$r.tasksFunctions.selectedValues` (see CLAUDE.md's CheckboxMap gotcha), not `.categoryName`
+iteration.
+
+Both filter facets are multiselect: selecting more than one value within a facet is OR'd
+(Tool = Brightspace OR YuJa), while the two facets are AND'd against each other (Tool =
+Brightspace AND Task = Grading) — this differs from the Instructional Design listing's
+topic cloud, which ANDs every selection regardless of dimension.
+
+`CtlInstructionalResource.relatedTechSupport` targets this content type (see that type's
+field table above) — confirm the relationship binds correctly now that CtlTechSupport
+exists.
+
+### `toolsCovered` field options
+
+```
+brightspace | Brightspace
+yuja | YuJa
+turnitin | Turnitin
+perusall | Perusall
+starfish | Starfish
+selectsurvey | Select Survey
+m365 | Microsoft 365
+acrobat | Adobe Acrobat
+indesign | InDesign
+classroomdisplays | Classroom Displays
+webex | Webex
+waymaker | Waymaker
+banner | Banner
+anthology | Anthology
+google | Google Workspace
+```
+
+### `tasksFunctions` field options
+
+```
+accessibility | Accessibility & Remediation
+grading | Grading & Assessment
+coursecontent | Course Content Creation
+communication | Communication & Notifications
+courseadmin | Course Administration
+video | Video
+training | Training & Professional Development
+reporting | Reporting & Analytics
+troubleshooting | Troubleshooting & Known Issues
+classroomtech | Classroom Technology & AV Support
+requesthelp | Request Help / Appointment
+```
 
 
