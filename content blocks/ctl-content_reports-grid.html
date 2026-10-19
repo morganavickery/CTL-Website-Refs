@@ -1,81 +1,26 @@
 ## Impact & Reports — downloadable annual reports grid. Sits below
 ## content blocks/ctl-content_outcomes-overview.html on the same page.
 ##
-## NOT YET LIVE — depends on a CtlReport content type that doesn't exist
-## in dotCMS yet. Proposed fields:
-##   reportTitle      | Text                | e.g. "2024-2025 Annual Report"
-##   reportYearLabel  | Text                | Display label, e.g. "2024-2025"
-##   reportYearStart  | Text (whole number) | Sort key, e.g. 2024
-##   reportSummary    | Textarea            | 1-2 sentence blurb
-##   reportThumbnail  | Image               | FileAssetMap — .path + .fileName
-##   reportFile       | File                | FileAssetMap — .path + .fileName
-##
-## Sorted descending by reportYearStart via bubble sort with a fixed-bound
-## range ([0..99] + #if guards) — see CLAUDE.md's Velocity range-operator gotcha.
+## Short-term hardcode: no CtlReport content type exists yet in dotCMS, so
+## this renders a static list of report cards directly in markup instead of
+## pulling content. Report PDFs are uploaded as File Assets directly into the
+## /centers/ctl/about/ folder in dotCMS (not attached to any contentlet field),
+## so hrefs below are just that folder path + the asset's filename (URL-encode
+## spaces). To add a report, upload the PDF to that folder, then copy a
+## .ctl-report-card block below and fill in title/date/href. To retire this in
+## favor of real content, swap back to a
+## $dotcontent.pull("+contentType:CtlReport ...") + the proposed field set
+## (reportTitle, reportYearLabel, reportSummary, reportThumbnail, reportFile)
+## once that content type is built.
 
-#set($allReports = $dotcontent.pull("+contentType:CtlReport +languageId:1 +live:true +deleted:false", 100, "score"))
+<h2 class="mb-3">Reports & Deliverables</h2>
 
-#set($sorted = [])
-#foreach($r in $allReports)
-    #set($dummy = $sorted.add($r))
-#end
-#foreach($i in [0..99])
-    #if($i < $sorted.size())
-        #foreach($j in [0..99])
-            #set($k = $j + 1)
-            #if($k < $sorted.size())
-                #set($a = $sorted.get($j))
-                #set($b = $sorted.get($k))
-                #set($aYear = 0)
-                #set($bYear = 0)
-                #if("$!a.reportYearStart" != "")
-                    #set($aYear = $a.reportYearStart)
-                #end
-                #if("$!b.reportYearStart" != "")
-                    #set($bYear = $b.reportYearStart)
-                #end
-                #if($aYear < $bYear)
-                    #set($dummy = $sorted.set($j, $b))
-                    #set($dummy = $sorted.set($k, $a))
-                #end
-            #end
-        #end
-    #end
-#end
-
-#if($EDIT_MODE)
-    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
-        &#128027; DEBUG: $allReports.size() CtlReport record(s). If this is always 0, the
-        content type likely hasn't been created in dotCMS yet — see this file's header.
+<div class="ctl-reports-grid">
+    <div class="card ctl-report-card">
+        <div class="card-body">
+            <span class="ctl-tag mb-2">August 1, 2026</span>
+            <h3 class="h6 fw-bold">SUNY Cortland Institutional Readiness Implementation Plan</h3>
+            <a href="/centers/ctl/about/SUNY%20Cortland%20IR%20Implementation%20Plan.pdf" class="ctl-btn" role="button" target="_blank" rel="noopener" aria-label="View SUNY Cortland Institutional Readiness Implementation Plan (opens in new tab)">View Report</a>
+        </div>
     </div>
-#end
-
-<h2 class="mb-3">Annual Reports</h2>
-
-#if($sorted.size() == 0)
-    <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
-        <p>Reports are coming soon &mdash; check back shortly.</p>
-    </div>
-#else
-    <div class="ctl-reports-grid">
-        #foreach($rpt in $sorted)
-            <div class="card ctl-report-card">
-                #if("$!rpt.reportThumbnail.fileName" != "")
-                    <img src="$rpt.reportThumbnail.path$rpt.reportThumbnail.fileName" alt="" class="ctl-report-thumb" />
-                #end
-                <div class="card-body">
-                    #if("$!rpt.reportYearLabel" != "")
-                        <span class="ctl-tag mb-2" style="align-self: flex-start;">$rpt.reportYearLabel</span>
-                    #end
-                    <h3 class="h6 fw-bold">$!rpt.reportTitle</h3>
-                    #if("$!rpt.reportSummary" != "")
-                        <p class="small ctl-report-summary">$rpt.reportSummary</p>
-                    #end
-                    #if("$!rpt.reportFile.fileName" != "")
-                        <a href="$rpt.reportFile.path$rpt.reportFile.fileName" class="ctl-btn" role="button" target="_blank" rel="noopener" aria-label="Download $!rpt.reportTitle (opens in new tab)">Download Report</a>
-                    #end
-                </div>
-            </div>
-        #end
-    </div>
-#end
+</div>
