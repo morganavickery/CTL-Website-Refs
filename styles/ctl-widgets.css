@@ -30,10 +30,191 @@
   --ctl-navy-tint: rgba(4, 32, 46, 0.06);
   --ctl-border: #E7E3DB;
   --ctl-gray-bg: #EFEEED;
-  --ctl-gray-text: #95959C;
+  /* Was #95959C — ~2.6:1 against --ctl-gray-bg and ~3:1 against white, both
+     well under WCAG AA's 4.5:1 for normal text (this is the token behind
+     meta rows, subtext, "muted" listing cards, and the Activity Detail
+     compensation box, all reported as low-contrast). Darkened to clear
+     4.5:1 against both white and --ctl-gray-bg. */
+  --ctl-gray-text: #5F6368;
   --ctl-closed-bg: #f8d7da;
   --ctl-closed-text: #842029;
   --ctl-closed-border: #f5c2c7;
+  --ctl-open-bg: #d1e7dd;
+  --ctl-open-text: #0f5132;
+}
+
+/* ============================================================
+   Shared utility classes — small, generic building blocks reused across
+   many widgets (not tied to one page/section). Prefer these over a
+   one-off inline style="..." when a pattern matches.
+   ============================================================ */
+.ctl-empty-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--ctl-gray-text);
+}
+.ctl-warn-box {
+  background: #fff3cd;
+  color: #856404;
+  padding: 20px;
+  border: 1px solid #ffeeba;
+  border-radius: 6px;
+}
+.ctl-warn-box h4 {
+  margin-top: 0;
+}
+/* Smaller, permanent-notice variant of .ctl-warn-box — used for the
+   "Editors only: N item(s) hidden" QC notice on the Instructional Design
+   Resources listing page, shown whenever $EDIT_MODE and not tied to any
+   debug dump. */
+.ctl-editor-notice {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+.ctl-link-inherit {
+  color: inherit;
+}
+.ctl-text-gray {
+  color: var(--ctl-gray-text);
+}
+.ctl-section-divider {
+  margin-bottom: 32px;
+  border-top: 1px solid var(--ctl-border);
+  padding-top: 20px;
+}
+.ctl-section-divider-sm {
+  margin-bottom: 28px;
+}
+.ctl-subheading {
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+.ctl-subheading-sm {
+  margin-bottom: 12px;
+}
+.ctl-badge-neutral {
+  background-color: var(--ctl-gray-bg);
+  color: var(--ctl-gray-text);
+}
+.ctl-mt-40 {
+  margin-top: 40px;
+}
+.ctl-mt-50 {
+  margin-top: 50px;
+}
+.ctl-mt-56 {
+  margin-top: 56px;
+}
+.ctl-section-subtext {
+  color: var(--ctl-gray-text);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+
+/* EDIT_MODE-only debug banners — never visible on a live/published page.
+   Base class sets shared box metrics; a --info/--warn/--neutral modifier
+   sets color; -sm / -compact modifiers tighten size for denser dumps. */
+.ctl-debug-box {
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+.ctl-debug-box-sm {
+  font-size: 0.75rem;
+}
+.ctl-debug-box-compact {
+  border-radius: 4px;
+  padding: 4px 10px;
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+}
+.ctl-debug-box--info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+.ctl-debug-box--warn {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+.ctl-debug-box--neutral {
+  background: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+/* Attachment/download link tile — Activity Detail (Downloads) and the
+   Instructional Resource detail page (Session/Resource Materials) share
+   this exact card shape: file icon square + label + download chevron. */
+.ctl-downloads-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 500px;
+}
+.ctl-download-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  text-transform: uppercase;
+}
+.ctl-download-icon-wrap {
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  background-color: #ffffff !important;
+  color: var(--ctl-maroon) !important;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid currentColor;
+}
+.ctl-download-icon-inner {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ctl-download-icon {
+  font-size: 1.25rem;
+  opacity: 0.5;
+}
+.ctl-download-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  padding: 0 16px;
+  gap: 12px;
+}
+.ctl-download-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+.ctl-download-chevron {
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: inline-flex;
+  flex-shrink: 0;
 }
 
 /* ============================================================
@@ -83,26 +264,48 @@
   white-space: nowrap;
 }
 
-/* Activity Detail only — "Closed" (registration/application) and
-   "Past Event" badges. */
+/* Activity Detail only — signup-status pill: "Open" / "Due [date]" /
+   "Closed" (registration/application), plus "Past Event". One shared box
+   shape across all three status colors. */
+.ctl-badge-open,
+.ctl-badge-due,
 .ctl-badge-closed,
 .ctl-badge-closed-compact {
   display: inline-flex;
   align-items: center;
-  background: var(--ctl-closed-bg);
-  color: var(--ctl-closed-text);
   border-radius: 4px;
   white-space: nowrap;
 }
 
+.ctl-badge-open,
+.ctl-badge-due,
 .ctl-badge-closed {
   padding: 4px 10px;
   font-size: 0.85rem;
 }
 
-/* Not wired into any widget yet — drafted as a smaller/bolder variant to
-   replace the "Expired" badge on Past Recipients (Missed Connections
-   section), which currently uses its own inline style instead of a class. */
+.ctl-badge-open {
+  background: var(--ctl-open-bg);
+  color: var(--ctl-open-text);
+}
+
+.ctl-badge-due {
+  background: var(--ctl-navy-tint);
+  color: var(--ctl-navy);
+}
+
+.ctl-badge-closed,
+.ctl-badge-closed-compact {
+  background: var(--ctl-closed-bg);
+  color: var(--ctl-closed-text);
+}
+
+/* Smaller/bolder variant used for the "Closed" badge on the Missed
+   Connections section of the three Opportunities tag pages
+   (ctl-content_awards_opportunities.html, ctl-content_grants-funding_
+   opportunities.html, ctl-content_programs-communities_opportunities.html)
+   and in the master list table (ctl-content_all-opportunities_
+   opportunities.html, where it reads "Closed" next to "Open"). */
 .ctl-badge-closed-compact {
   border: 1px solid var(--ctl-closed-border);
   padding: 2px 8px;
@@ -132,8 +335,8 @@
 }
 
 /* Not wired into any widget yet — drafted as a dimmed variant for expired
-   items on Past Recipients (Missed Connections section), which currently
-   uses its own inline-styled grey pill instead of a class. */
+   items on the Opportunities tag pages' Missed Connections sections, which
+   currently use their own inline-styled grey pill instead of a class. */
 .ctl-tag-muted {
   display: inline-block;
   font-size: 0.7rem;
@@ -178,17 +381,16 @@
   background: var(--ctl-gray-bg);
 }
 
-/* Wired in (2026-08-07) on the two single-column listing widgets: Current
-   Opportunities (ctl-widget_active-opportunities.html) and Events Upcoming
-   (ctl-widget_upcoming-events.html) — both now use class="ctl-listing-card
-   ctl-hover-lift" in place of the identical copy-pasted inline style="..."
-   they used to carry. Moving border/box-shadow out of inline is required,
-   not cosmetic — .ctl-hover-lift:hover changes border-color/box-shadow, and
-   an inline style always beats a stylesheet :hover rule on specificity, so
-   the hover state was invisible until this swap.
-   position:relative added 2026-08-07 (whole-tile-clickable pass) so the
-   title link's .stretched-link overlay can anchor to the card itself, same
-   as .ctl-res-card/.ctl-ir-related-card above. */
+/* Used on the single-column active-item listing widgets — the Opportunities
+   tag pages (ctl-content_awards_opportunities.html and its two siblings) and
+   Events Upcoming (ctl-content_upcoming-events.html) — all via
+   class="ctl-listing-card ctl-hover-lift" rather than inline style="...".
+   Moving border/box-shadow out of inline is required, not cosmetic —
+   .ctl-hover-lift:hover changes border-color/box-shadow, and an inline
+   style always beats a stylesheet :hover rule on specificity, so the hover
+   state would be invisible without this.
+   position:relative lets the title link's .stretched-link overlay anchor to
+   the card itself, same as .ctl-res-card/.ctl-ir-related-card above. */
 .ctl-listing-card {
   position: relative;
   display: flex;
@@ -201,14 +403,14 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-/* Same border/radius/shadow as .ctl-listing-card above, but for the two
-   pared-down 2-column-grid cards (Past Events, Missed Connections) whose
-   layout differs (column not row, 24px padding not 28px, no gap — they
-   space children with margin-bottom instead). Wired in 2026-08-07 alongside
-   .ctl-listing-card, same reason: border/box-shadow can't stay inline once
-   .ctl-hover-lift is applied. ctl-widget_missed-opportunities.html pairs
-   this with .ctl-listing-card-muted (below) for its grayed-out expired look.
-   position:relative added 2026-08-07, same reason as .ctl-listing-card above. */
+/* Same border/radius/shadow as .ctl-listing-card above, but for the
+   pared-down 2-column-grid cards (Past Events, and the Missed Connections
+   sections of the Awards/Grants & Funding/Programs & Communities pages)
+   whose layout differs (column not row, 24px padding not 28px, no gap —
+   they space children with margin-bottom instead). border/box-shadow can't
+   stay inline once .ctl-hover-lift is applied. Each Opportunities tag-page
+   widget (e.g. ctl-content_awards_opportunities.html) pairs this with
+   .ctl-listing-card-muted (below) for its grayed-out expired look. */
 .ctl-listing-card-compact {
   position: relative;
   display: flex;
@@ -237,21 +439,48 @@
 }
 
 /* Declared AFTER .ctl-listing-card / .ctl-listing-card-compact on purpose —
-   ctl-widget_missed-opportunities.html pairs this with
+   each Opportunities tag-page widget pairs this with
    .ctl-listing-card-compact on the same element, and since both are
    single-class selectors of equal specificity, the `background` property
    needs source order (not just selector weight) to decide the tie: this
    rule must come later so its gray background wins over compact's white
-   one. Reorder with care if this ever gets touched again. */
+   one. Reorder with care if this ever gets touched again.
+   No opacity here (there used to be one, 0.85) — applying opacity to the
+   whole card blends its already-muted text toward the page background too,
+   compounding the low-contrast problem instead of just fading the card.
+   The gray background + muted text colors carry the "expired" look on
+   their own. */
 .ctl-listing-card-muted {
   background: var(--ctl-gray-bg);
-  opacity: 0.85;
 }
 
+/* Stack .ctl-listing-card into a column below 768px — it had no responsive
+   behavior at all (unlike .ctl-listing-card-compact, which already collapses
+   its 2-col grid at this same breakpoint). Used by Happening Now, Upcoming
+   Events, the Awards/Grants & Funding/Programs & Communities active lists,
+   and Past Recipients (which uses .ctl-recipient-photo, not
+   .ctl-listing-thumb-wrap — that photo stays visible and just stacks above
+   the body text instead of beside it; it's a person's headshot, not a
+   generic preview thumbnail, so it's excluded from the hide rule below).
+   The CtlActivity thumbnail itself (.ctl-listing-thumb-wrap on the active
+   listing cards above, .ctl-listing-compact-thumb on Past Events/Missed
+   Connections) is hidden rather than shown full-width on mobile — a preview
+   image adds little at listing-card size once the layout is this narrow,
+   and dropping it gives the title/meta/description more room. */
+@media (max-width: 767px) {
+  .ctl-listing-card {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .ctl-listing-thumb-wrap,
+  .ctl-listing-compact-thumb {
+    display: none;
+  }
+}
 
-/* Used on: Events page (Past Events section) and Past Recipients page
-   (Missed Connections section) — 2-column card grid, collapses to 1 column
-   under 768px. */
+/* Used on: Events page (Past Events section) and the three Opportunities
+   tag pages' Missed Connections sections — 2-column card grid, collapses
+   to 1 column under 768px. */
 .ctl-past-events-grid,
 .ctl-missed-opps-grid {
   display: grid;
@@ -265,8 +494,9 @@
   }
 }
 
-/* 2-line text clamp. Used on: Past Recipients (expired opportunity
-   description, no expand control). Was also used on Request Support > Our
+/* 2-line text clamp. Used on: the Opportunities tag pages' Missed
+   Connections sections (expired opportunity description, no expand
+   control). Was also used on Request Support > Our
    Services (with a "Read more" toggle, via .ctl-gh-svc-desc/.is-expanded) —
    removed 2026-08-07 per user feedback; service tiles now show their full
    description with no truncation, so that variant and its toggle button/JS
@@ -277,6 +507,203 @@
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
+}
+
+/* Listing card BODY layout — the internal anatomy shared by the
+   CtlActivity listing widgets (Happening Now, Upcoming Events, Past Events,
+   and the Awards/Grants & Funding/Programs & Communities Opportunities tag
+   pages): thumbnail, category tag row, title, a meta row of icon+text
+   items separated by "|" dividers, a horizontal rule, then a description +
+   action button footer. Row-layout active-item sections (Happening Now/
+   Upcoming Events/each tag page's active list) pair these with
+   .ctl-listing-card; the 2-column grid closed-item sections (Past Events/
+   each tag page's Missed Connections list) pair them with .ctl-listing-card-compact
+   and the *-compact/-muted modifiers below. */
+.ctl-listing-thumb-wrap {
+  flex: 0 0 200px;
+}
+.ctl-listing-thumb {
+  width: 200px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.ctl-listing-compact-thumb {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+.ctl-listing-body {
+  flex: 1;
+  min-width: 0;
+}
+.ctl-listing-head {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+.ctl-listing-head-tight {
+  margin-bottom: 10px;
+}
+.ctl-listing-tags-row {
+  order: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.ctl-cat-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background-color: var(--ctl-gray-bg);
+  color: #444;
+  border: 1px solid var(--ctl-border);
+  border-radius: 4px;
+  display: inline-block;
+  line-height: 1;
+}
+.ctl-cat-tag-muted {
+  color: var(--ctl-gray-text);
+}
+.ctl-listing-title {
+  order: 2;
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.ctl-listing-title-compact {
+  font-size: 1.2rem;
+}
+.ctl-listing-title-muted {
+  color: var(--ctl-gray-text);
+}
+.ctl-listing-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--ctl-gray-text);
+}
+.ctl-listing-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ctl-listing-meta-single {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--ctl-gray-text);
+  margin-bottom: 10px;
+}
+.ctl-listing-meta-icon {
+  font-size: 0.95rem;
+}
+.ctl-listing-meta-row-tight {
+  margin-bottom: 14px;
+}
+.ctl-listing-meta-divider {
+  color: var(--ctl-border);
+}
+.ctl-listing-divider {
+  border-top: 1px solid var(--ctl-border);
+  margin-bottom: 14px;
+}
+.ctl-listing-divider-spaced {
+  margin-top: 14px;
+}
+.ctl-listing-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.ctl-listing-desc-block {
+  margin: 0 0 14px 0;
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  flex: 1;
+}
+.ctl-listing-desc-inline {
+  margin: 0;
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  flex: 1;
+}
+.ctl-listing-desc-muted {
+  color: var(--ctl-gray-text);
+}
+.ctl-listing-actions {
+  flex-shrink: 0;
+}
+.ctl-listing-empty {
+  color: var(--ctl-gray-text);
+  font-style: italic;
+}
+.ctl-listing-empty-pad {
+  padding: 12px 0;
+}
+.ctl-listing-indent {
+  margin-left: 10px;
+}
+.ctl-listing-indent-bottom {
+  margin-bottom: 30px;
+}
+/* Stacked single-column listing wrapper — Upcoming Events, Happening Now,
+   and each Opportunities tag page's active-items list
+   (event-listing-group / opp-listing-group in each widget's markup) all
+   wrap their repeated .ctl-listing-card tiles in one of these two class
+   names. Neither was ever defined here, so consecutive tiles rendered
+   flush against each other with no vertical whitespace between them. */
+.event-listing-group,
+.opp-listing-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.ctl-listing-card-now {
+  border-left: 4px solid var(--ctl-maroon);
+  background: var(--ctl-maroon-tint);
+}
+.ctl-badge-now {
+  background-color: var(--ctl-maroon);
+  color: #fff;
+}
+
+/* Closed-items collapsible toggle header (Opportunities tag pages). */
+.ctl-collapse-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.ctl-collapse-toggle h2 {
+  margin: 0;
+}
+.ctl-collapse-arrow {
+  font-size: 0.85rem;
+  color: var(--ctl-gray-text);
+}
+.ctl-collapse-subtext {
+  color: var(--ctl-gray-text);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+  margin-top: 6px;
+}
+.ctl-missed-opps-grid.is-collapsed {
+  display: none;
 }
 
 /* ============================================================
@@ -378,12 +805,13 @@
    row (.ctl-ir-related-card, added 2026-08-07 alongside a Bootstrap
    .stretched-link on the title so the whole card is clickable, not just
    the title text), and, via .ctl-hscroll-item .card, the Upcoming Events
-   & Opportunities carousel card. Also added 2026-08-07 to all 4 event/
-   opportunity LISTING widgets (Current Opportunities, Past Recipients'
-   Missed Connections, Events Upcoming, Events Past) so those tiles get the
-   same hover treatment as the carousel/nav-tile/resource cards above — see
-   .ctl-listing-card / .ctl-listing-card-compact just above, which those 4
-   widgets now pair this with (moving border/box-shadow out of inline was
+   & Opportunities carousel card. Also added to the event/opportunity
+   LISTING widgets (Awards/Grants & Funding/Programs & Communities — both
+   their active and closed sections, Events Upcoming, Events Past) so those
+   tiles get the same hover treatment as the carousel/nav-tile/resource
+   cards above — see .ctl-listing-card / .ctl-listing-card-compact just
+   above, which those widgets now pair this with (moving border/box-shadow
+   out of inline was
    required for the hover state to actually show, see those classes'
    comments). .ctl-hover-lift is the reusable name — grouped here with the
    older .ctl-hscroll-item .card selector so both keep working; apply
@@ -533,15 +961,19 @@
   color: var(--ctl-maroon);
   text-decoration: underline;
 }
+.ctl-activity-card img.card-img-top {
+  height: 160px;
+  object-fit: cover;
+}
 
 /* Same "plain until hovered, then maroon + underline" treatment as the
    .ctl-activity-card title links above, applied directly (no card-title
-   wrapper) to the 4 single/2-column listing widgets: Current Opportunities,
-   Past Recipients, Events (Upcoming), Events (Past). Added 2026-08-07 —
-   these headings were already wrapped in a link but had no hover state, so
-   they didn't visually read as clickable. As of the whole-tile-clickable
-   pass (2026-08-07, same day), this link also carries Bootstrap's
-   .stretched-link so the entire .ctl-listing-card/-compact tile is
+   wrapper) to the single/2-column listing widgets: the Awards/Grants &
+   Funding/Programs & Communities Opportunities tag pages (active + closed
+   sections), Events (Upcoming), Events (Past). These headings are wrapped
+   in a link and carry this hover state so they visually read as clickable.
+   This link also carries Bootstrap's .stretched-link so the entire
+   .ctl-listing-card/-compact tile is
    clickable to the same href, not just the title text — see the
    position:relative + .btn z-index rules on .ctl-listing-card above. */
 .ctl-listing-title-link {
@@ -608,7 +1040,7 @@
 }
 
 /* .ctl-ir-tag and .ctl-res-fmt-badge both style a format badge; .ctl-ir-topic-chip
-   and .ctl-res-topic-chip both style a topic chip. ctl-site_instRes-detail uses the
+   and .ctl-res-topic-chip both style a topic chip. ctl-content_instRes-detail uses the
    .ctl-ir-* classes below; the listing page and homepage carousel use the .ctl-res-*
    classes instead, with different sizing/shape:
      format badge:  .ctl-res-fmt-badge  0.68rem / 3px 8px padding / mr 4px
@@ -681,6 +1113,53 @@
   color: var(--ctl-gray-text);
   margin-bottom: 24px;
 }
+.ctl-ir-byline-tight {
+  margin-bottom: 14px;
+}
+.ctl-ir-frameworks-row {
+  margin-bottom: 20px;
+}
+.ctl-ir-tags-row {
+  margin-bottom: 14px;
+}
+.ctl-ir-topics-heading {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ctl-maroon);
+  margin-bottom: 10px;
+}
+.ctl-ir-citations-body {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.6;
+}
+.ctl-ir-related-list {
+  padding-left: 20px;
+}
+.ctl-ir-video-wrap {
+  margin-bottom: 28px;
+}
+.ctl-ir-video {
+  width: 100%;
+  border-radius: 8px;
+}
+.ctl-ir-embed-wrap {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  margin-bottom: 28px;
+  border-radius: 8px;
+}
+.ctl-ir-embed-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
 
 /* "Need to Know" highlights callout — resource detail page only, rendered
    above the article body from the `highlights` Textarea field (up to 4
@@ -716,7 +1195,7 @@
 }
 
 /* Resource detail page's WYSIWYG `body` field (wrapped in .ctl-ir-body, see
-   ctl-site_instRes-detail) — dev-checklist flagged that image captions
+   ctl-content_instRes-detail) — dev-checklist flagged that image captions
    added via the editor's "caption" option rendered identically to the
    surrounding body copy, making them hard to distinguish/read. Confirmed
    via live view-source 2026-08-06: the editor wraps a captioned image as
@@ -800,6 +1279,12 @@
   padding: 18px 20px 20px;
   margin-bottom: 32px;
 }
+.ctl-res-search-input {
+  max-width: 320px;
+}
+.ctl-res-topic-pill {
+  margin: 3px;
+}
 .ctl-res-subpanel {
   background: #fff;
   border: 1px solid var(--ctl-border);
@@ -882,16 +1367,42 @@
 }
 
 /* ============================================================
+   Tech Support listing (Resources > For Technologies) — reuses the
+   Instructional Design listing's .ctl-res-* card/filter-bar/pill classes
+   above. .ctl-tech-checkbox-list is the checkbox counterpart of
+   .ctl-res-radio-list (same layout, styled for input[type="checkbox"]
+   since both Tool and Task/Function facets are multiselect, unlike
+   Format/Modality's single-select radios).
+   ============================================================ */
+.ctl-tech-checkbox-list input[type="checkbox"] {
+  accent-color: var(--ctl-maroon);
+  margin: 0;
+}
+.ctl-tech-ext-icon {
+  font-size: 0.85em;
+  color: var(--ctl-gray-text);
+}
+/* Clamps shortDescription to 3 lines so cards in the same grid row stay a
+   consistent height regardless of description length. */
+.ctl-tech-card-desc {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* ============================================================
    Personnel cards — "gh" prefix is a naming holdover from this widget's
    original name (the old combined "Get Help" page); has nothing to do
    with current content.
    .ctl-gh-staff-* below: full single-column bio card. Used on: About the
    CTL > Meet the CTL Staff, AND Request Support > Make an Appointment
-   (same widget file, ctl-widget_ctl-staff-profiles.html, reused with a
+   (same widget file, ctl-content_ctl-staff-profiles.html, reused with a
    different section heading on each page).
    .ctl-gh-grid-* further below: compact multi-column card (no bio text).
    Used on: About the CTL > Faculty Development Committee only
-   (ctl-widget_fdc-member-grid.html).
+   (ctl-content_fdc-member-grid.html).
    .ctl-gh-section is an intentionally-empty CSS hook, present in both
    widgets' markup for possible future use.
    ============================================================ */
@@ -933,6 +1444,35 @@
 .ctl-gh-staff-actions .ctl-btn {
   padding: 4px 12px;
   font-size: 0.72rem;
+}
+/* Below 576px: .ctl-gh-staff-actions had no responsive behavior at all — its
+   absolute position (top/right, unconstrained width) plus the card-body's
+   permanent 170px right-padding reserved for it left almost no room for the
+   bio text next to the 96px photo, and a long email address could overflow
+   past the card edge. Below this breakpoint, drop the absolute positioning
+   and stack the actions below the photo/bio instead of floating beside it —
+   column-reverse (rather than reordering each child) is enough to flip
+   visual order because .ctl-gh-staff-actions is always the first DOM child
+   when present, .card-body always the last. */
+@media (max-width: 575px) {
+  .ctl-gh-staff-item {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .ctl-gh-staff-item .card-body {
+    padding-right: 1rem;
+  }
+  .ctl-gh-staff-actions {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    text-align: left;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ctl-border);
+  }
 }
 /* FDC compact grid — 2 columns (was auto-fill/minmax(220px), which packed in
    ~4 narrow columns on desktop; widened 2026-08-14 to give each member card
@@ -979,6 +1519,33 @@
   padding: 4px 12px;
   font-size: 0.72rem;
 }
+.ctl-gh-grid-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0;
+  line-height: 1.25;
+}
+.ctl-gh-grid-pronouns {
+  font-size: 0.875rem;
+  color: var(--ctl-gray-text);
+  margin-bottom: 0;
+  line-height: 1.25;
+}
+.ctl-gh-grid-jobtitle {
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--ctl-gray-text);
+  margin-bottom: 0;
+  margin-top: 4px;
+  line-height: 1.25;
+}
+.ctl-gh-grid-years {
+  font-size: 0.875rem;
+  color: var(--ctl-gray-text);
+  margin-bottom: 0;
+  margin-top: 4px;
+  line-height: 1.25;
+}
 
 /* ============================================================
    Service cards — originally Request Support > Our Services only; also
@@ -1005,10 +1572,9 @@
    as-is), and once a tile expands to the full grid row the text ran
    edge-to-edge with no line-length limit — both read as a "wall of text."
    Fixed by: line-height/spacing rules on the long-desc's child elements
-   (p/ul/ol, since we don't control the WYSIWYG markup itself), a
-   newspaper-style `columns` layout on .ctl-gh-svc-long-desc so wide expanded
-   tiles reflow into readable ~320px-wide columns instead of one full-width
-   paragraph block, and a small uppercase label + chevron on the toggle to
+   (p/ul/ol, since we don't control the WYSIWYG markup itself), a single
+   full-width column on a light gray panel, and a small
+   uppercase label + chevron on the toggle to
    make expand/collapse read as a distinct section rather than more running
    text.
    ============================================================ */
@@ -1027,12 +1593,14 @@
     grid-template-columns: 1fr;
   }
 }
-/* Modifier for a 4-tile grid that should read as 2x2 instead of the default
-   3-wide layout (e.g. articles/ctl-content_reach.html's Available Services
-   section) — the existing responsive breakpoints above already collapse to
-   2 and then 1 column, so this only needs to override the desktop width. */
-.ctl-gh-svc-grid--2col {
-  grid-template-columns: repeat(2, 1fr);
+/* Modifier for a 2-wide grid instead of the default 3-wide layout (e.g.
+   Our Services, articles/ctl-content_reach.html's Available Services) —
+   scoped to desktop so the breakpoints above still collapse it to 1 column
+   on mobile. */
+@media (min-width: 992px) {
+  .ctl-gh-svc-grid--2col {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 .ctl-gh-svc-tile {
   min-width: 0;
@@ -1079,8 +1647,9 @@
 }
 .ctl-gh-svc-long-desc {
   margin-bottom: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--ctl-border);
+  padding: 14px 16px;
+  background: var(--ctl-gray-bg);
+  border-radius: 6px;
   font-size: 0.9rem;
   line-height: 1.65;
 }
@@ -1093,22 +1662,10 @@
   color: var(--ctl-gray-text);
   margin-bottom: 8px;
 }
-/* Newspaper-style columns so a wide, full-row-width expanded tile still
-   reads at a comfortable line length instead of one edge-to-edge paragraph
-   block; below ~700px the tile is narrow enough that a single column is
-   already readable, so let it fall back naturally. */
-@media (min-width: 700px) {
-  .ctl-gh-svc-tile.is-expanded .ctl-gh-svc-long-desc {
-    column-width: 320px;
-    column-gap: 32px;
-    column-rule: 1px solid var(--ctl-border);
-  }
-}
 .ctl-gh-svc-long-desc p,
 .ctl-gh-svc-long-desc ul,
 .ctl-gh-svc-long-desc ol {
   margin-bottom: 0.85em;
-  break-inside: avoid;
 }
 .ctl-gh-svc-long-desc p:last-child {
   margin-bottom: 0;
@@ -1146,7 +1703,67 @@
 }
 
 /* ============================================================
-   Concurrent Sessions — ctl-site_activity-detail.html only, added
+   Activity Detail page body — ctl-content_activity-detail.html only. Layout
+   for the article itself: heading/thumbnail, category tag row, meta row
+   spacing, deadline-box text, compensation box, description, and the
+   Contact/"Back to X" footer.
+   ============================================================ */
+.ctl-detail-article {
+  max-width: 860px;
+}
+.ctl-detail-thumb {
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+.ctl-detail-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.ctl-detail-heading {
+  margin-top: 0;
+}
+.ctl-detail-meta-row {
+  margin-bottom: 12px;
+}
+.ctl-detail-deadline-text {
+  flex: 1;
+  min-width: 140px;
+}
+.ctl-detail-comp-box {
+  background: var(--ctl-gray-bg);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 24px;
+}
+.ctl-detail-description {
+  line-height: 1.7;
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 28px;
+}
+.ctl-detail-contact {
+  font-size: 0.95rem;
+  border-top: 1px solid var(--ctl-border);
+  padding-top: 20px;
+  margin-bottom: 28px;
+}
+.ctl-detail-contact dt {
+  font-weight: 700;
+}
+.ctl-detail-contact dd {
+  margin: 2px 0 0 0;
+}
+.ctl-detail-back-link {
+  margin-top: 40px;
+}
+
+/* ============================================================
+   Concurrent Sessions — ctl-content_activity-detail.html only, added
    2026-08-20. Accordion list of CtlActivitySession sub-records, grouped
    under a .ctl-session-block per sessionTimeBlock. Toggle treatment
    (chevron rotate, uppercase label) mirrors .ctl-gh-svc-toggle above;
@@ -1323,6 +1940,21 @@
   line-height: 1.6;
   color: #333;
   margin-bottom: 0;
+}
+/* .ctl-session-toggle has no flex-wrap, and .ctl-session-toggle-right
+   (tags + chevron) is flex-shrink:0 — on a narrow phone a session with 2+
+   tags won't overflow the card (.ctl-session-toggle-main can shrink to
+   0 width), but it does squeeze the title/meta column down to near nothing.
+   Below 575px, let the toggle wrap so tags/chevron drop to their own row
+   and the title keeps the full width. */
+@media (max-width: 575px) {
+  .ctl-session-toggle {
+    flex-wrap: wrap;
+  }
+  .ctl-session-toggle-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 
 /* ============================================================
@@ -1553,7 +2185,7 @@
 
 /* ============================================================
    Impact & Reports — reports grid (new 2026-08-06, CtlReport content type
-   proposed but not yet created — see ctl-widget_reports-grid.html header).
+   proposed but not yet created — see ctl-content_reports-grid.html header).
    Auto-fill card grid, cover thumbnail optional.
    ============================================================ */
 .ctl-reports-grid {
@@ -1580,17 +2212,16 @@
 .ctl-report-summary {
   flex: 1;
 }
+.ctl-report-card .ctl-tag {
+  align-self: flex-start;
+}
 
 /* ============================================================
-   Funding > Past Recipients — award-winners grid (new 2026-08-06,
-   CtlPastRecipient content type proposed but not yet created — see
-   ctl-widget_past-award-recipients_past-recipients.html header). Same
-   2-column/1-column-under-768px breakpoint as the Missed Connections grid
-   it sits alongside, so both sections line up. First widget to actually
-   use .ctl-listing-card (drafted earlier, previously unreferenced) instead
-   of copy-pasted inline style="...", per the "future pass" note above —
-   deliberate choice since this is a new file with no legacy inline-style
-   debt to work around.
+   Opportunities > Past Recipients — award-winners grid
+   (CtlPastRecipient content type proposed but not yet created — see
+   ctl-content_past-award-recipients_opportunities.html header). Same
+   2-column/1-column-under-768px breakpoint as the Opportunities tag pages'
+   Missed Connections grid, for visual consistency across the folder.
    ============================================================ */
 .ctl-past-recipients-grid {
   display: grid;
@@ -1609,6 +2240,27 @@
   border-radius: 6px;
   flex-shrink: 0;
 }
+.ctl-recipient-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.ctl-recipient-name {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.ctl-recipient-meta {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: var(--ctl-gray-text);
+}
+.ctl-recipient-summary {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
 
 /* ============================================================
    About the CTL — Strategic Vision collapsible pillars (added
@@ -1616,8 +2268,8 @@
    trigger (data-bs-toggle="collapse") wrapping its Mission/Objectives
    content — no custom JS needed, since Bootstrap's bundle.js is already
    loaded sitewide via the theme. This is unlike the hand-rolled
-   addEventListener toggles used elsewhere in this project (e.g. Past
-   Recipients' Missed Connections section), which exist because those
+   addEventListener toggles used elsewhere in this project (e.g. the
+   Opportunities tag pages' Missed Connections sections), which exist because those
    predate/duplicate non-Bootstrap show/hide behavior — a plain
    Bootstrap collapse didn't fit those cases the way it does here.
    Chevron rotates via the trigger's aria-expanded state.
@@ -1637,9 +2289,11 @@
 }
 
 /* ============================================================
-   Generic content tables — for static content blocks/articles that
-   render a plain HTML <table> (no widget/Velocity involved). Add
-   class="ctl-table" to any table that needs borders/padding/a readable
+   Generic content tables — used both by static content blocks/articles
+   that render a plain HTML <table> with no real <thead> (just a bolded
+   first row of <td>s) and by widgets that render a proper <thead>/<tbody>
+   (e.g. ctl-content_all-opportunities_opportunities.html's master list).
+   Add class="ctl-table" to any table that needs borders/padding/a readable
    header row instead of unstyled browser-default borders. Wrap in a
    <div class="table-responsive"> so wide tables scroll on narrow
    viewports rather than overflowing the page.
@@ -1659,8 +2313,13 @@
 .ctl-table th p {
   margin: 0;
 }
+/* Real <thead> tables (widget-rendered) get their header styling from the
+   first rule alone. Author-written tables with no <thead> — just one
+   implicit <tbody> holding every row — get it via the second rule instead,
+   scoped to :only-child so it can't also match a real table's first data
+   row (that tbody always has a <thead> sibling, so it's never :only-child). */
 .ctl-table thead th,
-.ctl-table tr:first-child td {
+.ctl-table > tbody:only-child > tr:first-child > td {
   background: var(--ctl-gray-bg);
   border-bottom: 2px solid var(--ctl-maroon);
   font-weight: 700;
@@ -1684,7 +2343,7 @@
 /* ============================================================
    Article-body skimmability classes — for use inside a
    CtlInstructionalResource's `body` field (rendered into .ctl-ir-body on
-   the resource detail page, ctl-site_instRes-detail) or any other WYSIWYG
+   the resource detail page, ctl-content_instRes-detail) or any other WYSIWYG
    body copy, not by any widget's own template markup. An in-page jump nav,
    a 2-up grid for short requirement-style lists, collapsible panels for
    long verbatim text (paired with .ctl-mission-toggle above for the
@@ -1799,4 +2458,25 @@
 }
 .ctl-option-label {
   margin-bottom: 8px;
+}
+
+/* ============================================================
+   Side-nav location/hours block — renders in the nav area on every CTL
+   page (content blocks/ctl-content_side-nav_location info.html). This is
+   the sitewide content record that also carries the <link rel="stylesheet">
+   to this file, per CLAUDE.md's Overview.
+   ============================================================ */
+.ctl-sidenav-location {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border-top: 1px solid #d6d3ce;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.ctl-sidenav-location h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+.ctl-sidenav-location dt {
+  font-weight: 600;
 }

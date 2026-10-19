@@ -8,7 +8,7 @@
 ## If no items are featured+reviewed, falls back to the 3 most recently modified
 ## reviewed resources (bubble sort descending by modDate — fixed [0..99] range +
 ## #if guards, per CLAUDE.md's Velocity range-operator gotcha).
-## .ctl-hscroll CSS/JS is duplicated in ctl-widget_upcoming-activities-carousel.html
+## .ctl-hscroll CSS/JS is duplicated in ctl-content_upcoming-activities-carousel.html
 ## (each carousel widget is self-contained); the button-binding script guards
 ## against double-binding since both carousels can appear on the same page.
 
@@ -21,7 +21,7 @@
 #set($allResources = $dotcontent.pull("+contentType:CtlInstructionalResource +languageId:1 +live:true", 500, "score"))
 
 #if($EDIT_MODE)
-    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+    <div class="ctl-debug-box ctl-debug-box--warn">
         &#128027; DEBUG: $allResources.size() live CtlInstructionalResource record(s) pulled.
     </div>
 #end
@@ -80,7 +80,7 @@
 #end
 
 #if($EDIT_MODE)
-    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+    <div class="ctl-debug-box ctl-debug-box--warn">
         &#128027; DEBUG: $featResources.size() resource(s) will show.
         #if($usingRecentFallback) (no featured+reviewed items -- falling back to most recently modified)#end
         #if($qcHiddenFeaturedCount > 0) ($qcHiddenFeaturedCount featured item(s) hidden — empty reviewedBy)#end

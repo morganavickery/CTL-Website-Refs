@@ -12,7 +12,7 @@
 ## fixed ranges + #if guards, never bounds derived from a value that can hit
 ## zero.
 ##
-## .ctl-hscroll CSS/JS is duplicated in ctl-widget_featured-instructional-resources.html
+## .ctl-hscroll CSS/JS is duplicated in ctl-content_featured-instructional-resources.html
 ## (each carousel widget is self-contained); the button-binding script guards
 ## against double-binding since both carousels can appear on the same page.
 
@@ -29,7 +29,7 @@
 #set($allActivities = $dotcontent.pull($activityQuery, 100, "score"))
 
 #if($EDIT_MODE)
-    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+    <div class="ctl-debug-box ctl-debug-box--warn">
         &#128027; DEBUG: $allActivities.size() CtlActivity record(s) pulled (pre-filter).
     </div>
 #end
@@ -68,7 +68,7 @@
 #end
 
 #if($EDIT_MODE)
-    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+    <div class="ctl-debug-box ctl-debug-box--warn">
         &#128027; DEBUG: $upcomingItems.size() record(s) have a usable future date (isEvent/isOpportunity checked, date >= now).
     </div>
 #end
@@ -106,7 +106,7 @@
 #end
 
 #if($EDIT_MODE && $upcomingItems.size() > 0)
-    <div style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-family: monospace;">
+    <div class="ctl-debug-box ctl-debug-box--warn">
         &#128027; DEBUG: soonest upcoming item after sort = "$upcomingItems.get(0).title" ($upcomingMs.get(0) ms).
     </div>
 #end
@@ -139,7 +139,7 @@
         <div class="ctl-hscroll-item">
           <div class="card h-100 position-relative ctl-activity-card">
             #if("$!item.thumbnail.fileName" != "")
-              <img src="$item.thumbnail.path$item.thumbnail.fileName" class="card-img-top" alt="$item.title" style="height: 160px; object-fit: cover;">
+              <img src="$item.thumbnail.path$item.thumbnail.fileName" class="card-img-top" alt="$item.title">
             #end
             <div class="card-body">
               <span class="ctl-badge mb-2" style="background-color: $badgeBg; color: $badgeColor;">$badgeLabel</span>

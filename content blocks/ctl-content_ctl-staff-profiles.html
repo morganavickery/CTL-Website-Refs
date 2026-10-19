@@ -3,7 +3,7 @@
 ## and reused as a 2nd content instance on Request Support ("Make an
 ## Appointment" section) — the $sectionHeading widget field (Text, falls back
 ## to "Meet the CTL Staff") is what differs between the two instances.
-## Compact FDC/grid cards live separately in ctl-widget_fdc-member-grid.html.
+## Compact FDC/grid cards live separately in ctl-content_fdc-member-grid.html.
 ##
 ## Need to know:
 ## - pronouns is a RADIO field -> .selectValue, mapped to display label via
@@ -65,7 +65,7 @@
 
     #if($ctlPersonnel.size() == 0)
 
-        <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
+        <div class="ctl-empty-state">
             <p>Staff bios are coming soon &mdash; check back shortly.</p>
         </div>
 

@@ -96,7 +96,7 @@ ordering. Contact the Marketing Office for further typeface assistance
   Registration, solid `--ctl-maroon`/`#fff` for the more selective Application) instead
   of being left as-is. See `styles/ctl-widgets.css`'s design-tokens comment.
 * Resolved 2026-08-07: the homepage carousel's Event/Opportunity/"Event & Opportunity"
-  type badges (`ctl-widget_upcoming-activities-carousel.html`) used Bootstrap's
+  type badges (`ctl-content_upcoming-activities-carousel.html`) used Bootstrap's
   `text-bg-success`/`text-bg-primary`/`text-bg-dark` — same non-brand-color issue as above,
   flagged separately in dev-checklist's "Side scroll cards" item. Fixed by extending the
   same tint/solid maroon pattern with one additional brand color, Secondary "Deep Navy"
