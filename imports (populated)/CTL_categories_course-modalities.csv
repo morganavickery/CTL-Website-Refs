@@ -1,0 +1,4 @@
+name,key,variable,sort
+In-Person,inperson,inperson,1
+Asynchronous,async,async,2
+Synchronous,sync,sync,3

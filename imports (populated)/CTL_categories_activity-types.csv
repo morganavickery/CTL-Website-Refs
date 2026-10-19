@@ -1,0 +1,20 @@
+name,key,variable,sort
+Award,award,award,1
+Book Club,bookClub,bookClub,2
+Community of Practice,communityOfPractice,communityOfPractice,3
+Conference,conference,conference,4
+Fellowship,fellowship,fellowship,5
+Grant,grant,grant,6
+Information Session,informationSession,informationSession,7
+Paid,paid,paid,8
+Presentation,presentation,presentation,9
+Professional Development,professionalDevelopment,professionalDevelopment,10
+Research Grant,researchGrant,researchGrant,11
+Service,service,service,12
+Teaching Grant,teachingGrant,teachingGrant,13
+Working Group,workingGroup,workingGroup,14
+Working Session,workingSession,workingSession,15
+Workshop,workshop,workshop,16
+New Faculty,newFaculty,newFaculty,17
+Staff,staff,staff,18
+FDC,fdc,fdc,19
