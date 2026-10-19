@@ -1,55 +1,84 @@
 ## ============================================================
 ## Faculty Development Committee — compact multi-column grid cards (square
 ## photo, name/title, actions — no expertise/help bullets) for CtlPersonnel
-## where affiliations contains "FDC". Sorted ascending by rank.
-## Full single-column staff cards live separately in
-## ctl-widget_ctl-staff-profiles.html (different layout).
+## where affiliations contains "FDC". Full single-column staff cards live
+## separately in ctl-content_ctl-staff-profiles.html (different layout).
 ##
 ## Need to know:
 ## - pronouns is a RADIO field -> .selectValue + values/options lookup.
 ##   "dont show pronouns" is a real option, treated as blank.
-## - rank is already a java.lang.Long at the Velocity layer (despite the
-##   "Text ... whole number" editor label) — use $p.rank directly as the sort
-##   key, don't round-trip it through a String.
 ## - affiliations is a Checkbox -> .selectedValues.contains(...); values are
 ##   capitalized ("CTL"/"FDC"/"Other").
 ## - degrees is freeform Text; a case-insensitive "phd" substring appends
 ##   ", PhD" to the displayed name. Other degree values are not otherwise
 ##   displayed.
+## - department is freeform Text (academic/administrative department),
+##   distinct from degrees.
 ## - serviceYearStart / serviceYearEnd are FDC term-of-service years, shown
-##   as "2022-2024"; falls back to just the start year if only one is set.
+##   as "2022 - 2024"; a blank serviceYearEnd means the member is still
+##   serving, shown as "2022 - present". Always put a space before/after the
+##   hyphen between two references (e.g. "$!p.serviceYearStart - $!p.serviceYearEnd",
+##   never "...Start-$!p.serviceYearEnd") — this Velocity engine treats "-" as
+##   a valid identifier character, so a hyphen glued directly onto a
+##   reference gets parsed as part of that reference's property name (a
+##   nonexistent property), which "$!" then silently renders as blank
+##   instead of erroring — the start year vanishes and only the end year
+##   is left on screen.
+## - Sort order (ascending composite key, ties broken left to right):
+##     1. present members (blank serviceYearEnd) before former members
+##     2. jobTitle containing "chair" (case-insensitive) before non-chairs
+##     3. ascending by serviceYearStart (earlier tenure first); blank start
+##        sorts last within its group (sentinel 999999, same convention as
+##        other rank sorts in this project)
 ## Card info stack, top to bottom: name (+ ", PhD" if applicable), pronouns,
-## jobTitle, service years, then email/meet/website actions.
+## jobTitle, department, service years, then meet/website actions (email is
+## intentionally hidden here).
 ## ============================================================
 
 #set($allPersonnel = $dotcontent.pull("+contentType:CtlPersonnel +languageId:1 +live:true", 500, "score"))
 
-## filter to FDC affiliation, bubble-sort ascending by rank
+## filter to FDC affiliation, bubble-sort ascending by composite rank key
 #set($fdcPersonnel = [])
-#set($fdcRankKeys = [])
+#set($fdcSortKeys = [])
 #foreach($p in $allPersonnel)
     #if($p.affiliations && $p.affiliations.selectedValues && $p.affiliations.selectedValues.contains("FDC"))
         #set($dummy = $fdcPersonnel.add($p))
-        #set($rankRaw = "$!p.rank")
-        #if($rankRaw == "")
-            #set($rankKey = 999999)
+
+        #set($startRaw = "$!p.serviceYearStart")
+        #if($startRaw == "")
+            #set($startKey = 999999)
         #else
-            #set($rankKey = $p.rank)
+            #set($startKey = $p.serviceYearStart)
         #end
-        #set($dummy = $fdcRankKeys.add($rankKey))
+
+        #set($presentWeight = 1)
+        #if("$!p.serviceYearEnd" == "")
+            #set($presentWeight = 0)
+        #end
+
+        #set($chairWeight = 1)
+        #if("$!p.jobTitle" != "")
+            #set($titleLower = $p.jobTitle.toLowerCase())
+            #if($titleLower.contains("chair"))
+                #set($chairWeight = 0)
+            #end
+        #end
+
+        #set($sortKey = ($presentWeight * 2000000) + ($chairWeight * 1000000) + $startKey)
+        #set($dummy = $fdcSortKeys.add($sortKey))
     #end
 #end
 #foreach($i in [0..20])
     #foreach($j in [0..20])
         #set($k = $j + 1)
         #if($k < $fdcPersonnel.size())
-            #if($fdcRankKeys.get($j) > $fdcRankKeys.get($k))
+            #if($fdcSortKeys.get($j) > $fdcSortKeys.get($k))
                 #set($tmpP = $fdcPersonnel.get($j))
-                #set($tmpR = $fdcRankKeys.get($j))
+                #set($tmpR = $fdcSortKeys.get($j))
                 #set($dummy = $fdcPersonnel.set($j, $fdcPersonnel.get($k)))
-                #set($dummy = $fdcRankKeys.set($j, $fdcRankKeys.get($k)))
+                #set($dummy = $fdcSortKeys.set($j, $fdcSortKeys.get($k)))
                 #set($dummy = $fdcPersonnel.set($k, $tmpP))
-                #set($dummy = $fdcRankKeys.set($k, $tmpR))
+                #set($dummy = $fdcSortKeys.set($k, $tmpR))
             #end
         #end
     #end
@@ -67,7 +96,7 @@
 
     #if($fdcPersonnel.size() == 0)
 
-        <div style="padding: 40px; text-align: center; color: var(--ctl-gray-text);">
+        <div class="ctl-empty-state">
             <p>FDC member bios are coming soon &mdash; check back shortly.</p>
         </div>
 
@@ -90,9 +119,9 @@
 
             #set($yearsDisplay = "")
             #if("$!p.serviceYearStart" != "" && "$!p.serviceYearEnd" != "")
-                #set($yearsDisplay = "$!p.serviceYearStart-$!p.serviceYearEnd")
+                #set($yearsDisplay = "$!p.serviceYearStart - $!p.serviceYearEnd")
             #elseif("$!p.serviceYearStart" != "")
-                #set($yearsDisplay = "$!p.serviceYearStart")
+                #set($yearsDisplay = "$!p.serviceYearStart - present")
             #end
 
             #set($pronounsDisplay = "")
@@ -120,25 +149,26 @@
                     #end
 
                     <div class="ctl-gh-grid-info">
-                        <h3 class="h6 fw-bold mb-0 lh-sm">$displayName</h3>
+                        <h3 class="ctl-gh-grid-name">$displayName</h3>
 
                         #if($pronounsDisplay != "")
-                            <p class="small text-muted mb-0 lh-sm">$pronounsDisplay</p>
+                            <p class="ctl-gh-grid-pronouns">$pronounsDisplay</p>
                         #end
 
                         #if("$!p.jobTitle" != "")
-                            <p class="fst-italic text-muted small mb-0 mt-1 lh-sm">$!p.jobTitle</p>
+                            <p class="ctl-gh-grid-jobtitle">$!p.jobTitle</p>
+                        #end
+
+                        #if("$!p.department" != "")
+                            <p class="ctl-gh-grid-department">$!p.department</p>
                         #end
 
                         #if($yearsDisplay != "")
-                            <p class="small text-muted mb-0 mt-1 lh-sm">$yearsDisplay</p>
+                            <p class="ctl-gh-grid-years">$yearsDisplay</p>
                         #end
 
-                        #if("$!p.emailCortlandEdu" != "" || "$!p.bookWithMeFullLink" != "" || "$!p.websitePromo" != "")
+                        #if("$!p.bookWithMeFullLink" != "" || "$!p.websitePromo" != "")
                             <div class="ctl-gh-grid-actions">
-                                #if("$!p.emailCortlandEdu" != "")
-                                    <a href="mailto:$!p.emailCortlandEdu" class="text-body small">$!p.emailCortlandEdu</a>
-                                #end
                                 #if("$!p.bookWithMeFullLink" != "")
                                     <a class="ctl-btn" role="button" href="$!p.bookWithMeFullLink" target="_blank" rel="noopener" aria-label="Schedule a meeting with $!p.name (opens in new tab)">Meet with Me</a>
                                 #end

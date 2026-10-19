@@ -1,5 +1,5 @@
-name,pronouns,host1,headshotPhoto,jobTitle,degrees,rank,affiliations,emailCortlandEdu,bookWithMeFullLink,websitePromo,buttonLabel,areasOfExpertise,howICanHelp,serviceYearStart,serviceYearEnd,affiliation,yearAwarded,honorRecieved
-Jennifer Hall,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Senior Director,PhD,1,CTL,jennifer.hall02@cortland.edu,https://bookings.cloud.microsoft/bookwithme/user/62f79a17795b43be8a47deea7425dc45%40cortland.edu/meetingtype/Zlxk-gaDRkCapEvQnHkPMQ2?anonymous&ismsaljsauthenabled,,,"Online education
+host1,affiliations,name,pronouns,headshotPhoto,jobTitle,department,degrees,emailCortlandEdu,websitePromo,buttonLabel,rank,bookWithMeFullLink,areasOfExpertise,howICanHelp,serviceYearStart,serviceYearEnd,associateTitle,roleDescription,termYearStart,termYearEnd,honorRecieved
+9dfcddfa05fe814ac62518319d6d00ca,CTL,Jennifer Hall,dont show pronouns,,Senior Director,,PhD,jennifer.hall02@cortland.edu,,,1,https://bookings.cloud.microsoft/bookwithme/user/62f79a17795b43be8a47deea7425dc45%40cortland.edu/meetingtype/Zlxk-gaDRkCapEvQnHkPMQ2?anonymous&ismsaljsauthenabled,"Online education
 Teaching Effectiveness Strategies
 Online / Hybrid Teaching
 Assessment and Data-Driven Design
@@ -12,8 +12,8 @@ Brainstorming Teaching Conundrums
 Program and Course Learning Analysis Support
 Title II Resources
 Workshop Requests
-Online Education Resources",,,,,
-Morgan Vickery,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Director,"PhD, MSEd",2,CTL,morganavickery@cortland.edu,https://outlook.office.com/bookwithme/user/2158e71475624b1ba946cef95a2cf0fb@cortland.edu?anonymous&ismsaljsauthenabled&ep=plink,,,"Accessible & inclusive design
+Online Education Resources",,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,CTL,Morgan Vickery,dont show pronouns,,Associate Director,,"PhD, MSEd",morganavickery@cortland.edu,,,2,https://outlook.office.com/bookwithme/user/2158e71475624b1ba946cef95a2cf0fb@cortland.edu?anonymous&ismsaljsauthenabled&ep=plink,"Accessible & inclusive design
 In-person activity design
 Interactive & multimodal learning technologies
 Humane & dignity-affirming education
@@ -21,8 +21,8 @@ Ethical AI use & policy
 Connecting content to the real world","Researching & publishing on your teaching
 Exploring new technologies
 Syllabus / classroom policy
-Title II Compliance / remediating course materials",,,,,
-Kristina Maricle,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Senior Instructional Designer,MSEd,3,CTL,kristina.maricle@cortland.edu,https://bookings.cloud.microsoft/bookwithme/user/160545c15a024e0a9740e6e11c49b2bf%40cortland.edu?anonymous&ismsaljsauthenabled,,,"Brightspace Administration and Support
+Title II Compliance / remediating course materials",,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,CTL,Kristina Maricle,dont show pronouns,,Senior Instructional Designer,,MSEd,kristina.maricle@cortland.edu,,,3,https://bookings.cloud.microsoft/bookwithme/user/160545c15a024e0a9740e6e11c49b2bf%40cortland.edu?anonymous&ismsaljsauthenabled,"Brightspace Administration and Support
 OER Advocacy & Consultation
 Accessibility / UDL
 Assessment Design
@@ -31,52 +31,56 @@ Technology Integration","Brightspace Support
 Accessing & developing Open Educational Resources (OER)
 Title II Compliance / remediating course materials
 Requesting a workshop / training
-Teaching observations & feedback (OSCQR)",,,,,
-Lisa Sieg,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Instructional Designer,"MA, MA TESOL",4,CTL,lisa.sieg@cortland.edu,https://bookings.cloud.microsoft/bookwithme/user/4ad856d94f4743dd860b005988aea0c0%40cortland.edu?anonymous&ismsaljsauthenabled,,,"Working with multilingual & English-language learners
+Teaching observations & feedback (OSCQR)",,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,CTL,Lisa Sieg,dont show pronouns,,Instructional Designer,,"MA, MA TESOL",lisa.sieg@cortland.edu,,,4,https://bookings.cloud.microsoft/bookwithme/user/4ad856d94f4743dd860b005988aea0c0%40cortland.edu?anonymous&ismsaljsauthenabled,"Working with multilingual & English-language learners
 Data storytelling
 Title II and Accessibility","Brightspace support
 Title II Compliance / remediating course materials
 Assisting multilingual & English-language learners
 InDesign support
 YuJa video support
-Requesting a workshop/training",,,,,
-Heather Hammond,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Administrative Assistant,,5,CTL,,,,,,"Payments & Reimbursements
+Requesting a workshop/training",,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,CTL,Heather Hammond,dont show pronouns,,Administrative Assistant,,,heather.hammond@cortland.edu,,,5,,,"Payments & Reimbursements
 Accessing CTL materials
 Requesting an event / workshop
 Event logistics
-Communications",,,,,
-Brian Barrett,he/him,9dfcddfa05fe814ac62518319d6d00ca,,Professor,Foundations and Social Advocacy,1,FDC,brian.barrett@cortland.edu,,https://www2.cortland.edu/departments/fandsa/faculty-staff-detail.dot?fsid=673d5f6a-6542-4073-bd78-ade22185983e,,,,2013,,FDC,,
-Gillian Mertens,she/they,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,Literacy,2,FDC,gillian.mertens@cortland.edu,,,,,,2023,,FDC,,
-Kevin Dames,he/him,9dfcddfa05fe814ac62518319d6d00ca,,Professor,Kinesiology,3,FDC,kevin.dames@cortland.edu,,https://www.researchgate.net/profile/Kevin-Dames,,,,2024,,FDC,,
-Lauren deLaubell,she/her,9dfcddfa05fe814ac62518319d6d00ca,,"Librarian, Information Literacy/Instruction Coordinator",Library,4,FDC,lauren.delaubell@cortland.edu,,,,,,2020,,FDC,,
-Wendy Miller,she/her,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,Geography,5,FDC,wendy.miller@cortland.edu,,,,,,2024,,FDC,,
-Christine Uliassi,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Assistant Professor,Childhood/Early Childhood Education,,Other,christine.uliassi@cortland.edu,,,,,,,,,,
-Laura Eierman,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,Biology,,Other,laura.eierman@cortland.edu,,https://www2.cortland.edu/departments/biology/faculty/eierman.dot,,,,,,,,
-Danielle Bouchard-Bihr,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Lecturer III,Modern Languages,,Other,danielle.bouchardbi@cortland.edu,,,,,,,,,,
-Casey Pennington,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Assistant Professor,Literacy,,Other,casey.pennington@cortland.edu,,,,,,,,,,
-Hollis Miller,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Assistant Professor,Sociology/Anthropology,,Other,hollis.miller@cortland.edu,,,,,,,,,,
-Anisha Saxena,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,History,,Other,,,,,,,,,,,
-Kent Johnson,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,Sociology/Anthropology,,Other,kent.johnson@cortland.edu,,,,,,,,,,
-Laura Gathagan,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Professor,History,,Other,laura.gathagan@cortland.edu,,,,,,,,,,
-Abigail Droge,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Assistant Professor,English,,Other,abigail.droge@cortland.edu,,,,,,,,,,
-Bridget Heir,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,Psychology,,Other,bridget.heir@cortland.edu,,,,,,,,,,
-Jeffrey Jackson,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Instructor,English,,Other,jeffrey.jackson@cortland.edu,,,,,,,,,,
-Shena Driscoll Salvato,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Lecturer IV,Modern Languages,,Other,shena.salvato@cortland.edu,,,,,,,,,,
-Elizabeth Bittel,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Assistant Professor,Sociology/Anthropology,,Other,elizabeth.bittel@cortland.edu,,,,,,,,,,
-Danica Savonick,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,English,,Other,danica.savonick@cortland.edu,,,,,,,,,,
-Mary A. Cannito Coville,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,Sociology/Anthropology,,Other,,,,,,,,,,,
-Lynn E. Craver,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Instructor,Performing Arts,,Other,lynn.craver@cortland.edu,,,,,,,,,,
-Frank M. Rossi,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Professor,Chemistry,,Other,frank.rossi@cortland.edu,,,,,,,,,,
-Emily Gilbert,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Assistant Professor,Physical Education,,Other,emily.gilbert@cortland.edu,,,,,,,,,,
-Alexis Blavos,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Professor,Health,,Other,alexis.blavos@cortland.edu,,,,,,,,,,
-Nancy J. Kane,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Adjunct Lecturer,Kinesiology,,Other,nancy.kane@cortland.edu,,,,,,,,,,
-Lin Lin,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Professor,Childhood/Early Childhood Education,,Other,,,,,,,,,,,
-Rhiannon Maton,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,Foundations and Social Advocacy,,Other,rhianon.maton@cortland.edu,,https://cortland.academia.edu/RhiannonMaton,,,,,,,,
-Brittany Adams,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,,,,Other,,,,,,,,,,,
-Jacob Hall,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,,,,Other,,,,,,,,,,,
-Samantha Applin,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,Sociology/Anthropology,,Other,samantha.applin@cortland.edu,,,,,,,,,,
-AJ Fallon-Korb,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Assistant Professor,Kinesiology,,Other,,,,,,,,,,,
-Tyson Luneau,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Assistant Professor,History,,Other,tyson.luneau@cortland.edu,,,,,,,,,,
-Dianne Wellington,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Assistant Professor,Literacy,,Other,dianne.wellington@cortland.edu,,,,,,,,,,
-Bryanne Bellovary,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Associate Professor,Kinesiology,,Other,bryanne.bellovary@cortland.edu,,,,,,,,,,
-Christina Knopf,dont show pronouns,9dfcddfa05fe814ac62518319d6d00ca,,Professor,Communication and Media Studies,,Other,christina.knopf@cortland.edu,,,,,,,,,,
+Communications",,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,FDC,Brian Barrett,he/him,,Professor,Foundations and Social Advocacy,,brian.barrett@cortland.edu,https://www2.cortland.edu/departments/fandsa/faculty-staff-detail.dot?fsid=673d5f6a-6542-4073-bd78-ade22185983e,,1,,,,2013,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,"FDC,Recipient",Gillian Mertens,she/they,,"Associate Professor, Former FDC Co-Chair",Literacy,,gillian.mertens@cortland.edu,,,2,,,,2023,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,FDC,Kevin Dames,he/him,,Professor,Kinesiology,,kevin.dames@cortland.edu,https://www.researchgate.net/profile/Kevin-Dames,,3,,,,2024,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,FDC,Lauren deLaubell,she/her,,"Librarian, Information Literacy/Instruction Coordinator",Library,,lauren.delaubell@cortland.edu,,,4,,,,2020,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,FDC,Wendy Miller,she/her,,Associate Professor,Geography,,wendy.miller@cortland.edu,,,5,,,,2024,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,FDC,Kate McCormick,she/her,,"Associate Professor, Former FDC Chair",,PhD,kate.mccormick@cortland.edu,,,0,,,,2022,2024,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,FDC,Kati Ahern,she/her,,"Assistant Professor, Former FDC Co-Chair",,"Phd, MFA",katherine.ahern@cortland.edu,https://www2.cortland.edu/departments/english/faculty-staff-detail.dot?fsid=ab84d26f-e3ad-425c-ba98-6e077b41601d,Visit My Website,0,,,,2022,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Christine Uliassi,dont show pronouns,,Assistant Professor,Childhood/Early Childhood Education,,christine.uliassi@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Laura Eierman,dont show pronouns,,Associate Professor,Biology,,laura.eierman@cortland.edu,https://www2.cortland.edu/departments/biology/faculty/eierman.dot,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Danielle Bouchard-Bihr,dont show pronouns,,Lecturer III,Modern Languages,,danielle.bouchardbi@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Casey Pennington,dont show pronouns,,Assistant Professor,Literacy,,casey.pennington@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Hollis Miller,dont show pronouns,,Assistant Professor,Sociology/Anthropology,,hollis.miller@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Anisha Saxena,dont show pronouns,,Associate Professor,History,,anisha.saxena@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Kent Johnson,dont show pronouns,,Associate Professor,Sociology/Anthropology,,kent.johnson@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Laura Gathagan,dont show pronouns,,Professor,History,,laura.gathagan@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Abigail Droge,dont show pronouns,,Assistant Professor,English,,abigail.droge@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Bridget Heir,dont show pronouns,,Associate Professor,Psychology,,bridget.heir@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Jeffrey Jackson,dont show pronouns,,Instructor,English,,jeffrey.jackson@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Shena Driscoll Salvato,dont show pronouns,,Lecturer IV,Modern Languages,,shena.salvato@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Elizabeth Bittel,dont show pronouns,,Assistant Professor,Sociology/Anthropology,,elizabeth.bittel@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Danica Savonick,dont show pronouns,,Associate Professor,English,,danica.savonick@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Mary A. Cannito Coville,dont show pronouns,,Associate Professor,Sociology/Anthropology,,mary.cannitocoville@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Lynn E. Craver,dont show pronouns,,Instructor,Performing Arts,,lynn.craver@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Frank M. Rossi,dont show pronouns,,Professor,Chemistry,,frank.rossi@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Emily Gilbert,dont show pronouns,,Assistant Professor,Physical Education,,emily.gilbert@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Alexis Blavos,dont show pronouns,,Professor,Health,,alexis.blavos@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Nancy J. Kane,dont show pronouns,,Adjunct Lecturer,Kinesiology,,nancy.kane@cortland.edu,,,,,,,,,,,,,ebf0b61216b8562cdd0aedf0054ba871
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Lin Lin,dont show pronouns,,Professor,Childhood/Early Childhood Education,,lin.lin@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Rhiannon Maton,dont show pronouns,,Associate Professor,Foundations and Social Advocacy,,rhianon.maton@cortland.edu,https://cortland.academia.edu/RhiannonMaton,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Brittany Adams,dont show pronouns,,,,,brittany.adams@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Jacob Hall,dont show pronouns,,,,,jacob.hall@cortland.edu,,,,,,,,,,,,,
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Samantha Applin,dont show pronouns,,Associate Professor,Sociology/Anthropology,,samantha.applin@cortland.edu,,,,,,,,,,,,,041014d48d6c7efe3513de63e0ed2d5c
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,AJ Fallon-Korb,dont show pronouns,,Assistant Professor,Kinesiology,,aj.fallon-korb@cortland.edu,,,,,,,,,,,,,041014d48d6c7efe3513de63e0ed2d5c
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Tyson Luneau,dont show pronouns,,Assistant Professor,History,,tyson.luneau@cortland.edu,,,,,,,,,,,,,c285aeb0f3cf48c779e0402fd81b87fb
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Dianne Wellington,dont show pronouns,,Assistant Professor,Literacy,,dianne.wellington@cortland.edu,,,,,,,,,,,,,c285aeb0f3cf48c779e0402fd81b87fb
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Bryanne Bellovary,dont show pronouns,,Associate Professor,Kinesiology,"PhD, CSCS,D, NSCA-CPT,D",bryanne.bellovary@cortland.edu,,,,,,,,,,,,,ebf0b61216b8562cdd0aedf0054ba871
+9dfcddfa05fe814ac62518319d6d00ca,Recipient,Christina Knopf,dont show pronouns,,Professor,Communication and Media Studies,,christina.knopf@cortland.edu,,,,,,,,,,,,,d042e6a11fc7594dfc98ab5cc7c24181
+9dfcddfa05fe814ac62518319d6d00ca,Affiliate,Katie Laux,dont show pronouns,,Assistant Professor,Biological Sciences,PhD,katie.laux@cortland.edu,,,,,,,,,SoTL Faculty Associate,Scholarship of Teaching and Learning — works with the SoTL Writing Accountability Group and mentors faculty.,,,
+9dfcddfa05fe814ac62518319d6d00ca,Affiliate,Carrie Rood,dont show pronouns,,Associate Professor,Foundations and Social Advocacy,PhD,carrie.rood@cortland.edu,,,,,,,,,UDL Faculty Associate,"Universal Design for Learning — works with the Play, Joy, and Belonging Community of Practice.",,,
